@@ -26,6 +26,9 @@ public sealed class ScatterDefinition
 
 	/// <summary>How many degrees it may lean (random pitch and roll).</summary>
 	public float Lean = 0f;
+
+	/// <summary>Plants and dry growth: only where the land supports vegetation, thicker the more it does.</summary>
+	public bool Vegetation;
 }
 
 public readonly record struct ScatterInstance( ScatterDefinition Def, Vector3 Position, float Yaw, float Scale, float Lean );
@@ -49,6 +52,7 @@ public static class ScatterLibrary
 		public string collide { get; set; } = "box";
 		public float sink { get; set; }
 		public float lean { get; set; }
+		public bool vegetation { get; set; }
 	}
 
 	private sealed class ScatterFile
@@ -88,7 +92,7 @@ public static class ScatterLibrary
 					Weight = MathF.Max( 0.01f, r.weight ),
 					MinScale = r.scale is { Length: > 0 } ? r.scale[0] : 1f,
 					MaxScale = r.scale is { Length: > 1 } ? r.scale[1] : (r.scale is { Length: 1 } ? r.scale[0] : 1f),
-					Collide = (r.collide ?? "box").ToLowerInvariant(), Sink = r.sink, Lean = r.lean,
+					Collide = (r.collide ?? "box").ToLowerInvariant(), Sink = r.sink, Lean = r.lean, Vegetation = r.vegetation,
 				} );
 			}
 			Log.Info( $"[scatter] {_all.Count} prop kinds loaded" );
@@ -143,10 +147,18 @@ public static class ScatterLibrary
 		float R( int k ) => WorldNoise.Hash01( seed + 9100 + k, chunk.x, chunk.y );
 
 		// ---- wild: anywhere away from the road, thicker where vegetation would be
+		// Things in nature come in groups: a few cluster centres per chunk, everything gathers round them (a boulder with smaller rocks
+		// at its feet, a patch of shrubs) and the gaps between stay empty.
 		int wild = (int)(WildPerChunk * density);
+		int clusters = 3 + (int)(R( 7000 ) * 4f);
 		for ( int a = 0; a < wild; a++ )
 		{
-			float px = x0 + R( a * 11 + 0 ) * size, py = y0 + R( a * 11 + 1 ) * size;
+			int c = a % clusters;
+			float cx = x0 + R( 7100 + c * 2 ) * size, cy = y0 + R( 7101 + c * 2 ) * size;
+			float ang = R( a * 11 + 0 ) * MathF.PI * 2f;
+			float rad = MathF.Pow( R( a * 11 + 1 ), 1.6f ) * (500f + R( 7200 + c ) * 900f);
+			float px = cx + MathF.Cos( ang ) * rad, py = cy + MathF.Sin( ang ) * rad;
+			if ( px < x0 || px >= x0 + size || py < y0 || py >= y0 + size ) continue;
 			float dist = MathF.Abs( py - gen.RoadCenterY( px ) );
 			if ( dist < 700f ) continue;
 			TryAdd( gen, list, "wild", px, py, R( a * 11 + 2 ), R( a * 11 + 3 ), R( a * 11 + 4 ), R( a * 11 + 5 ), R( a * 11 + 6 ) );
@@ -189,6 +201,8 @@ public static class ScatterLibrary
 		string biome = BiomeName( gen, px, py );
 		var def = Pick( zone, biome, rPick );
 		if ( def is null ) return;
+
+		if ( def.Vegetation && rVeg > 0.15f + gen.VegetationDensity( px, py ) * 0.85f ) return;
 
 		float h = gen.GetHeight( px, py );
 		if ( MathF.Abs( gen.GetHeight( px + 70f, py ) - h ) > 24f || MathF.Abs( gen.GetHeight( px, py + 70f ) - h ) > 24f ) return;
