@@ -7,7 +7,7 @@ namespace LongTrip.Gameplay;
 /// </summary>
 public sealed class ItemContainer : Component
 {
-	public sealed record Stored( string ItemId, float Amount );
+	public sealed record Stored( string ItemId, float Amount, string Liquid = null );
 
 	[Property] public int Capacity { get; set; } = 6;
 
@@ -34,6 +34,11 @@ public sealed class ItemContainer : Component
 		return -1;
 	}
 
+	public Stored Get( int slot ) => slot >= 0 && slot < Slots.Count ? _slots[slot] : null;
+
+	/// <summary>Put a stored item straight into a slot (or clear it with null).</summary>
+	public void Set( int slot, Stored stored ) { if ( slot >= 0 && slot < Slots.Count ) _slots[slot] = stored; }
+
 	public bool IsEmpty( int slot ) => slot >= 0 && slot < Slots.Count && _slots[slot] is null;
 
 	/// <summary>Put an item away in a slot (the first free one when <paramref name="slot"/> is -1). Returns the slot used, or -1 if it doesn't fit.</summary>
@@ -45,7 +50,7 @@ public sealed class ItemContainer : Component
 		if ( slot < 0 || slot >= Slots.Count || _slots[slot] is not null ) slot = FirstFree();
 		if ( slot < 0 ) return -1;
 
-		_slots[slot] = new Stored( item.ItemId, item.Amount );
+		_slots[slot] = new Stored( item.ItemId, item.Amount, item.Liquid );
 		item.Unweld();
 		item.GameObject.Destroy();
 		return slot;
@@ -58,6 +63,8 @@ public sealed class ItemContainer : Component
 
 		var stored = _slots[slot];
 		_slots[slot] = null;
-		return ItemLibrary.Spawn( Scene, stored.ItemId, position, rotation, stored.Amount );
+		var item = ItemLibrary.Spawn( Scene, stored.ItemId, position, rotation, stored.Amount );
+		if ( item.IsValid() && stored.Liquid is not null ) { item.Liquid = stored.Liquid; item.Amount = stored.Amount; }
+		return item;
 	}
 }

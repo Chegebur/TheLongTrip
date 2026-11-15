@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/gas_mask/old_gas_mask_diff.png"
+	"TextureNormal"		"materials/items/gas_mask/old_gas_mask_nor_gl.png"
+	"TextureRoughness"		"materials/items/gas_mask/old_gas_mask_rough.png"
+	"TextureMetalness"		"materials/items/gas_mask/old_gas_mask_metal.png"
+}

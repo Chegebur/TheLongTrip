@@ -20,10 +20,10 @@ public sealed class PlayerStats : Component
 	public void Damage( float amount )
 	{
 		if ( IsProxy ) { DamageOwner( amount ); return; }
-		Health = MathF.Max( 0f, Health - amount );
+		Health = MathF.Max( 0f, Health - amount * (PlayerInventory.Instance?.DamageFactor ?? 1f) );   // armor takes a share of every hit
 	}
 
-	[Rpc.Owner] private void DamageOwner( float amount ) => Health = MathF.Max( 0f, Health - amount );
+	[Rpc.Owner] private void DamageOwner( float amount ) => Damage( amount );
 
 	public void Eat( float amount ) => Food = Math.Clamp( Food + amount, 0f, Max );
 	public void Drink( float amount ) => Water = Math.Clamp( Water + amount, 0f, Max );

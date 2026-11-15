@@ -4,6 +4,16 @@
 @namespace LongTrip.Gameplay
 
 <root>
+	@if ( Info is not null )
+	{
+		<div style="position: absolute; right: 24px; top: 20px; display: flex; flex-direction: column; align-items: flex-end; padding: 10px 16px; border-radius: 10px; background-color: rgba(0,0,0,0.4); color: white; font-size: 17px; font-weight: 600; text-align: right; line-height: 24px;">
+			@foreach ( var line in Info )
+			{
+				<div>@line</div>
+			}
+		</div>
+	}
+
 	<div style="position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin-left: -3px; margin-top: -3px; border-radius: 3px; background-color: rgba(255,255,255,0.85);"></div>
 
 	@if ( !string.IsNullOrEmpty( Hint ) )
@@ -74,6 +84,9 @@
 	/// <summary>The car's fuel, as text, while sitting in it.</summary>
 	public string Fuel { get; set; }
 
+	/// <summary>Time, place and road distance, shown top right.</summary>
+	public string[] Info { get; set; }
+
 	/// <summary>The hotbar: what is in each slot ("" when empty), how full it is (-1 when empty), which slot is selected and which one is in your hands.</summary>
 	public string[] SlotNames { get; set; } = new string[6] { "", "", "", "", "", "" };
 	public float[] SlotAmounts { get; set; } = new float[6] { -1f, -1f, -1f, -1f, -1f, -1f };
@@ -86,7 +99,7 @@
 	{
 		var hash = new System.HashCode();
 		hash.Add( Hint ); hash.Add( Controls ); hash.Add( Percent( Health ) ); hash.Add( Percent( Food ) ); hash.Add( Percent( Water ) );
-		hash.Add( Fuel ); hash.Add( Selected ); hash.Add( Equipped );
+		hash.Add( Fuel ); hash.Add( Info is null ? "" : string.Join( '|', Info ) ); hash.Add( Selected ); hash.Add( Equipped );
 		for ( int i = 0; i < SlotNames.Length; i++ ) { hash.Add( SlotNames[i] ); hash.Add( Percent( SlotAmounts[i] * 100f ) ); }
 		return hash.ToHashCode();
 	}

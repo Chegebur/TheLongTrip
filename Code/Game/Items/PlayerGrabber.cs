@@ -60,8 +60,10 @@ public sealed class PlayerGrabber : Component
 	private PlayerController _player;
 	private PlayerStats _stats;
 	private ItemContainer _pack;
+	private PlayerInventory _inventory;
 	private StretchyArms _arms;
 	private GrabHud _hud;
+	private InventoryHud _inventoryHud;
 	private string _notice;
 	private TimeSince _noticeAge = 999f;
 
@@ -74,12 +76,15 @@ public sealed class PlayerGrabber : Component
 		_stats = Components.GetOrCreate<PlayerStats>();
 		_pack = Components.GetOrCreate<ItemContainer>();
 		_pack.Capacity = 6;
+		_inventory = Components.GetOrCreate<PlayerInventory>();
+		RecipeLibrary.Reset();
 
 		var hudObject = Scene.CreateObject();
 		hudObject.Name = "Grab HUD";
 		hudObject.Flags |= GameObjectFlags.NotSaved;
 		hudObject.Components.Create<ScreenPanel>();
 		_hud = hudObject.Components.Create<GrabHud>();
+		_inventoryHud = hudObject.Components.Create<InventoryHud>();
 	}
 
 	protected override void OnEnabled() => Instance = this;
@@ -120,6 +125,17 @@ public sealed class PlayerGrabber : Component
 	{
 		var camera = Scene.Camera;
 		if ( !camera.IsValid() ) return;
+
+		// with the inventory open the mouse belongs to the menu: no grabbing, swinging or looking about
+		if ( InventoryHud.IsOpen )
+		{
+			LookSuppressed = true;
+			if ( _player.IsValid() ) _player.UseLookControls = false;
+			_hud.Hint = null; _hud.Controls = null;
+			UpdateHud( FindAssembly( Scene ) );
+			_arms.Tick( camera, _held, Time.Delta, _held.IsValid() ? (_held.Definition?.Hands ?? 2) : 2 );
+			return;
+		}
 
 		bool pressedF = Input.Keyboard.Pressed( "f" );
 		bool pressedR = Input.Keyboard.Pressed( "r" );
@@ -234,6 +250,7 @@ public sealed class PlayerGrabber : Component
 	private void UpdateHud( CarAssembly assembly )
 	{
 		if ( _stats.IsValid() ) { _hud.Health = _stats.Health; _hud.Food = _stats.Food; _hud.Water = _stats.Water; }
+		_hud.Info = WorldInfo.Lines( Scene );
 		_hud.Fuel = assembly is { Occupied: true } ? $"Fuel  {assembly.Fuel:F0} / {CarAssembly.TankCapacity:F0} L" : null;
 
 		var slots = _pack.Slots;
@@ -256,6 +273,7 @@ public sealed class PlayerGrabber : Component
 		_hud.SlotNames = names;
 		_hud.SlotAmounts = amounts;
 		_hud.Selected = _selected;
+		if ( _inventoryHud.IsValid() ) { _inventoryHud.HotSelected = _selected; _inventoryHud.HeldSlot = _held.IsValid() ? _equipped : -1; _inventoryHud.Info = _hud.Info; }
 		_hud.Equipped = _held.IsValid() ? _equipped : -1;
 	}
 
@@ -298,7 +316,16 @@ public sealed class PlayerGrabber : Component
 		if ( def is null || !def.Stowable ) { Notify( $"The {item.Display.ToLowerInvariant()} doesn't fit in a slot" ); return false; }
 
 		int slot = _equipped >= 0 && _pack.IsEmpty( _equipped ) ? _equipped : _pack.FirstFree();
-		if ( slot < 0 ) { Notify( "All the slots are full" ); return false; }
+		if ( slot < 0 )
+		{
+			// the hotbar is full: pockets and backpack
+			var stored = new ItemContainer.Stored( item.ItemId, item.Amount, item.Liquid );
+			if ( _inventory is null || !_inventory.TryAddStorage( stored ) ) { Notify( "All the slots are full" ); return false; }
+			Release( false );
+			item.GameObject.Destroy();
+			Notify( $"{def.Name} put in your pockets" );
+			return true;
+		}
 
 		Release( false );
 		_pack.TryStore( item, slot );
@@ -323,6 +350,7 @@ public sealed class PlayerGrabber : Component
 		UseKind.Drink => "drink",
 		UseKind.Refuel => "pour fuel into the car",
 		UseKind.Melee => "swing",
+		UseKind.Wear => "put on",
 		_ => "use",
 	};
 
@@ -442,6 +470,21 @@ public sealed class PlayerGrabber : Component
 			_swinging = true;
 			_swingTime = 0f;
 			_swingReadyAt = Time.Now + _swing.Cooldown;
+			return true;
+		}
+
+		if ( def.Use == UseKind.Wear )
+		{
+			if ( _inventory is null ) return true;
+			var worn = _held;
+			bool ok;
+			if ( def.BackpackTier > 0 ) ok = _inventory.WearPack( def.BackpackTier );
+			else ok = _inventory.Wear( new ItemContainer.Stored( worn.ItemId, worn.Amount, worn.Liquid ) );
+
+			if ( !ok ) { Notify( def.BackpackTier > 0 ? "You already have an equal or bigger pack" : "No room to swap that" ); return true; }
+			Notify( def.BackpackTier > 0 ? $"You put on the {def.Name.ToLowerInvariant()}" : $"You wear the {def.Name.ToLowerInvariant()}" );
+			Release( false );
+			if ( worn.IsValid() ) worn.GameObject.Destroy();
 			return true;
 		}
 

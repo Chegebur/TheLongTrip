@@ -19,6 +19,9 @@ public enum UseKind
 
 	/// <summary>A weapon: left mouse swings it.</summary>
 	Melee,
+
+	/// <summary>Armor or a backpack: left mouse puts it on.</summary>
+	Wear,
 }
 
 /// <summary>
@@ -114,6 +117,13 @@ public sealed class ItemDefinition
 	/// <summary>Whether it can be put away at all (in a hotbar slot).</summary>
 	public bool Stowable = true;
 
+	/// <summary>Armor: which slot it goes in (head, chest, legs, feet) and how much of every hit it takes away (0 to 1).</summary>
+	public string ArmorSlot;
+	public float Defense;
+
+	/// <summary>Backpack: the tier it unlocks (1 small, 2 medium, 3 large).</summary>
+	public int BackpackTier;
+
 	/// <summary>The orientation it is held in, in degrees (pitch, yaw, roll) in your view. Null: however it was lying.</summary>
 	public Angles? HoldAngles;
 
@@ -206,6 +216,9 @@ public static class ItemLibrary
 		public float portionPerUse { get; set; } = 1f;
 		public bool consumedWhenEmpty { get; set; }
 		public bool stowable { get; set; } = true;
+		public string armorSlot { get; set; }
+		public float defense { get; set; }
+		public int backpack { get; set; }
 		public float[] hold { get; set; }
 		public float holdDistance { get; set; }
 		public int hands { get; set; } = 2;
@@ -263,6 +276,7 @@ public static class ItemLibrary
 				PortionPerUse = r.portionPerUse <= 0f ? 1f : r.portionPerUse,
 				ConsumedWhenEmpty = r.consumedWhenEmpty,
 				Stowable = r.stowable,
+				ArmorSlot = r.armorSlot, Defense = r.defense, BackpackTier = r.backpack,
 				HoldAngles = r.hold is { Length: 3 } ? new Angles( r.hold[0], r.hold[1], r.hold[2] ) : null,
 				HoldDistance = r.holdDistance,
 				Hands = r.hands == 1 ? 1 : 2,
@@ -292,6 +306,7 @@ public static class ItemLibrary
 		"drink" => UseKind.Drink,
 		"refuel" => UseKind.Refuel,
 		"melee" => UseKind.Melee,
+		"wear" => UseKind.Wear,
 		_ => UseKind.None,
 	};
 
@@ -371,6 +386,9 @@ public static class ItemLibrary
 
 		return item;
 	}
+
+	/// <summary>The model an item is drawn with (for previews).</summary>
+	public static Model GetModel( ItemDefinition def ) => ModelFor( def );
 
 	private static Model ModelFor( ItemDefinition def )
 	{

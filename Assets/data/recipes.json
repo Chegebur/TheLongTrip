@@ -1,0 +1,64 @@
+{
+  "recipes": [
+    {
+      "id": "banana_bunch",
+      "name": "Banana bunch",
+      "description": "Tie three bananas together: a bunch lasts longer than loose fruit.",
+      "output": "banana_bunch",
+      "count": 1,
+      "inputs": [
+        {
+          "item": "banana",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "id": "carry_crate",
+      "name": "Carry crate",
+      "description": "Flatten and tape two cardboard boxes round a frame.",
+      "output": "plastic_crate",
+      "count": 1,
+      "inputs": [
+        {
+          "item": "cardboard_box",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "id": "sack_pack",
+      "name": "Sack",
+      "description": "Two sacks of cloth stitched into a rough pack. Needs a tyre for the straps.",
+      "output": "sack_pack",
+      "count": 1,
+      "inputs": [
+        {
+          "item": "tyre",
+          "count": 1
+        },
+        {
+          "item": "cardboard_box",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "suitcase_pack",
+      "name": "Suitcase pack",
+      "description": "A crate with straps cut from tyre rubber.",
+      "output": "suitcase_pack",
+      "count": 1,
+      "inputs": [
+        {
+          "item": "plastic_crate",
+          "count": 1
+        },
+        {
+          "item": "tyre",
+          "count": 2
+        }
+      ]
+    }
+  ]
+}

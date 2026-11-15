@@ -491,6 +491,126 @@
         "minSpeed": 4,
         "cap": 10
       }
+    },
+    {
+      "id": "fisher_hat",
+      "name": "Fisherman's hat",
+      "category": "Armor",
+      "description": "Keeps the sun off. A little padding.",
+      "mass": 0.2,
+      "model": "models/items/hat/hat.vmdl",
+      "modelScale": 1.3,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "head",
+      "defense": 0.06,
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "gas_mask",
+      "name": "Gas mask",
+      "category": "Armor",
+      "description": "Old but sturdy.",
+      "mass": 0.8,
+      "model": "models/items/gas_mask/gas_mask.vmdl",
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "head",
+      "defense": 0.12,
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "life_jacket",
+      "name": "Life jacket",
+      "category": "Armor",
+      "description": "Padded and bright.",
+      "mass": 1.2,
+      "model": "models/items/life_jacket/life_jacket.vmdl",
+      "hands": 2,
+      "use": "wear",
+      "armorSlot": "chest",
+      "defense": 0.15,
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "rubber_boots",
+      "name": "Rubber boots",
+      "category": "Armor",
+      "description": "Waterproof, thick soles.",
+      "mass": 1.5,
+      "model": "models/items/boots/boots.vmdl",
+      "hands": 2,
+      "use": "wear",
+      "armorSlot": "feet",
+      "defense": 0.08,
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "sack_pack",
+      "name": "Sack",
+      "category": "Backpack",
+      "description": "A small pack: four more slots.",
+      "mass": 0.3,
+      "model": "models/items/sack/sack.vmdl",
+      "modelScale": 1.2,
+      "hands": 1,
+      "use": "wear",
+      "backpack": 1,
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "suitcase_pack",
+      "name": "Suitcase",
+      "category": "Backpack",
+      "description": "A medium pack: eight more slots.",
+      "mass": 1.6,
+      "model": "models/items/suitcase/suitcase.vmdl",
+      "modelScale": 0.6,
+      "hands": 2,
+      "use": "wear",
+      "backpack": 2,
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "footlocker_pack",
+      "name": "Footlocker",
+      "category": "Backpack",
+      "description": "A large pack: twelve more slots.",
+      "mass": 4,
+      "model": "models/items/military_crate/military_crate.vmdl",
+      "modelScale": 0.6,
+      "hands": 2,
+      "use": "wear",
+      "backpack": 3,
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
     }
   ],
   "loot": [
@@ -584,6 +704,34 @@
     },
     {
       "id": "trash_can",
+      "count": 1
+    },
+    {
+      "id": "fisher_hat",
+      "count": 1
+    },
+    {
+      "id": "gas_mask",
+      "count": 1
+    },
+    {
+      "id": "life_jacket",
+      "count": 1
+    },
+    {
+      "id": "rubber_boots",
+      "count": 1
+    },
+    {
+      "id": "sack_pack",
+      "count": 1
+    },
+    {
+      "id": "suitcase_pack",
+      "count": 1
+    },
+    {
+      "id": "footlocker_pack",
       "count": 1
     }
   ]

@@ -1,0 +1,492 @@
+@using Sandbox;
+@using Sandbox.UI;
+@inherits PanelComponent
+@namespace LongTrip.Gameplay
+
+<root>
+	<div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: @(Open ? "flex" : "none"); flex-direction: row; align-items: center; justify-content: center; background-color: rgba(4,6,10,0.62);">
+
+		<div style="display: flex; flex-direction: column; align-items: stretch; width: 940px; padding: 22px; border-radius: 16px; background-color: rgba(18,22,30,0.92); border: 2px solid rgba(255,255,255,0.12); color: white;">
+
+			@* ---- top: armor, the character, pockets and backpack ---- *@
+			<div style="display: flex; flex-direction: row; height: 400px;">
+
+				<div style="display: flex; flex-direction: column; justify-content: space-between; width: 92px;">
+					@for ( int a = 0; a < 4; a++ )
+					{
+						int armor = a;
+						var worn = Inv?.Armor[armor];
+						<div onclick=@(() => Click( "arm", armor )) onrightclick=@(() => RightClick( "arm", armor )) style="position: relative; width: 92px; height: 92px; border-radius: 10px; background-color: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.22);">
+							<div style="position: absolute; left: 0; right: 0; top: 22px; text-align: center; font-size: 44px; font-weight: 700; color: rgba(255,255,255,0.10);">@(new[] { "H", "C", "L", "F" }[armor])</div>
+							<div style="position: absolute; left: 0; right: 0; bottom: 3px; text-align: center; font-size: 12px; opacity: 0.45;">@(new[] { "HEAD", "CHEST", "LEGS", "FEET" }[armor])</div>
+							@if ( worn is not null )
+							{
+								<div style="position: absolute; left: 4px; right: 4px; top: 6px; text-align: center; font-size: 14px; font-weight: 700; line-height: 16px;">@NameOf( worn )</div>
+								<div style="position: absolute; left: 4px; right: 4px; bottom: 18px; text-align: center; font-size: 13px; opacity: 0.75;">-@((int)((ItemLibrary.Get( worn.ItemId )?.Defense ?? 0f) * 100f))%</div>
+							}
+						</div>
+					}
+				</div>
+
+				<div style="position: relative; width: 300px; margin: 0 16px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.22); background-color: rgba(0,0,0,0.35); overflow: hidden;" onmousedown=@StartSpin>
+					<ScenePanel @ref="_charPanel" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%;" />
+					<div style="position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font-size: 13px; opacity: 0.5;">Drag to turn</div>
+				</div>
+
+				<div style="display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1;">
+					@for ( int row = 0; row < 4; row++ )
+					{
+						int r = row;
+						<div style="display: flex; flex-direction: row; align-items: center; height: 92px;">
+							<div style="width: 86px; font-size: 14px; opacity: @(Unlocked( r * 4 ) ? "0.7" : "0.3"); line-height: 16px;">@(new[] { "Pockets", "Small pack", "Medium pack", "Large pack" }[r])</div>
+							@for ( int col = 0; col < 4; col++ )
+							{
+								int idx = r * 4 + col;
+								bool open = Unlocked( idx );
+								var stored = Inv?.Storage[idx];
+								<div onclick=@(() => Click( "bag", idx )) onrightclick=@(() => RightClick( "bag", idx )) style="position: relative; width: 82px; height: 82px; margin-right: 8px; border-radius: 10px; background-color: rgba(255,255,255,@(open ? "0.06" : "0.015")); border: 2px solid rgba(255,255,255,@(open ? "0.22" : "0.07"));">
+									@if ( !open )
+									{
+										<div style="position: absolute; left: 0; right: 0; top: 28px; text-align: center; font-size: 13px; opacity: 0.25;">locked</div>
+									}
+									else if ( stored is not null )
+									{
+										<div style="position: absolute; left: 4px; right: 4px; top: 8px; text-align: center; font-size: 15px; font-weight: 600; line-height: 17px;">@NameOf( stored )</div>
+										@if ( HasBar( stored ) )
+										{
+											<div style="position: absolute; left: 8px; right: 8px; bottom: 7px; height: 5px; border-radius: 3px; background-color: rgba(255,255,255,0.18);">
+												<div style="width: @((int)(stored.Amount * 100f))%; height: 5px; border-radius: 3px; background-color: rgba(120,200,255,0.95);"></div>
+											</div>
+										}
+									}
+								</div>
+							}
+						</div>
+					}
+				</div>
+			</div>
+
+			@* ---- pocket crafting ---- *@
+			<div style="display: flex; flex-direction: row; height: 300px; margin-top: 16px; padding: 12px; border-radius: 12px; background-color: rgba(255,255,255,0.04); border: 2px solid rgba(255,255,255,0.18);">
+
+				<div style="display: flex; flex-direction: column; width: 440px; padding: 8px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.2); background-color: rgba(0,0,0,0.22);">
+					<div style="font-size: 14px; opacity: 0.6; margin-bottom: 6px;">Pocket crafting</div>
+					<div style="display: flex; flex-direction: row; flex-wrap: wrap; align-content: flex-start;">
+						@for ( int i = 0; i < Recipes.Count; i++ )
+						{
+							int recipe = i;
+							bool can = CanCraft( Recipes[recipe] );
+							<div onclick=@(() => SelectRecipe( recipe )) style="width: 132px; height: 60px; margin: 0 6px 6px 0; padding: 6px; border-radius: 8px; background-color: rgba(255,255,255,@(recipe == _recipe ? "0.16" : "0.06")); border: 2px solid rgba(255,255,255,@(recipe == _recipe ? "0.8" : "0.2")); font-size: 14px; font-weight: 600; line-height: 16px; opacity: @(can ? "1" : "0.55");">@Recipes[recipe].Name</div>
+						}
+					</div>
+				</div>
+
+				<div style="display: flex; flex-direction: row; flex-grow: 1; margin-left: 12px; padding: 8px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.2); background-color: rgba(0,0,0,0.22);">
+					<div style="display: flex; flex-direction: column; width: 190px;">
+						<div style="position: relative; width: 190px; height: 190px; border-radius: 8px; background-color: rgba(0,0,0,0.35); overflow: hidden;">
+							<ScenePanel @ref="_recipePanel" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%;" />
+						</div>
+						<div style="margin-top: 8px; padding: 8px 0; text-align: center; border-radius: 8px; font-size: 18px; font-weight: 700; background-color: rgba(255,255,255,@(SelectedCanCraft ? "0.22" : "0.06")); opacity: @(SelectedCanCraft ? "1" : "0.5");" onclick=@Craft>Craft</div>
+					</div>
+					<div style="display: flex; flex-direction: column; flex-grow: 1; margin-left: 12px; font-size: 15px; line-height: 19px;">
+						@if ( Selected is not null )
+						{
+							<div style="font-size: 20px; font-weight: 700;">@Selected.Name@(Selected.OutputCount > 1 ? $" x{Selected.OutputCount}" : "")</div>
+							<div style="margin-top: 4px; opacity: 0.8;">@Selected.Description</div>
+							<div style="margin-top: 8px; font-size: 13px; opacity: 0.55;">NEEDS</div>
+							@foreach ( var (item, count) in Selected.Inputs )
+							{
+								int have = Inv?.Count( item ) ?? 0;
+								<div style="color: @(have >= count ? "rgb(220,230,240)" : "rgb(230,120,110)");">@count x @(ItemLibrary.Get( item )?.Name ?? item)  (@have)</div>
+							}
+						}
+						else
+						{
+							<div style="opacity: 0.5;">No recipes</div>
+						}
+					</div>
+				</div>
+			</div>
+
+			@* ---- the hotbar ---- *@
+			<div style="display: flex; flex-direction: row; justify-content: center; margin-top: 16px;">
+				@for ( int h = 0; h < 6; h++ )
+				{
+					int slot = h;
+					var hot = Inv?.Hotbar?.Get( slot );
+					<div onclick=@(() => Click( "hot", slot )) onrightclick=@(() => RightClick( "hot", slot )) style="position: relative; width: 82px; height: 82px; margin: 0 5px; border-radius: 10px; background-color: rgba(255,255,255,0.07); border: 2px solid rgba(255,255,255,@(slot == HotSelected ? "0.85" : "0.25"));">
+						<div style="position: absolute; left: 7px; top: 3px; font-size: 13px; opacity: 0.6;">@(slot + 1)</div>
+						@if ( hot is not null )
+						{
+							<div style="position: absolute; left: 4px; right: 4px; top: 22px; text-align: center; font-size: 15px; font-weight: 600; line-height: 17px;">@NameOf( hot )</div>
+							@if ( HasBar( hot ) )
+							{
+								<div style="position: absolute; left: 8px; right: 8px; bottom: 7px; height: 5px; border-radius: 3px; background-color: rgba(255,255,255,0.18);">
+									<div style="width: @((int)(hot.Amount * 100f))%; height: 5px; border-radius: 3px; background-color: rgba(120,200,255,0.95);"></div>
+								</div>
+							}
+						}
+						else if ( slot == HeldSlot )
+						{
+							<div style="position: absolute; left: 0; right: 0; top: 30px; text-align: center; font-size: 13px; opacity: 0.55;">in hand</div>
+						}
+					</div>
+				}
+			</div>
+		</div>
+
+		@* ---- status ---- *@
+		<div style="display: flex; flex-direction: column; width: 270px; margin-left: 18px; padding: 18px; align-self: flex-start; margin-top: 90px; border-radius: 16px; background-color: rgba(18,22,30,0.92); border: 2px solid rgba(255,255,255,0.12); color: white; font-size: 16px; font-weight: 600;">
+			<div style="font-size: 13px; opacity: 0.5; margin-bottom: 8px;">STATUS</div>
+			@foreach ( var (label, value, color) in Bars() )
+			{
+				<div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
+					<div style="width: 64px;">@label</div>
+					<div style="flex-grow: 1; height: 16px; border-radius: 8px; background-color: rgba(255,255,255,0.15);">
+						<div style="width: @((int)Math.Clamp( value, 0f, 100f ))%; height: 16px; border-radius: 8px; background-color: @color;"></div>
+					</div>
+				</div>
+			}
+			<div style="margin-top: 6px; font-size: 13px; opacity: 0.5;">ARMOR</div>
+			<div style="margin-bottom: 10px;">@((int)((1f - (Inv?.DamageFactor ?? 1f)) * 100f))% less damage</div>
+			<div style="font-size: 13px; opacity: 0.5;">WORLD</div>
+			@if ( Info is not null )
+			{
+				@foreach ( var line in Info )
+				{
+					<div style="margin-top: 4px; font-weight: 500;">@line</div>
+				}
+			}
+			<div style="margin-top: 12px; font-size: 13px; opacity: 0.5; line-height: 17px; font-weight: 400;">Click an item to pick it up, click a slot to put it down. Right click sends it to the other bar or puts armor on. Tab closes.</div>
+		</div>
+
+		@if ( _cursor is not null )
+		{
+			<div style="position: absolute; left: @((int)_mouse.x + 12)px; top: @((int)_mouse.y + 12)px; padding: 6px 12px; border-radius: 8px; background-color: rgba(255,255,255,0.9); color: black; font-size: 16px; font-weight: 700; pointer-events: none;">@NameOf( _cursor )</div>
+		}
+	</div>
+</root>
+
+@code
+{
+	public static bool IsOpen { get; private set; }
+
+	public bool Open { get; private set; }
+
+	/// <summary>Filled by the grabber each frame: the hotbar slot that is selected and the one whose item is in your hands.</summary>
+	public int HotSelected { get; set; }
+	public int HeldSlot { get; set; } = -1;
+	public string[] Info { get; set; }
+
+	private PlayerInventory Inv => PlayerInventory.Instance;
+	private PlayerStats Stats => Scene.GetAllComponents<PlayerStats>().FirstOrDefault();
+
+	private ItemContainer.Stored _cursor;
+	private Vector2 _mouse;
+	private int _recipe;
+	private int _version;
+
+	// the two 3D previews
+	private ScenePanel _charPanel, _recipePanel;
+	private GameObject _charRoot, _charCamera, _recipeRoot, _recipeCamera;
+	private CameraComponent _charCam, _recipeCam;
+	private string _recipeShown;
+	private bool _spinning;
+	private float _spinFrom;
+	private float _charYaw = 20f;
+	private bool _scenesReady;
+
+	private IReadOnlyList<Recipe> Recipes => RecipeLibrary.All;
+	private Recipe Selected => _recipe >= 0 && _recipe < Recipes.Count ? Recipes[_recipe] : null;
+	private bool SelectedCanCraft => Selected is not null && CanCraft( Selected );
+
+	private bool Unlocked( int storageSlot ) => Inv is not null && Inv.IsUnlocked( storageSlot );
+
+	private static string NameOf( ItemContainer.Stored s ) => ItemLibrary.Get( s.ItemId )?.Name ?? s.ItemId;
+	private static bool HasBar( ItemContainer.Stored s ) { var d = ItemLibrary.Get( s.ItemId ); return d is not null && (d.Use is UseKind.Drink or UseKind.Refuel || d.Container is not null || (d.Use == UseKind.Eat && s.Amount < 0.99f)); }
+
+	private IEnumerable<(string, float, string)> Bars()
+	{
+		var s = Stats;
+		yield return ("Health", s?.Health ?? 100f, "rgba(210,70,70,0.95)");
+		yield return ("Food", s?.Food ?? 100f, "rgba(225,170,60,0.95)");
+		yield return ("Water", s?.Water ?? 100f, "rgba(80,160,230,0.95)");
+	}
+
+	// ---- opening and closing -----------------------------------------------------------------------------------------------------
+
+	protected override void OnUpdate()
+	{
+		if ( Input.Keyboard.Pressed( "tab" ) || (Open && Input.Keyboard.Pressed( "escape" )) ) Toggle();
+
+		if ( !Open ) return;
+
+		_mouse = Panel.MousePosition;
+		Mouse.Visibility = MouseVisibility.Visible;
+
+		// drag on the character to turn it
+		if ( _spinning )
+		{
+			if ( Input.Down( "Attack1" ) ) { _charYaw += (Mouse.Position.x - _spinFrom) * 0.6f; _spinFrom = Mouse.Position.x; }
+			else _spinning = false;
+		}
+
+		UpdateScenes();
+	}
+
+	private void Toggle()
+	{
+		Open = !Open;
+		IsOpen = Open;
+		Mouse.Visibility = Open ? MouseVisibility.Visible : MouseVisibility.Auto;
+
+		if ( Open )
+		{
+			RecipeLibrary.Reset();
+			ItemLibrary.Reset();
+			if ( !_scenesReady ) SetUpScenes();
+			_recipeShown = null;
+		}
+		else
+		{
+			ReturnCursor();
+		}
+		_version++;
+	}
+
+	protected override void OnDisabled() { IsOpen = false; }
+
+	/// <summary>Closing with something on the cursor: it goes back into the inventory, or onto the ground in front of you.</summary>
+	private void ReturnCursor()
+	{
+		if ( _cursor is null ) return;
+		var stored = _cursor;
+		_cursor = null;
+		if ( Inv is not null && Inv.TryAdd( stored ) ) return;
+		DropInFront( stored );
+	}
+
+	private void DropInFront( ItemContainer.Stored stored )
+	{
+		var cam = Scene.Camera;
+		if ( !cam.IsValid() ) return;
+		var item = ItemLibrary.Spawn( Scene, stored.ItemId, cam.WorldPosition + cam.WorldRotation.Forward * 90f, cam.WorldRotation, stored.Amount );
+		if ( item.IsValid() && stored.Liquid is not null ) item.Liquid = stored.Liquid;
+	}
+
+	// ---- slots ---------------------------------------------------------------------------------------------------------------------
+
+	private ItemContainer.Stored GetSlot( string kind, int i ) => kind switch
+	{
+		"hot" => Inv?.Hotbar?.Get( i ),
+		"bag" => Inv is not null && i < PlayerInventory.MaxStorage ? Inv.Storage[i] : null,
+		"arm" => Inv is not null && i < 4 ? Inv.Armor[i] : null,
+		_ => null,
+	};
+
+	private void SetSlot( string kind, int i, ItemContainer.Stored s )
+	{
+		if ( Inv is null ) return;
+		if ( kind == "hot" ) Inv.Hotbar?.Set( i, s );
+		else if ( kind == "bag" ) Inv.Storage[i] = s;
+		else if ( kind == "arm" ) Inv.Armor[i] = s;
+	}
+
+	private bool Accepts( string kind, int i, ItemContainer.Stored s )
+	{
+		var def = ItemLibrary.Get( s.ItemId );
+		if ( def is null ) return false;
+		return kind switch
+		{
+			"arm" => PlayerInventory.ArmorIndex( s.ItemId ) == i,
+			"bag" => Unlocked( i ) && def.Stowable,
+			_ => def.Stowable,
+		};
+	}
+
+	private void Click( string kind, int i )
+	{
+		if ( Inv is null ) return;
+		if ( kind == "bag" && !Unlocked( i ) ) return;
+
+		var here = GetSlot( kind, i );
+		if ( _cursor is null )
+		{
+			if ( here is null ) return;
+			_cursor = here;
+			SetSlot( kind, i, null );
+		}
+		else
+		{
+			if ( !Accepts( kind, i, _cursor ) ) { PlayerGrabber.Instance?.Notify( kind == "arm" ? "That does not go there" : "It does not fit" ); return; }
+			SetSlot( kind, i, _cursor );
+			_cursor = here;
+		}
+		_version++;
+	}
+
+	private void RightClick( string kind, int i )
+	{
+		if ( Inv is null || _cursor is not null ) return;
+		var here = GetSlot( kind, i );
+		if ( here is null ) return;
+
+		bool moved;
+		if ( kind == "arm" ) moved = Inv.TryAdd( here );
+		else if ( PlayerInventory.ArmorIndex( here.ItemId ) >= 0 ) { SetSlot( kind, i, null ); moved = Inv.Wear( here ); if ( !moved ) SetSlot( kind, i, here ); }
+		else if ( kind == "hot" ) moved = Inv.TryAddStorage( here );
+		else { int free = Inv.Hotbar?.FirstFree() ?? -1; moved = free >= 0; if ( moved ) Inv.Hotbar.Set( free, here ); }
+
+		if ( moved && kind != "arm" && PlayerInventory.ArmorIndex( here.ItemId ) < 0 ) SetSlot( kind, i, null );
+		else if ( moved && kind == "arm" ) SetSlot( kind, i, null );
+		_version++;
+	}
+
+	// ---- crafting ------------------------------------------------------------------------------------------------------------------
+
+	private void SelectRecipe( int i ) { _recipe = i; _version++; }
+
+	private bool CanCraft( Recipe r ) => Inv is not null && r.Inputs.All( x => Inv.Count( x.Item ) >= x.Count );
+
+	private void Craft()
+	{
+		var r = Selected;
+		if ( r is null || Inv is null || !CanCraft( r ) ) return;
+
+		foreach ( var (item, count) in r.Inputs ) Inv.Consume( item, count );
+
+		var def = ItemLibrary.Get( r.Output );
+		for ( int n = 0; n < r.OutputCount; n++ )
+		{
+			var made = new ItemContainer.Stored( r.Output, def?.Container?.StartFill ?? 1f, def?.Container?.StartFill > 0f ? def.Container.Liquid : null );
+			if ( def is not null && def.Stowable && Inv.TryAdd( made ) ) continue;
+			DropInFront( made );
+		}
+		PlayerGrabber.Instance?.Notify( $"Crafted {r.Name}" );
+		_version++;
+	}
+
+	// ---- the 3D previews ---------------------------------------------------------------------------------------------------------------
+
+	private void StartSpin() { _spinning = true; _spinFrom = Mouse.Position.x; }
+
+	private static void Build( ScenePanel panel, out GameObject root, out GameObject camera, out CameraComponent cam )
+	{
+		var scene = panel.RenderScene;
+		camera = scene.CreateObject();
+		cam = camera.Components.Create<CameraComponent>();
+		cam.BackgroundColor = new Color( 0.06f, 0.07f, 0.09f, 1f );
+		cam.FieldOfView = 30f;
+		cam.ZNear = 1f;
+		cam.ZFar = 2000f;
+
+		var sun = scene.CreateObject();
+		sun.WorldRotation = Rotation.From( 45f, -35f, 0f );
+		sun.Components.Create<DirectionalLight>().LightColor = Color.White * 2.4f;
+		var fill = scene.CreateObject();
+		fill.Components.Create<AmbientLight>().Color = new Color( 0.5f, 0.52f, 0.58f );
+
+		root = scene.CreateObject();
+	}
+
+	private void SetUpScenes()
+	{
+		if ( _charPanel is null || _recipePanel is null ) return;
+		_scenesReady = true;
+
+		Build( _charPanel, out _charRoot, out _charCamera, out _charCam );
+		Build( _recipePanel, out _recipeRoot, out _recipeCamera, out _recipeCam );
+
+		// the character: the player's own model and clothes, copied
+		var player = Scene.GetAllObjects( true ).FirstOrDefault( g => g.Components.Get<PlayerController>( true ) is not null );
+		var source = player?.Components.Get<PlayerController>( true )?.Renderer ?? player?.Components.Get<SkinnedModelRenderer>( FindMode.EverythingInSelfAndDescendants );
+		if ( source.IsValid() && source.Model is not null )
+		{
+			var body = _charRoot.Scene.CreateObject();
+			body.Parent = _charRoot;
+			var bodyRenderer = body.Components.Create<SkinnedModelRenderer>();
+			bodyRenderer.Model = source.Model;
+			bodyRenderer.Tint = source.Tint;
+			bodyRenderer.MaterialGroup = source.MaterialGroup;
+
+			foreach ( var piece in source.GameObject.Children )
+			{
+				var from = piece.Components.Get<SkinnedModelRenderer>( true );
+				if ( !from.IsValid() || from.Model is null ) continue;
+				var clone = _charRoot.Scene.CreateObject();
+				clone.Parent = body;
+				var r = clone.Components.Create<SkinnedModelRenderer>();
+				r.Model = from.Model;
+				r.Tint = from.Tint;
+				r.MaterialGroup = from.MaterialGroup;
+				r.BoneMergeTarget = bodyRenderer;
+			}
+		}
+
+		_charCamera.WorldPosition = new Vector3( 150f, 0f, 37f );
+		_charCamera.WorldRotation = Rotation.LookAt( new Vector3( -1f, 0f, 0f ) );
+	}
+
+	private void UpdateScenes()
+	{
+		if ( !_scenesReady ) return;
+
+		_charRoot.WorldRotation = Rotation.FromYaw( _charYaw );
+		FitCamera( _charPanel, _charCam );
+		FitCamera( _recipePanel, _recipeCam );
+
+		// the recipe's result, turning slowly about the vertical axis
+		var recipe = Selected;
+		if ( recipe?.Id != _recipeShown )
+		{
+			_recipeShown = recipe?.Id;
+			foreach ( var child in _recipeRoot.Children.ToList() ) child.Destroy();
+
+			var def = recipe is null ? null : ItemLibrary.Get( recipe.Output );
+			var model = def is null ? null : ItemLibrary.GetModel( def );
+			if ( model.IsValid() )
+			{
+				float scale = def.ModelScale;
+				var go = _recipeRoot.Scene.CreateObject();
+				go.Parent = _recipeRoot;
+				go.LocalPosition = -model.Bounds.Center * scale;
+				go.LocalScale = Vector3.One * scale;
+				go.Components.Create<ModelRenderer>().Model = model;
+
+				float size = MathF.Max( 4f, model.Bounds.Size.Length * scale );
+				_recipeCamera.WorldPosition = new Vector3( size * 2.1f, 0f, size * 0.35f );
+				_recipeCamera.WorldRotation = Rotation.LookAt( -_recipeCamera.WorldPosition );
+			}
+		}
+		_recipeRoot.WorldRotation = Rotation.FromYaw( RealTime.Now * 24f );
+	}
+
+	private static void FitCamera( ScenePanel panel, CameraComponent cam )
+	{
+		if ( panel is null || !cam.IsValid() ) return;
+		var size = panel.Box.RectInner.Size;
+		if ( size.x > 1f && size.y > 1f ) cam.CustomSize = size;
+	}
+
+	protected override int BuildHash()
+	{
+		var hash = new System.HashCode();
+		hash.Add( Open ); hash.Add( _version ); hash.Add( _recipe ); hash.Add( HotSelected ); hash.Add( HeldSlot );
+		if ( Open )
+		{
+			hash.Add( Info is null ? "" : string.Join( '|', Info ) );
+			var s = Stats;
+			if ( s is not null ) { hash.Add( (int)s.Health ); hash.Add( (int)s.Food ); hash.Add( (int)s.Water ); }
+			if ( _cursor is not null ) { hash.Add( (int)_mouse.x ); hash.Add( (int)_mouse.y ); }
+			var inv = Inv;
+			if ( inv is not null )
+			{
+				hash.Add( inv.BackpackTier );
+				for ( int i = 0; i < inv.Storage.Length; i++ ) hash.Add( inv.Storage[i] );
+				for ( int i = 0; i < inv.Armor.Length; i++ ) hash.Add( inv.Armor[i] );
+				for ( int i = 0; inv.Hotbar is not null && i < inv.Hotbar.Slots.Count; i++ ) hash.Add( inv.Hotbar.Get( i ) );
+			}
+		}
+		return hash.ToHashCode();
+	}
+}

@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/life_jacket/life_jacket_diff.png"
+	"TextureNormal"		"materials/items/life_jacket/life_jacket_nor_gl.png"
+	"TextureRoughness"		"materials/items/life_jacket/life_jacket_rough.png"
+	"TextureMetalness"		"materials/items/life_jacket/life_jacket_metal.png"
+}

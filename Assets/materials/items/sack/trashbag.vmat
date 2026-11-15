@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/sack/trashbag_diff.png"
+	"TextureNormal"		"materials/items/sack/trashbag_nor_gl.png"
+	"TextureRoughness"		"materials/items/sack/trashbag_rough.png"
+}
