@@ -4,33 +4,36 @@
 @namespace LongTrip.Gameplay
 
 <root>
-	<div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: @(Open ? "flex" : "none"); flex-direction: row; align-items: center; justify-content: center; background-color: rgba(4,6,10,0.62);">
+	<div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: @(Open ? "flex" : "none"); flex-direction: row; align-items: center; justify-content: center; background-color: rgba(4,6,10,0.62); pointer-events: all;">
 
-		<div style="display: flex; flex-direction: column; align-items: stretch; width: 940px; padding: 22px; border-radius: 16px; background-color: rgba(18,22,30,0.92); border: 2px solid rgba(255,255,255,0.12); color: white;">
+		<div style="display: flex; flex-direction: column; align-items: stretch; width: 940px; padding: 22px; border-radius: 16px; background-color: rgba(18,22,30,0.96); border: 2px solid rgba(255,255,255,0.12); color: white; pointer-events: all;">
 
 			@* ---- top: armor, the character, pockets and backpack ---- *@
 			<div style="display: flex; flex-direction: row; height: 400px;">
 
-				<div style="display: flex; flex-direction: column; justify-content: space-between; width: 92px;">
+				<div style="display: flex; flex-direction: column; justify-content: space-between; width: 92px; flex-shrink: 0;">
 					@for ( int a = 0; a < 4; a++ )
 					{
 						int armor = a;
 						var worn = Inv?.Armor[armor];
-						<div onclick=@(() => Click( "arm", armor )) onrightclick=@(() => RightClick( "arm", armor )) style="position: relative; width: 92px; height: 92px; border-radius: 10px; background-color: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.22);">
-							<div style="position: absolute; left: 0; right: 0; top: 22px; text-align: center; font-size: 44px; font-weight: 700; color: rgba(255,255,255,0.10);">@(new[] { "H", "C", "L", "F" }[armor])</div>
-							<div style="position: absolute; left: 0; right: 0; bottom: 3px; text-align: center; font-size: 12px; opacity: 0.45;">@(new[] { "HEAD", "CHEST", "LEGS", "FEET" }[armor])</div>
+						<div onclick=@(() => Click( "arm", armor )) onrightclick=@(() => RightClick( "arm", armor )) style="display: flex; flex-direction: column; align-items: center; justify-content: space-between; width: 92px; height: 92px; padding: 6px 4px; overflow: hidden; border-radius: 10px; background-color: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.22); pointer-events: all;">
+							<div style="font-size: 12px; line-height: 14px; opacity: 0.5; pointer-events: none;">@(new[] { "HEAD", "CHEST", "LEGS", "FEET" }[armor])</div>
 							@if ( worn is not null )
 							{
-								<div style="position: absolute; left: 4px; right: 4px; top: 6px; text-align: center; font-size: 14px; font-weight: 700; line-height: 16px;">@NameOf( worn )</div>
-								<div style="position: absolute; left: 4px; right: 4px; bottom: 18px; text-align: center; font-size: 13px; opacity: 0.75;">-@((int)((ItemLibrary.Get( worn.ItemId )?.Defense ?? 0f) * 100f))%</div>
+								<div style="width: 100%; max-height: 36px; overflow: hidden; text-align: center; font-size: 14px; font-weight: 700; line-height: 16px; pointer-events: none;">@NameOf( worn )</div>
+								<div style="font-size: 12px; line-height: 14px; opacity: 0.75; pointer-events: none;">-@((int)((ItemLibrary.Get( worn.ItemId )?.Defense ?? 0f) * 100f))% damage</div>
+							}
+							else
+							{
+								<div style="font-size: 12px; line-height: 14px; opacity: 0.25; pointer-events: none;">empty</div>
 							}
 						</div>
 					}
 				</div>
 
-				<div style="position: relative; width: 300px; margin: 0 16px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.22); background-color: rgba(0,0,0,0.35); overflow: hidden;" onmousedown=@StartSpin>
+				<div style="position: relative; width: 300px; flex-shrink: 0; margin: 0 16px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.22); background-color: rgba(0,0,0,0.35); overflow: hidden; pointer-events: all;" onmousedown=@StartSpin>
 					<ScenePanel @ref="_charPanel" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%;" />
-					<div style="position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font-size: 13px; opacity: 0.5;">Drag to turn</div>
+					<div style="position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font-size: 13px; opacity: 0.5; pointer-events: none;">Drag to turn</div>
 				</div>
 
 				<div style="display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1;">
@@ -38,23 +41,23 @@
 					{
 						int r = row;
 						<div style="display: flex; flex-direction: row; align-items: center; height: 92px;">
-							<div style="width: 86px; font-size: 14px; opacity: @(Unlocked( r * 4 ) ? "0.7" : "0.3"); line-height: 16px;">@(new[] { "Pockets", "Small pack", "Medium pack", "Large pack" }[r])</div>
+							<div style="width: 70px; flex-shrink: 0; font-size: 13px; opacity: @(Unlocked( r * 4 ) ? "0.7" : "0.3"); line-height: 15px;">@(new[] { "Pockets", "Small pack", "Medium pack", "Large pack" }[r])</div>
 							@for ( int col = 0; col < 4; col++ )
 							{
 								int idx = r * 4 + col;
 								bool open = Unlocked( idx );
 								var stored = Inv?.Storage[idx];
-								<div onclick=@(() => Click( "bag", idx )) onrightclick=@(() => RightClick( "bag", idx )) style="position: relative; width: 82px; height: 82px; margin-right: 8px; border-radius: 10px; background-color: rgba(255,255,255,@(open ? "0.06" : "0.015")); border: 2px solid rgba(255,255,255,@(open ? "0.22" : "0.07"));">
+								<div onclick=@(() => Click( "bag", idx )) onrightclick=@(() => RightClick( "bag", idx )) style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 82px; height: 82px; flex-shrink: 0; margin-right: 8px; padding: 4px; overflow: hidden; border-radius: 10px; background-color: rgba(255,255,255,@(open ? "0.06" : "0.015")); border: 2px solid rgba(255,255,255,@(open ? "0.22" : "0.07")); pointer-events: all;">
 									@if ( !open )
 									{
-										<div style="position: absolute; left: 0; right: 0; top: 28px; text-align: center; font-size: 13px; opacity: 0.25;">locked</div>
+										<div style="font-size: 12px; opacity: 0.25; pointer-events: none;">locked</div>
 									}
 									else if ( stored is not null )
 									{
-										<div style="position: absolute; left: 4px; right: 4px; top: 8px; text-align: center; font-size: 15px; font-weight: 600; line-height: 17px;">@NameOf( stored )</div>
+										<div style="width: 100%; max-height: 36px; overflow: hidden; text-align: center; font-size: 14px; font-weight: 600; line-height: 16px; pointer-events: none;">@NameOf( stored )</div>
 										@if ( HasBar( stored ) )
 										{
-											<div style="position: absolute; left: 8px; right: 8px; bottom: 7px; height: 5px; border-radius: 3px; background-color: rgba(255,255,255,0.18);">
+											<div style="width: 100%; height: 5px; margin-top: 6px; border-radius: 3px; background-color: rgba(255,255,255,0.18); pointer-events: none;">
 												<div style="width: @((int)(stored.Amount * 100f))%; height: 5px; border-radius: 3px; background-color: rgba(120,200,255,0.95);"></div>
 											</div>
 										}
@@ -69,35 +72,35 @@
 			@* ---- pocket crafting ---- *@
 			<div style="display: flex; flex-direction: row; height: 300px; margin-top: 16px; padding: 12px; border-radius: 12px; background-color: rgba(255,255,255,0.04); border: 2px solid rgba(255,255,255,0.18);">
 
-				<div style="display: flex; flex-direction: column; width: 440px; padding: 8px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.2); background-color: rgba(0,0,0,0.22);">
-					<div style="font-size: 14px; opacity: 0.6; margin-bottom: 6px;">Pocket crafting</div>
+				<div style="display: flex; flex-direction: column; width: 440px; flex-shrink: 0; padding: 8px; overflow: hidden; border-radius: 10px; border: 2px solid rgba(255,255,255,0.2); background-color: rgba(0,0,0,0.22);">
+					<div style="font-size: 14px; line-height: 16px; opacity: 0.6; margin-bottom: 8px;">Pocket crafting</div>
 					<div style="display: flex; flex-direction: row; flex-wrap: wrap; align-content: flex-start;">
 						@for ( int i = 0; i < Recipes.Count; i++ )
 						{
 							int recipe = i;
 							bool can = CanCraft( Recipes[recipe] );
-							<div onclick=@(() => SelectRecipe( recipe )) style="width: 132px; height: 60px; margin: 0 6px 6px 0; padding: 6px; border-radius: 8px; background-color: rgba(255,255,255,@(recipe == _recipe ? "0.16" : "0.06")); border: 2px solid rgba(255,255,255,@(recipe == _recipe ? "0.8" : "0.2")); font-size: 14px; font-weight: 600; line-height: 16px; opacity: @(can ? "1" : "0.55");">@Recipes[recipe].Name</div>
+							<div onclick=@(() => SelectRecipe( recipe )) style="display: flex; flex-direction: column; justify-content: center; width: 132px; height: 60px; flex-shrink: 0; margin: 0 6px 6px 0; padding: 4px 8px; overflow: hidden; border-radius: 8px; background-color: rgba(255,255,255,@(recipe == _recipe ? "0.16" : "0.06")); border: 2px solid rgba(255,255,255,@(recipe == _recipe ? "0.8" : "0.2")); font-size: 14px; font-weight: 600; line-height: 16px; opacity: @(can ? "1" : "0.55"); pointer-events: all;">@Recipes[recipe].Name</div>
 						}
 					</div>
 				</div>
 
-				<div style="display: flex; flex-direction: row; flex-grow: 1; margin-left: 12px; padding: 8px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.2); background-color: rgba(0,0,0,0.22);">
-					<div style="display: flex; flex-direction: column; width: 190px;">
-						<div style="position: relative; width: 190px; height: 190px; border-radius: 8px; background-color: rgba(0,0,0,0.35); overflow: hidden;">
+				<div style="display: flex; flex-direction: row; flex-grow: 1; min-width: 0; margin-left: 12px; padding: 8px; overflow: hidden; border-radius: 10px; border: 2px solid rgba(255,255,255,0.2); background-color: rgba(0,0,0,0.22);">
+					<div style="display: flex; flex-direction: column; width: 170px; flex-shrink: 0;">
+						<div style="position: relative; width: 170px; height: 170px; border-radius: 8px; background-color: rgba(0,0,0,0.35); overflow: hidden;">
 							<ScenePanel @ref="_recipePanel" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%;" />
 						</div>
-						<div style="margin-top: 8px; padding: 8px 0; text-align: center; border-radius: 8px; font-size: 18px; font-weight: 700; background-color: rgba(255,255,255,@(SelectedCanCraft ? "0.22" : "0.06")); opacity: @(SelectedCanCraft ? "1" : "0.5");" onclick=@Craft>Craft</div>
+						<div onclick=@Craft style="margin-top: 10px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 18px; font-weight: 700; background-color: rgba(255,255,255,@(SelectedCanCraft ? "0.22" : "0.06")); opacity: @(SelectedCanCraft ? "1" : "0.5"); pointer-events: all;">Craft</div>
 					</div>
-					<div style="display: flex; flex-direction: column; flex-grow: 1; margin-left: 12px; font-size: 15px; line-height: 19px;">
+					<div style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0; margin-left: 14px; overflow: hidden; font-size: 14px; line-height: 18px;">
 						@if ( Selected is not null )
 						{
-							<div style="font-size: 20px; font-weight: 700;">@Selected.Name@(Selected.OutputCount > 1 ? $" x{Selected.OutputCount}" : "")</div>
+							<div style="font-size: 19px; line-height: 22px; font-weight: 700;">@Selected.Name@(Selected.OutputCount > 1 ? $" x{Selected.OutputCount}" : "")</div>
 							<div style="margin-top: 4px; opacity: 0.8;">@Selected.Description</div>
-							<div style="margin-top: 8px; font-size: 13px; opacity: 0.55;">NEEDS</div>
+							<div style="margin-top: 10px; font-size: 12px; line-height: 14px; opacity: 0.55;">NEEDS</div>
 							@foreach ( var (item, count) in Selected.Inputs )
 							{
 								int have = Inv?.Count( item ) ?? 0;
-								<div style="color: @(have >= count ? "rgb(220,230,240)" : "rgb(230,120,110)");">@count x @(ItemLibrary.Get( item )?.Name ?? item)  (@have)</div>
+								<div style="margin-top: 2px; color: @(have >= count ? "rgb(220,230,240)" : "rgb(230,120,110)");">@count x @(ItemLibrary.Get( item )?.Name ?? item) (@have)</div>
 							}
 						}
 						else
@@ -114,21 +117,21 @@
 				{
 					int slot = h;
 					var hot = Inv?.Hotbar?.Get( slot );
-					<div onclick=@(() => Click( "hot", slot )) onrightclick=@(() => RightClick( "hot", slot )) style="position: relative; width: 82px; height: 82px; margin: 0 5px; border-radius: 10px; background-color: rgba(255,255,255,0.07); border: 2px solid rgba(255,255,255,@(slot == HotSelected ? "0.85" : "0.25"));">
-						<div style="position: absolute; left: 7px; top: 3px; font-size: 13px; opacity: 0.6;">@(slot + 1)</div>
+					<div onclick=@(() => Click( "hot", slot )) onrightclick=@(() => RightClick( "hot", slot )) style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 82px; height: 82px; flex-shrink: 0; margin: 0 5px; padding: 14px 4px 4px 4px; overflow: hidden; border-radius: 10px; background-color: rgba(255,255,255,0.07); border: 2px solid rgba(255,255,255,@(slot == HotSelected ? "0.85" : "0.25")); pointer-events: all;">
+						<div style="position: absolute; left: 7px; top: 2px; font-size: 12px; line-height: 14px; opacity: 0.6; pointer-events: none;">@(slot + 1)</div>
 						@if ( hot is not null )
 						{
-							<div style="position: absolute; left: 4px; right: 4px; top: 22px; text-align: center; font-size: 15px; font-weight: 600; line-height: 17px;">@NameOf( hot )</div>
+							<div style="width: 100%; max-height: 34px; overflow: hidden; text-align: center; font-size: 14px; font-weight: 600; line-height: 16px; pointer-events: none;">@NameOf( hot )</div>
 							@if ( HasBar( hot ) )
 							{
-								<div style="position: absolute; left: 8px; right: 8px; bottom: 7px; height: 5px; border-radius: 3px; background-color: rgba(255,255,255,0.18);">
+								<div style="width: 100%; height: 5px; margin-top: 5px; border-radius: 3px; background-color: rgba(255,255,255,0.18); pointer-events: none;">
 									<div style="width: @((int)(hot.Amount * 100f))%; height: 5px; border-radius: 3px; background-color: rgba(120,200,255,0.95);"></div>
 								</div>
 							}
 						}
 						else if ( slot == HeldSlot )
 						{
-							<div style="position: absolute; left: 0; right: 0; top: 30px; text-align: center; font-size: 13px; opacity: 0.55;">in hand</div>
+							<div style="font-size: 12px; opacity: 0.55; pointer-events: none;">in hand</div>
 						}
 					</div>
 				}
@@ -136,20 +139,20 @@
 		</div>
 
 		@* ---- status ---- *@
-		<div style="display: flex; flex-direction: column; width: 270px; margin-left: 18px; padding: 18px; align-self: flex-start; margin-top: 90px; border-radius: 16px; background-color: rgba(18,22,30,0.92); border: 2px solid rgba(255,255,255,0.12); color: white; font-size: 16px; font-weight: 600;">
-			<div style="font-size: 13px; opacity: 0.5; margin-bottom: 8px;">STATUS</div>
+		<div style="display: flex; flex-direction: column; width: 270px; flex-shrink: 0; margin-left: 18px; padding: 18px; align-self: flex-start; margin-top: 90px; border-radius: 16px; background-color: rgba(18,22,30,0.96); border: 2px solid rgba(255,255,255,0.12); color: white; font-size: 16px; line-height: 20px; font-weight: 600;">
+			<div style="font-size: 12px; line-height: 14px; opacity: 0.5; margin-bottom: 10px;">STATUS</div>
 			@foreach ( var (label, value, color) in Bars() )
 			{
 				<div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
-					<div style="width: 64px;">@label</div>
+					<div style="width: 70px; flex-shrink: 0;">@label</div>
 					<div style="flex-grow: 1; height: 16px; border-radius: 8px; background-color: rgba(255,255,255,0.15);">
 						<div style="width: @((int)Math.Clamp( value, 0f, 100f ))%; height: 16px; border-radius: 8px; background-color: @color;"></div>
 					</div>
 				</div>
 			}
-			<div style="margin-top: 6px; font-size: 13px; opacity: 0.5;">ARMOR</div>
-			<div style="margin-bottom: 10px;">@((int)((1f - (Inv?.DamageFactor ?? 1f)) * 100f))% less damage</div>
-			<div style="font-size: 13px; opacity: 0.5;">WORLD</div>
+			<div style="margin-top: 6px; font-size: 12px; line-height: 14px; opacity: 0.5;">ARMOR</div>
+			<div style="margin-top: 2px; margin-bottom: 12px;">@((int)((1f - (Inv?.DamageFactor ?? 1f)) * 100f))% less damage</div>
+			<div style="font-size: 12px; line-height: 14px; opacity: 0.5;">WORLD</div>
 			@if ( Info is not null )
 			{
 				@foreach ( var line in Info )
@@ -157,12 +160,12 @@
 					<div style="margin-top: 4px; font-weight: 500;">@line</div>
 				}
 			}
-			<div style="margin-top: 12px; font-size: 13px; opacity: 0.5; line-height: 17px; font-weight: 400;">Click an item to pick it up, click a slot to put it down. Right click sends it to the other bar or puts armor on. Tab closes.</div>
+			<div style="margin-top: 14px; font-size: 13px; opacity: 0.5; line-height: 17px; font-weight: 400;">Click an item to pick it up, click a slot to put it down. Right click sends it to the other bar or puts armor on. Tab closes.</div>
 		</div>
 
 		@if ( _cursor is not null )
 		{
-			<div style="position: absolute; left: @((int)_mouse.x + 12)px; top: @((int)_mouse.y + 12)px; padding: 6px 12px; border-radius: 8px; background-color: rgba(255,255,255,0.9); color: black; font-size: 16px; font-weight: 700; pointer-events: none;">@NameOf( _cursor )</div>
+			<div style="position: absolute; left: @((int)_mouse.x + 14)px; top: @((int)_mouse.y + 14)px; padding: 6px 12px; border-radius: 8px; background-color: rgba(255,255,255,0.92); color: black; font-size: 16px; line-height: 18px; font-weight: 700; pointer-events: none;">@NameOf( _cursor )</div>
 		}
 	</div>
 </root>
