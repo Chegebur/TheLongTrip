@@ -1,9 +1,11 @@
 namespace LongTrip.Gameplay;
 
 /// <summary>
-/// Picking things up, The Long Drive style. Look at a car part (or a part that is on the car) and press F to grab it; your arms
+/// Picking things up, The Long Drive style. Look at an item (or a part that is on the car) and press F to grab it; your arms
 /// stretch out to it. While you carry it: hold the right mouse button and move the mouse to turn it, the wheel pushes it away or
-/// pulls it close, the left button throws it, and F lets go (or fits it onto the car when its green ghost is showing).
+/// pulls it close, the left button uses it (eat, drink, pour fuel; anything else is thrown), T throws it, R puts it in the
+/// backpack (with empty hands R takes the last thing out), Z welds it to what is behind it, and F lets go, or fits a car part
+/// onto the car when its green ghost is showing. Hold the left mouse on a door or the handbrake lever and move the mouse to swing it.
 /// Goes on the player object.
 /// </summary>
 public sealed class PlayerGrabber : Component
@@ -23,14 +25,14 @@ public sealed class PlayerGrabber : Component
 	/// <summary>True while the mouse is busy turning a part or swinging a door: cameras that read the mouse (the cockpit view) leave it alone.</summary>
 	public static bool LookSuppressed { get; private set; }
 
-	public CarPartItem Held => _held;
+	public Item Held => _held;
 
-	private CarPartItem _held;
-	private Rotation _relative = Rotation.Identity;   // the part's orientation in the camera's frame
+	private Item _held;
+	private Rotation _relative = Rotation.Identity;   // the item's orientation in the camera's frame
 	private float _holdDistance = 130f;
 	private bool _rotating;
 
-	private CarPartItem _hoverItem;
+	private Item _hoverItem;
 	private CarAssembly.Socket _hoverSocket;
 
 	/// <summary>The door, hood or trunk being dragged open or shut (left mouse held), or null.</summary>
@@ -43,6 +45,8 @@ public sealed class PlayerGrabber : Component
 	private string _weldTargetName;
 
 	private PlayerController _player;
+	private PlayerStats _stats;
+	private ItemContainer _pack;
 	private StretchyArms _arms;
 	private GrabHud _hud;
 	private string _notice;
@@ -51,8 +55,11 @@ public sealed class PlayerGrabber : Component
 	protected override void OnStart()
 	{
 		Instance = this;
+		ItemLibrary.Reset();   // pick up any change to the item definitions
 		_player = Components.Get<PlayerController>( true );
 		_arms = Components.GetOrCreate<StretchyArms>();
+		_stats = Components.GetOrCreate<PlayerStats>();
+		_pack = Components.GetOrCreate<ItemContainer>();
 
 		var hudObject = Scene.CreateObject();
 		hudObject.Name = "Grab HUD";
@@ -65,7 +72,6 @@ public sealed class PlayerGrabber : Component
 
 	protected override void OnDisabled()
 	{
-		// the player is switched off while driving: put everything down
 		if ( _held.IsValid() ) Release( false );
 		_dragSocket = null;
 		if ( _player.IsValid() ) _player.UseLookControls = true;
@@ -94,6 +100,7 @@ public sealed class PlayerGrabber : Component
 		if ( !camera.IsValid() ) return;
 
 		bool pressedF = Input.Keyboard.Pressed( "f" );
+		bool pressedR = Input.Keyboard.Pressed( "r" );
 		var assembly = FindAssembly( Scene );
 		LookSuppressed = false;
 
@@ -101,6 +108,7 @@ public sealed class PlayerGrabber : Component
 		{
 			_hoverItem = null;
 			_hoverSocket = null;
+			var part = _held as CarPartItem;
 
 			// right button held: the mouse turns the part instead of turning your head
 			_rotating = Input.Down( "Attack2" );
@@ -111,20 +119,28 @@ public sealed class PlayerGrabber : Component
 			float wheel = Input.MouseWheel.y;
 			if ( wheel != 0f ) _holdDistance = Math.Clamp( _holdDistance + wheel * 14f, MinHoldDistance, MaxHoldDistance );
 
-			// near its socket the part shows a green ghost, and letting go fits it
+			// near its socket a car part shows a green ghost, and letting go fits it
 			CarAssembly.Socket snap = null;
-			if ( assembly is not null && assembly.TrySnap( _held, out snap ) ) assembly.ShowGhost( snap );
+			if ( part is not null && assembly is not null && assembly.TrySnap( part, out snap ) ) assembly.ShowGhost( snap );
 			else assembly?.HideGhost();
 
-			// Z welds the part to whatever is behind it (the car, another part), exactly where it is
+			// Z welds the item to whatever is behind it (the car, another item), exactly where it is
 			FindWeldTarget( camera );
 
+			var def = _held.Definition;
+			bool usable = def is not null && def.Use != UseKind.None;
+
 			if ( pressedF ) Release( true );
-			else if ( Input.Pressed( "Attack1" ) ) Throw( camera );
+			else if ( Input.Pressed( "Attack1" ) ) { if ( !usable || !UseHeld( def ) ) Throw( camera ); }
+			else if ( Input.Keyboard.Pressed( "t" ) ) Throw( camera );
+			else if ( pressedR ) Stow();
 			else if ( Input.Keyboard.Pressed( "z" ) && _weldTarget.IsValid() ) WeldHeld();
 
 			_hud.Hint = _held.IsValid() && snap is not null ? $"F   Fit {snap.Display}"
 				: _held.IsValid() && _weldTarget.IsValid() ? $"Z   Weld to {_weldTargetName}" : null;
+			_hud.Controls = _held.IsValid()
+				? $"Right mouse (hold): turn     Wheel: distance     Left mouse: {(usable ? UsePrompt( def ) : "throw")}     T: throw     R: stow     Z: weld     F: drop / fit"
+				: null;
 		}
 		else
 		{
@@ -154,20 +170,48 @@ public sealed class PlayerGrabber : Component
 					if ( item.IsValid() ) Pickup( camera, item );
 				}
 			}
+			else if ( pressedR )
+			{
+				// empty hands: take the last thing out of the backpack
+				var taken = _pack.TakeLast( camera.WorldPosition + camera.WorldRotation.Forward * 90f, camera.WorldRotation );
+				if ( taken.IsValid() ) Pickup( camera, taken );
+				else Notify( "The backpack is empty" );
+			}
 
-			_hud.Hint = _hoverItem.IsValid() ? $"F   Pick up {_hoverItem.Display}{(_hoverItem.IsWelded ? " (breaks the weld)" : "")}"
+			_hud.Hint = _hoverItem.IsValid() ? $"F   Pick up {_hoverItem.Display}{Describe( _hoverItem )}{(_hoverItem.IsWelded ? " (breaks the weld)" : "")}"
 				: _hoverSocket is { Group: "handbrake" } ? "Hold left mouse + move up / down   Handbrake"
 				: _hoverSocket is { IsHinged: true } ? $"Hold left mouse + move   Open / close {_hoverSocket.Display}      F   Remove"
 				: _hoverSocket is not null ? $"F   Remove {_hoverSocket.Display}" : null;
+			_hud.Controls = null;
 		}
 
-		_hud.Controls = _held.IsValid() ? "Right mouse (hold): turn     Wheel: distance     Left mouse: throw     Z: weld     F: drop / fit" : null;
 		if ( _noticeAge < 3.5f && !string.IsNullOrEmpty( _notice ) ) _hud.Hint = _notice;
+
+		// the stats, the car's fuel gauge (while sitting in it) and the backpack
+		if ( _stats.IsValid() ) { _hud.Health = _stats.Health; _hud.Food = _stats.Food; _hud.Water = _stats.Water; }
+		_hud.Fuel = assembly is { Occupied: true } ? $"Fuel  {assembly.Fuel:F0} / {CarAssembly.TankCapacity:F0} L" : null;
+		_hud.Pack = _pack.IsValid() ? $"Backpack  {_pack.Contents.Count} / {_pack.Capacity}" : null;
 
 		_arms.Tick( camera, _held, Time.Delta );
 	}
 
-	/// <summary>What is under the crosshair: a loose part, or a part that is on the car.</summary>
+	/// <summary>How full / how much is left, for the "Pick up" hint.</summary>
+	private static string Describe( Item item )
+	{
+		var def = item.Definition;
+		if ( def is null || def.Use == UseKind.None ) return "";
+		return def.Use == UseKind.Refuel ? $"  ({item.Amount * def.Capacity:F0} L)" : $"  ({(int)(item.Amount * 100f)}%)";
+	}
+
+	private static string UsePrompt( ItemDefinition def ) => def.Use switch
+	{
+		UseKind.Eat => "eat",
+		UseKind.Drink => "drink",
+		UseKind.Refuel => "pour fuel into the car",
+		_ => "use",
+	};
+
+	/// <summary>What is under the crosshair: a loose item, or a part that is on the car.</summary>
 	private void FindTarget( CameraComponent camera, CarAssembly assembly )
 	{
 		_hoverItem = null;
@@ -181,7 +225,7 @@ public sealed class PlayerGrabber : Component
 
 		if ( tr.Hit && tr.GameObject.IsValid() )
 		{
-			var item = tr.GameObject.Components.Get<CarPartItem>( FindMode.EverythingInSelfAndParent );
+			var item = tr.GameObject.Components.Get<Item>( FindMode.EverythingInSelfAndParent );
 			if ( item.IsValid() )
 			{
 				_hoverItem = item;
@@ -230,7 +274,7 @@ public sealed class PlayerGrabber : Component
 		assembly.SwingBy( socket, degrees );
 	}
 
-	/// <summary>The loose part or the car behind the held part, for welding.</summary>
+	/// <summary>The loose item or the car behind the held item, for welding and for pouring fuel.</summary>
 	private void FindWeldTarget( CameraComponent camera )
 	{
 		_weldTarget = null;
@@ -247,11 +291,11 @@ public sealed class PlayerGrabber : Component
 		if ( !body.IsValid() || body == _held.Body ) return;
 
 		_weldTarget = body;
-		var item = body.Components.Get<CarPartItem>();
+		var item = body.Components.Get<Item>();
 		_weldTargetName = item.IsValid() ? item.Display : (body.Components.Get<CarAssembly>() is not null ? "the car" : body.GameObject.Name);
 	}
 
-	/// <summary>Fix the held part where it is to the object behind it (a fixed joint), then let go.</summary>
+	/// <summary>Fix the held item where it is to the object behind it (a fixed joint), then let go.</summary>
 	private void WeldHeld()
 	{
 		var item = _held;
@@ -270,7 +314,72 @@ public sealed class PlayerGrabber : Component
 		Notify( $"{item.Display} welded to {name}" );
 	}
 
-	private void Pickup( CameraComponent camera, CarPartItem item )
+	/// <summary>Use the held item (left mouse). Returns false if it can't be used right now, so the click throws it instead.</summary>
+	private bool UseHeld( ItemDefinition def )
+	{
+		if ( !_held.IsValid() ) return false;
+
+		if ( _held.Amount <= 0.01f )
+		{
+			Notify( $"{_held.Display} is empty" );
+			return true;
+		}
+
+		float take = MathF.Min( def.PortionPerUse, _held.Amount );
+
+		switch ( def.Use )
+		{
+			case UseKind.Eat:
+				_stats?.Eat( def.Restore * take );
+				Notify( $"You ate the {_held.Display.ToLowerInvariant()}" );
+				break;
+
+			case UseKind.Drink:
+				_stats?.Drink( def.Restore * take );
+				Notify( "You drink" );
+				break;
+
+			case UseKind.Refuel:
+			{
+				var car = _weldTarget.IsValid() ? _weldTarget.Components.Get<CarAssembly>() : null;
+				if ( car is null ) { Notify( "Aim at the car to pour" ); return true; }
+
+				float accepted = car.AddFuel( def.Capacity * take );
+				if ( accepted <= 0.01f ) { Notify( "The tank is full" ); return true; }
+				take = accepted / def.Capacity;   // only what went in leaves the can
+				Notify( $"Poured {accepted:F1} L" );
+				break;
+			}
+
+			default:
+				return false;
+		}
+
+		_held.Amount = MathF.Max( 0f, _held.Amount - take );
+		if ( _held.Amount <= 0.01f && def.ConsumedWhenEmpty )
+		{
+			var used = _held;
+			Release( false );
+			if ( used.IsValid() ) used.GameObject.Destroy();
+		}
+		return true;
+	}
+
+	/// <summary>Put the held item in the backpack.</summary>
+	private void Stow()
+	{
+		var item = _held;
+		if ( !item.IsValid() ) return;
+
+		var def = item.Definition;
+		if ( def is null || !def.Stowable ) { Notify( $"The {item.Display.ToLowerInvariant()} won't fit in the backpack" ); return; }
+		if ( _pack.IsFull ) { Notify( "The backpack is full" ); return; }
+
+		Release( false );
+		if ( _pack.TryStore( item ) ) Notify( $"{def.Name} put in the backpack" );
+	}
+
+	private void Pickup( CameraComponent camera, Item item )
 	{
 		if ( !item.IsValid() || item.Body is null ) return;
 
@@ -288,13 +397,13 @@ public sealed class PlayerGrabber : Component
 
 	private void Rotate( Vector2 mouse )
 	{
-		// turn the part in the camera's frame: left-right about the camera's up axis, up-down about its left axis
+		// turn the item in the camera's frame: left-right about the camera's up axis, up-down about its left axis
 		var yaw = Rotation.FromAxis( Vector3.Up, -mouse.x * RotateSpeed );
 		var pitch = Rotation.FromAxis( Vector3.Left, -mouse.y * RotateSpeed );
 		_relative = yaw * pitch * _relative;
 	}
 
-	/// <summary>Let go of the part. With <paramref name="fit"/>, a part that is near its socket goes onto the car instead of dropping.</summary>
+	/// <summary>Let go of the item. With <paramref name="fit"/>, a car part that is near its socket goes onto the car instead of dropping.</summary>
 	private void Release( bool fit )
 	{
 		var item = _held;
@@ -313,7 +422,7 @@ public sealed class PlayerGrabber : Component
 		var assembly = FindAssembly( Scene );
 		if ( assembly is null ) return;
 		assembly.HideGhost();
-		if ( fit && assembly.TrySnap( item, out var socket ) ) assembly.Attach( item, socket );
+		if ( fit && item is CarPartItem part && assembly.TrySnap( part, out var socket ) ) assembly.Attach( part, socket );
 	}
 
 	private void Throw( CameraComponent camera )
@@ -335,7 +444,7 @@ public sealed class PlayerGrabber : Component
 		var body = _held.Body;
 		if ( body is null ) return;
 
-		// carried a little way in front of you, where you left it; the part is pulled there by its velocity, so walls still stop it
+		// carried a little way in front of you, where you left it; the item is pulled there by its velocity, so walls still stop it
 		var target = camera.WorldPosition + camera.WorldRotation.Forward * _holdDistance;
 		var toTarget = target - body.WorldPosition;
 

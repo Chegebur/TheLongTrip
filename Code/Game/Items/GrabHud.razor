@@ -15,6 +15,35 @@
 	{
 		<div style="position: absolute; left: 50%; bottom: 64px; transform: translateX(-50%); padding: 6px 16px; border-radius: 8px; background-color: rgba(0,0,0,0.45); color: rgba(255,255,255,0.9); font-size: 18px; white-space: nowrap;">@Controls</div>
 	}
+
+	<div style="position: absolute; left: 28px; bottom: 28px; width: 420px; display: flex; flex-direction: column; align-items: stretch; padding: 14px 16px; border-radius: 10px; background-color: rgba(0,0,0,0.4); color: white; font-size: 17px; font-weight: 600;">
+		<div style="display: flex; flex-direction: row; align-items: center; margin-top: 8px;">
+			<div style="width: 70px;">Health</div>
+			<div style="flex-grow: 1; height: 20px; border-radius: 10px; background-color: rgba(255,255,255,0.15);">
+				<div style="width: @(Percent( Health ))%; height: 20px; border-radius: 10px; background-color: rgba(210,70,70,0.95);"></div>
+			</div>
+		</div>
+		<div style="display: flex; flex-direction: row; align-items: center; margin-top: 8px;">
+			<div style="width: 70px;">Food</div>
+			<div style="flex-grow: 1; height: 20px; border-radius: 10px; background-color: rgba(255,255,255,0.15);">
+				<div style="width: @(Percent( Food ))%; height: 20px; border-radius: 10px; background-color: rgba(225,170,60,0.95);"></div>
+			</div>
+		</div>
+		<div style="display: flex; flex-direction: row; align-items: center; margin-top: 8px;">
+			<div style="width: 70px;">Water</div>
+			<div style="flex-grow: 1; height: 20px; border-radius: 10px; background-color: rgba(255,255,255,0.15);">
+				<div style="width: @(Percent( Water ))%; height: 20px; border-radius: 10px; background-color: rgba(80,160,230,0.95);"></div>
+			</div>
+		</div>
+		@if ( !string.IsNullOrEmpty( Fuel ) )
+		{
+			<div style="margin-top: 6px; font-size: 16px; font-weight: 600;">@Fuel</div>
+		}
+		@if ( !string.IsNullOrEmpty( Pack ) )
+		{
+			<div style="margin-top: 2px; opacity: 0.8;">@Pack</div>
+		}
+	</div>
 </root>
 
 @code
@@ -22,8 +51,20 @@
 	/// <summary>The main line under the crosshair: what F will do right now.</summary>
 	public string Hint { get; set; }
 
-	/// <summary>The controls reminder along the bottom while carrying a part.</summary>
+	/// <summary>The controls reminder along the bottom while carrying something.</summary>
 	public string Controls { get; set; }
 
-	protected override int BuildHash() => System.HashCode.Combine( Hint, Controls );
+	public float Health { get; set; } = 100f;
+	public float Food { get; set; } = 100f;
+	public float Water { get; set; } = 100f;
+
+	/// <summary>The car's fuel, as text, while sitting in it.</summary>
+	public string Fuel { get; set; }
+
+	/// <summary>The backpack, as text.</summary>
+	public string Pack { get; set; }
+
+	private static int Percent( float value ) => (int)Math.Clamp( value, 0f, 100f );
+
+	protected override int BuildHash() => System.HashCode.Combine( Hint, Controls, Percent( Health ), Percent( Food ), Percent( Water ), Fuel, Pack );
 }

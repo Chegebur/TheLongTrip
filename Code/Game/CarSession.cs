@@ -177,6 +177,17 @@ public sealed class CarSession : Component
 			var position = new Vector3( x, y, ground + MathF.Max( size.x, MathF.Max( size.y, size.z ) ) * 0.5f + 12f );
 			CarPartItem.Spawn( Scene, groups[i], position, Rotation.FromYaw( random.Next( 360 ) ) );
 		}
+
+		// and a few things to eat, drink and fill the tank with, in a row beside the parts
+		string[] supplies = { "fuel_can", "fuel_can", "water_bottle", "water_bottle", "water_bottle", "canned_food", "canned_food", "canned_food" };
+		ItemLibrary.Reset();
+		for ( int i = 0; i < supplies.Length; i++ )
+		{
+			float x = baseX + i * 60f;
+			float y = gen.RoadCenterY( x ) - 330f + 190f;
+			float ground = GroundGuard.SurfaceHeight( gen, x, y );
+			ItemLibrary.Spawn( Scene, supplies[i], new Vector3( x, y, ground + 30f ), Rotation.FromYaw( random.Next( 360 ) ), supplies[i] == "water_bottle" && i == 3 ? 0.5f : 1f );
+		}
 	}
 
 	private PlayerController _seatedController;
@@ -229,6 +240,7 @@ public sealed class CarSession : Component
 		}
 
 		IsDriving = true;
+		if ( _assembly is not null ) _assembly.Occupied = true;
 		SeatPlayer();
 		Controller.InputOverride = null; // live keyboard / gamepad (filtered by the car's parts every frame)
 
@@ -270,6 +282,7 @@ public sealed class CarSession : Component
 		Mouse.Visibility = MouseVisibility.Auto;
 
 		// The driver's door swings open, the handbrake goes on, and the player steps out on the driver's side.
+		if ( _assembly is not null ) _assembly.Occupied = false;
 		_assembly?.OpenDriverDoor();
 		_assembly?.SetHandbrake( true );
 

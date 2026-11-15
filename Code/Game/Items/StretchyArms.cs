@@ -72,7 +72,7 @@ public sealed class StretchyArms : Component
 	}
 
 	/// <summary>Move the arms for this frame. <paramref name="held"/> is the part being carried, or null for no arms.</summary>
-	public void Tick( CameraComponent camera, CarPartItem held, float dt )
+	public void Tick( CameraComponent camera, Item held, float dt )
 	{
 		float goal = held.IsValid() ? 1f : 0f;
 		_reach = MathX.Approach( _reach, goal, dt * (goal > _reach ? 6f : 4.5f) );

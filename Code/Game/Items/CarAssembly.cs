@@ -74,8 +74,27 @@ public sealed class CarAssembly : Component
 	public bool HasSteeringWheel => Has( "steering" );
 	public int WheelsOn => WheelSockets.Count( Has );
 
-	/// <summary>The engine needs its radiator; and it needs at least one driven wheel on the road to go anywhere.</summary>
-	public bool CanRun => HasEngine && HasRadiator;
+	/// <summary>The fuel tank holds this many litres.</summary>
+	public const float TankCapacity = 60f;
+
+	/// <summary>Litres in the tank. The car starts with a little, and burns it while the throttle is down.</summary>
+	public float Fuel { get; private set; } = 15f;
+
+	public bool HasFuel => Fuel > 0.01f;
+
+	/// <summary>True while the player is sitting in the car (the HUD shows the fuel gauge).</summary>
+	public bool Occupied { get; set; }
+
+	/// <summary>Pour fuel in. Returns how many litres actually went in (the tank can be full).</summary>
+	public float AddFuel( float litres )
+	{
+		float accepted = MathF.Max( 0f, MathF.Min( litres, TankCapacity - Fuel ) );
+		Fuel += accepted;
+		return accepted;
+	}
+
+	/// <summary>The engine needs its radiator and some fuel; it also needs a driven wheel on the road to go anywhere.</summary>
+	public bool CanRun => HasEngine && HasRadiator && HasFuel;
 
 	/// <summary>What is stopping the car from running, in words, or null when nothing is.</summary>
 	public string WhatIsMissing()
@@ -83,6 +102,7 @@ public sealed class CarAssembly : Component
 		var missing = new List<string>();
 		if ( !HasEngine ) missing.Add( "an engine" );
 		if ( !HasRadiator ) missing.Add( "a radiator" );
+		if ( !HasFuel ) missing.Add( "fuel" );
 		if ( WheelsOn == 0 ) missing.Add( "wheels" );
 		return missing.Count == 0 ? null : "The car needs " + string.Join( ", ", missing );
 	}
@@ -195,6 +215,12 @@ public sealed class CarAssembly : Component
 		// (It is not held while the player is on the throttle, so a handbrake turn still starts.)
 		bool onWheels = _controller.Wheels.Any( w => w.IsGrounded );
 		bool park = _controller.Handbrake && onWheels && _controller.SpeedMs < 0.6f && _controller.Throttle < 0.05f;
+		// the engine burns fuel while the throttle is down
+		if ( CanRun && _controller.Throttle > 0.05f )
+			Fuel = MathF.Max( 0f, Fuel - (0.004f + 0.035f * _controller.Throttle) * Time.Delta );
+
+		if ( _engineAudio.IsValid() && _engineAudio.Enabled != CanRun ) _engineAudio.Enabled = CanRun;   // the engine dies when the tank runs dry
+
 		if ( park != _parked )
 		{
 			_parked = park;
