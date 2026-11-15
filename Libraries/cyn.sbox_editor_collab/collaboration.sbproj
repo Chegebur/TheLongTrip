@@ -1,0 +1,14 @@
+{
+  "Title": "s&box Editor Collaboration",
+  "Type": "library",
+  "Org": "cyn",
+  "Ident": "sbox_editor_collab",
+  "Schema": 1,
+  "IncludeSourceFiles": false,
+  "Resources": null,
+  "PackageReferences": [],
+  "EditorReferences": null,
+  "Mounts": null,
+  "IsStandaloneOnly": false,
+  "Metadata": {}
+}

@@ -4,13 +4,16 @@
   </Configurations>
   <Project Path="Code/the_long_trip.csproj" />
   <Project Path="Editor/the_long_trip.editor.csproj" />
+  <Folder Name="/Libraries/">
+    <Project Path="Libraries/cyn.sbox_editor_collab/Editor/sbox_editor_collab.editor.csproj" />
+  </Folder>
   <Folder Name="/Tools/">
-    <Project Path="../../sbox-public/game/addons/tools/Code/Base Editor Library.csproj" />
-    <Project Path="../../sbox-public/game/editor/ActionGraph/Code/actiongraph.csproj" />
-    <Project Path="../../sbox-public/game/editor/AnimGraph/Code/animgraph.csproj" />
-    <Project Path="../../sbox-public/game/editor/DooEditor/Code/dooeditor.csproj" />
-    <Project Path="../../sbox-public/game/editor/Hammer/Code/hammer.csproj" />
-    <Project Path="../../sbox-public/game/editor/MovieMaker/Code/moviemaker.csproj" />
-    <Project Path="../../sbox-public/game/editor/ShaderGraph/Code/shadergraph.csproj" />
+    <Project Path="../../../sbox-public/game/addons/tools/Code/Base Editor Library.csproj" />
+    <Project Path="../../../sbox-public/game/editor/ActionGraph/Code/actiongraph.csproj" />
+    <Project Path="../../../sbox-public/game/editor/AnimGraph/Code/animgraph.csproj" />
+    <Project Path="../../../sbox-public/game/editor/DooEditor/Code/dooeditor.csproj" />
+    <Project Path="../../../sbox-public/game/editor/Hammer/Code/hammer.csproj" />
+    <Project Path="../../../sbox-public/game/editor/MovieMaker/Code/moviemaker.csproj" />
+    <Project Path="../../../sbox-public/game/editor/ShaderGraph/Code/shadergraph.csproj" />
   </Folder>
 </Solution>

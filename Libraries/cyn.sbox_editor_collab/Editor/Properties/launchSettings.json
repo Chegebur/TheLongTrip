@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Editor": {
+      "commandName": "Executable",
+      "executablePath": "../../../../../../../sbox-public/game/sbox-dev.exe",
+      "commandLineArgs": "-project \u0022D:\\s\u0026box projects\\GitHub\\TheLongTrip\\Libraries\\cyn.sbox_editor_collab\\collaboration.sbproj\u0022"
+    }
+  }
+}
