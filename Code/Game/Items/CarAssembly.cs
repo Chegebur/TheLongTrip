@@ -107,6 +107,29 @@ public sealed class CarAssembly : Component
 		return missing.Count == 0 ? null : "The car needs " + string.Join( ", ", missing );
 	}
 
+	public bool Has_( string group ) => Has( group );
+
+	/// <summary>A proxy shows the owner's fuel level.</summary>
+	public void SetFuelFromNetwork( float litres ) => Fuel = litres;
+
+	/// <summary>
+	/// Make the visible parts match a mask the owner sent: fit what is on, take off what is off, without making loose items (the real
+	/// part exists once, on the machine that owns it). Wheels only change their visuals; the physics is on the owner.
+	/// </summary>
+	public void ApplyNetworkMask( long mask )
+	{
+		var groups = OldCarAssembler.GroupNames;
+		for ( int i = 0; i < groups.Length && i < 62; i++ )
+		{
+			bool want = (mask & (1L << i)) != 0;
+			if ( !Sockets.TryGetValue( groups[i], out var s ) || s.IsAttached == want ) continue;
+
+			if ( want ) { s.Attached = OldCarAssembler.BuildAttached( Scene, GameObject, s.Group ); s.Angle = s.TargetAngle = 0f; }
+			else if ( s.IsAttached ) { s.Attached.Destroy(); s.Attached = null; }
+		}
+		UpdateEngineSound();
+	}
+
 	private bool Has( string group ) => Sockets.TryGetValue( group, out var s ) && s.IsAttached;
 
 	/// <summary>Measure the sockets from the imported models and fit the parts the car starts with. Call once, right after the car is spawned.</summary>
@@ -177,16 +200,21 @@ public sealed class CarAssembly : Component
 	}
 
 	/// <summary>You get in through the driver's door: it has to be off or swung well open.</summary>
-	public bool CanEnter()
+	public bool CanEnter( string doorGroup = "door_fl" )
 	{
-		if ( !Sockets.TryGetValue( "door_fl", out var door ) || !door.IsAttached ) return true;
+		if ( !Sockets.TryGetValue( doorGroup, out var door ) || !door.IsAttached ) return true;
 		return door.MaxAngle != 0f && door.TargetAngle / door.MaxAngle > 0.3f;
 	}
 
 	/// <summary>Swing the driver's door open (when getting out).</summary>
-	public void OpenDriverDoor()
+	public void OpenDriverDoor() => OpenDoor( "door_fl" );
+
+	/// <summary>Is this seat (seat_l / seat_r) fitted to the car?</summary>
+	public bool HasSeat( string seat ) => Has( seat );
+
+	public void OpenDoor( string doorGroup )
 	{
-		if ( Sockets.TryGetValue( "door_fl", out var door ) && door.IsAttached ) door.TargetAngle = door.MaxAngle * 0.85f;
+		if ( Sockets.TryGetValue( doorGroup, out var door ) && door.IsAttached ) door.TargetAngle = door.MaxAngle * 0.85f;
 	}
 
 	/// <summary>Switch one of the four physics wheels on (a wheel is fitted) or off (nothing there to carry the car).</summary>
@@ -210,6 +238,7 @@ public sealed class CarAssembly : Component
 	protected override void OnFixedUpdate()
 	{
 		if ( Sockets.Count == 0 || !_controller.IsValid() || !_rb.IsValid() ) return;
+		if ( IsProxy ) return;   // only the machine that simulates the car runs the parking brake, fuel burn and engine
 
 		// Parking brake: with the handbrake on, a stopped car on its wheels stays put instead of creeping or rolling off a slope.
 		// (It is not held while the player is on the throttle, so a handbrake turn still starts.)

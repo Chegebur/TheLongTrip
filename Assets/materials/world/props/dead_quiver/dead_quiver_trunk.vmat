@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/props/dead_quiver/dead_quiver_trunk_diff.png"
+	"TextureNormal"		"materials/world/props/dead_quiver/dead_quiver_trunk_nor_gl.png"
+	"TextureRoughness"		"materials/world/props/dead_quiver/dead_quiver_trunk_rough.png"
+}

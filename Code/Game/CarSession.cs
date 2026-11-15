@@ -31,6 +31,12 @@ public sealed class CarSession : Component
 	private TimeSince _lastWarning = 999f;
 	private bool _grabberAdded;
 
+	/// <summary>The seat the player is in: "seat_l" (driver) or "seat_r" (passenger).</summary>
+	private string _seat = "seat_l";
+
+	/// <summary>True while sitting in a seat that is not the driver's: you ride along and cannot drive.</summary>
+	public bool IsPassenger => IsDriving && _seat != "seat_l";
+
 	/// <summary>Driving starts in first person from the driver's seat. Press View (C) to swap to the chase camera.</summary>
 	private bool _cockpitView = true;
 
@@ -79,7 +85,9 @@ public sealed class CarSession : Component
 
 			if ( _playerObject.IsValid() && Input.Pressed( "Use" ) && (_playerObject.WorldPosition - Car.WorldPosition).Length < EnterRange )
 			{
-				Enter();
+				// you get in on whichever side of the car you are standing
+				var local = Car.WorldTransform.PointToLocal( _playerObject.WorldPosition );
+				Enter( local.y >= 0f ? "seat_l" : "seat_r" );
 			}
 		}
 		else
@@ -87,10 +95,13 @@ public sealed class CarSession : Component
 			// the car only does what its parts allow: no engine or radiator, no throttle; no steering wheel, no steering
 			if ( _assembly is not null )
 			{
-				var raw = DriveInputs.SampleDeviceInputs();
+				// only the driver drives; a passenger just rides (the handbrake lever still holds the car)
+				var raw = IsPassenger ? new DriveInputs() : DriveInputs.SampleDeviceInputs();
 				Controller.InputOverride = _assembly.Filter( raw );
 
-				if ( MathF.Abs( raw.MoveForward ) > 0.1f && _assembly.WhatIsMissing() is { } problem && _lastWarning > 4f )
+				if ( Input.Keyboard.Pressed( "x" ) ) SwitchSeat();
+
+				if ( !IsPassenger && MathF.Abs( raw.MoveForward ) > 0.1f && _assembly.WhatIsMissing() is { } problem && _lastWarning > 4f )
 				{
 					_lastWarning = 0f;
 					PlayerGrabber.Instance?.Notify( problem );
@@ -134,6 +145,12 @@ public sealed class CarSession : Component
 
 		Car.Name = "Base Car";
 		Car.Flags |= GameObjectFlags.NotSaved;
+
+		// the car is a moving base: things standing on it ride along, and it carries a local building grid (no buildings yet)
+		Car.AddComponent<MovingBase>();
+		Car.AddComponent<CarNetwork>();
+		var grid = Car.AddComponent<BuildGrid>();
+		grid.Anchor = Car.Children.FirstOrDefault( c => c.Name == "Kit Body" );
 		Controller = Car.Components.Get<VehicleController>();
 		Controller.InputOverride = new DriveInputs { Handbrake = true };
 
@@ -195,6 +212,7 @@ public sealed class CarSession : Component
 
 	private PlayerController _seatedController;
 	private Rigidbody _seatedBody;
+	private readonly List<Collider> _seatedColliders = new();
 
 	/// <summary>
 	/// Put the player's own character in the driver's seat. They stay in the world (nothing is switched off): the character
@@ -203,24 +221,46 @@ public sealed class CarSession : Component
 	/// </summary>
 	private void SeatPlayer()
 	{
+		PlaceInSeat( _seat );
+		SetSitting( true );
+		if ( _interior is OldCarInterior old ) old.Occupant = _playerObject;
+	}
+
+	private void PlaceInSeat( string seat )
+	{
+		_seat = seat;
 		var kitBody = Car.Children.FirstOrDefault( c => c.Name == "Kit Body" );
 		_seatedController = _playerObject.Components.Get<PlayerController>( true );
 		_seatedBody = _playerObject.Components.Get<Rigidbody>( true );
 
 		// the controller (and the capsule it makes) is switched off while seated, and comes back, rebuilt, when the player gets out
 		if ( _seatedController.IsValid() ) _seatedController.Enabled = false;
-		if ( _seatedBody.IsValid() ) { _seatedBody.Velocity = Vector3.Zero; _seatedBody.MotionEnabled = false; }
+		// while seated the character is just a child of the car: no physics body or collision of its own, so nothing pushes it off the seat
+		if ( _seatedBody.IsValid() ) { _seatedBody.Velocity = Vector3.Zero; _seatedBody.MotionEnabled = false; _seatedBody.Enabled = false; }
+		_seatedColliders.Clear();
+		foreach ( var c in _playerObject.Components.GetAll<Collider>( FindMode.EverythingInSelfAndDescendants ) )
+			if ( c.Enabled ) { _seatedColliders.Add( c ); c.Enabled = false; }
 
 		if ( kitBody.IsValid() )
 		{
 			_playerObject.SetParent( kitBody, false );
-			_playerObject.LocalPosition = OldCarAssembler.PelvisM * 39.37f;
+			_playerObject.LocalPosition = (OldCarAssembler.PelvisFor( seat ) + OldCarAssembler.SitOffsetM) * 39.37f;
 			_playerObject.LocalRotation = Rotation.Identity;
 		}
-
-		SetSitting( true );
-		if ( _interior is OldCarInterior old ) old.Occupant = _playerObject;
 	}
+
+	/// <summary>Slide over to the other front seat without getting out (the seat has to be fitted).</summary>
+	private void SwitchSeat()
+	{
+		string other = _seat == "seat_l" ? "seat_r" : "seat_l";
+		if ( _assembly is not null && !_assembly.HasSeat( other ) ) { PlayerGrabber.Instance?.Notify( "There is no seat there" ); return; }
+
+		PlaceInSeat( other );
+		if ( _cockpit.IsValid() && _interior is not null ) _cockpit.EyeM = EyeForSeat();
+		PlayerGrabber.Instance?.Notify( other == "seat_l" ? "Driver's seat" : "Passenger seat" );
+	}
+
+	private Vector3 EyeForSeat() => _interior is OldCarInterior ? OldCarAssembler.EyeFor( _seat ) : _interior.EyeM;
 
 	private void SetSitting( bool sitting )
 	{
@@ -233,16 +273,24 @@ public sealed class CarSession : Component
 		renderer.Set( "sit_offset_height", sitting ? 4f : 0f );
 	}
 
-	private void Enter()
+	private void Enter( string seat )
 	{
-		// you get in through the driver's door, which has to be open (or gone)
-		if ( _assembly is not null && !_assembly.CanEnter() )
+		_seat = seat;
+
+		// you get in through the door on that side, which has to be open (or gone), and the seat has to be there
+		if ( _assembly is not null && !_assembly.HasSeat( seat ) )
 		{
-			PlayerGrabber.Instance?.Notify( "Open the driver's door first" );
+			PlayerGrabber.Instance?.Notify( seat == "seat_l" ? "The driver's seat is missing" : "The passenger seat is missing" );
+			return;
+		}
+		if ( _assembly is not null && !_assembly.CanEnter( OldCarAssembler.DoorFor( seat ) ) )
+		{
+			PlayerGrabber.Instance?.Notify( seat == "seat_l" ? "Open the driver's door first" : "Open the passenger door first" );
 			return;
 		}
 
 		IsDriving = true;
+		if ( seat == "seat_l" ) Car.Components.Get<CarNetwork>()?.TakeControl();   // the driver simulates the car
 		if ( _assembly is not null ) _assembly.Occupied = true;
 		SeatPlayer();
 		Controller.InputOverride = null; // live keyboard / gamepad (filtered by the car's parts every frame)
@@ -263,7 +311,7 @@ public sealed class CarSession : Component
 		_cockpit = _camera.GameObject.GetOrAddComponent<CockpitCamera>();
 		_cockpit.Car = Car;
 		_cockpit.Body = _interior?.Body;
-		if ( _interior is not null ) _cockpit.EyeM = _interior.EyeM;
+		if ( _interior is not null ) _cockpit.EyeM = EyeForSeat();
 		_cockpit.Controller = Controller;
 
 		_camera.ZNear = 4f; // the dashboard is close to the eye
@@ -277,6 +325,7 @@ public sealed class CarSession : Component
 	{
 		IsDriving = false;
 		Controller.InputOverride = new DriveInputs { Handbrake = true };
+		Car.Components.Get<CarNetwork>()?.ReleaseControl();
 
 		if ( _chase.IsValid() ) _chase.Enabled = false;
 		if ( _cockpit.IsValid() ) _cockpit.Enabled = false;
@@ -286,20 +335,23 @@ public sealed class CarSession : Component
 
 		// The driver's door swings open, the handbrake goes on, and the player steps out on the driver's side.
 		if ( _assembly is not null ) _assembly.Occupied = false;
-		_assembly?.OpenDriverDoor();
+		_assembly?.OpenDoor( OldCarAssembler.DoorFor( _seat ) );
 		_assembly?.SetHandbrake( true );
 
-		var side = Car.WorldRotation.Left;
+		var side = _seat == "seat_r" ? Car.WorldRotation.Right : Car.WorldRotation.Left;
 		_playerObject.SetParent( null, true );
 		_playerObject.WorldPosition = Car.WorldPosition + side * 150f + Vector3.Up * 40f;
 		_playerObject.WorldRotation = Rotation.FromYaw( Car.WorldRotation.Angles().yaw );
-		if ( _seatedBody.IsValid() ) { _seatedBody.MotionEnabled = true; _seatedBody.Velocity = Vector3.Zero; }
+		if ( _seatedBody.IsValid() ) { _seatedBody.Enabled = true; _seatedBody.MotionEnabled = true; _seatedBody.Velocity = Vector3.Zero; }
+		foreach ( var c in _seatedColliders ) if ( c.IsValid() ) c.Enabled = true;
+		_seatedColliders.Clear();
 		SetSitting( false );
 		if ( _seatedController.IsValid() )
 		{
 			_seatedController.Enabled = true;
 			_seatedController.EyeAngles = new Angles( 0f, Car.WorldRotation.Angles().yaw, 0f );
 		}
+		_seat = "seat_l";
 		if ( _interior is OldCarInterior old ) old.Occupant = null;
 
 		_world.Target = null; // back to following the player

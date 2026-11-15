@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/apple/food_apple_01_diff.png"
+	"TextureNormal"		"materials/items/apple/food_apple_01_nor_gl.png"
+	"TextureRoughness"		"materials/items/apple/food_apple_01_rough.png"
+}

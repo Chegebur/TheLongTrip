@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/props/cardboard_box/cardboard_box_01_diff.png"
+	"TextureNormal"		"materials/world/props/cardboard_box/cardboard_box_01_nor_gl.png"
+	"TextureRoughness"		"materials/world/props/cardboard_box/cardboard_box_01_rough.png"
+}

@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/hacksaw/rusted_hacksaw_diff.png"
+	"TextureNormal"		"materials/items/hacksaw/rusted_hacksaw_nor_gl.png"
+	"TextureRoughness"		"materials/items/hacksaw/rusted_hacksaw_rough.png"
+	"TextureMetalness"		"materials/items/hacksaw/rusted_hacksaw_metal.png"
+}

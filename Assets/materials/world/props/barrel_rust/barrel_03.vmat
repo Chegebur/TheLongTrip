@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/props/barrel_rust/barrel_03_diff.png"
+	"TextureNormal"		"materials/world/props/barrel_rust/barrel_03_nor_gl.png"
+	"TextureRoughness"		"materials/world/props/barrel_rust/barrel_03_rough.png"
+	"TextureMetalness"		"materials/world/props/barrel_rust/barrel_03_metal.png"
+}

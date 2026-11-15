@@ -1,0 +1,6 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/props/barrel_blue/Barrel_02_diff.png"
+	"TextureNormal"		"materials/world/props/barrel_blue/Barrel_02_nor_gl.png"
+}

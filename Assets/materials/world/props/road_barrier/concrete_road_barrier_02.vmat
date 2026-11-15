@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/props/road_barrier/concrete_road_barrier_02_diff.png"
+	"TextureNormal"		"materials/world/props/road_barrier/concrete_road_barrier_02_nor_gl.png"
+	"TextureRoughness"		"materials/world/props/road_barrier/concrete_road_barrier_02_rough.png"
+}

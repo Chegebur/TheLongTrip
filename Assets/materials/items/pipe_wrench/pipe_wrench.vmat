@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/pipe_wrench/pipe_wrench_diff.png"
+	"TextureNormal"		"materials/items/pipe_wrench/pipe_wrench_nor_gl.png"
+	"TextureRoughness"		"materials/items/pipe_wrench/pipe_wrench_rough.png"
+	"TextureMetalness"		"materials/items/pipe_wrench/pipe_wrench_metal.png"
+}

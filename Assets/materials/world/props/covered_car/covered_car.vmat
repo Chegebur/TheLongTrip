@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/props/covered_car/covered_car_diff.png"
+	"TextureNormal"		"materials/world/props/covered_car/covered_car_nor_gl.png"
+	"TextureRoughness"		"materials/world/props/covered_car/covered_car_rough.png"
+	"TextureMetalness"		"materials/world/props/covered_car/covered_car_metal.png"
+}

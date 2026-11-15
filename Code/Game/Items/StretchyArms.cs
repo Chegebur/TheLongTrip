@@ -72,7 +72,7 @@ public sealed class StretchyArms : Component
 	}
 
 	/// <summary>Move the arms for this frame. <paramref name="held"/> is the part being carried, or null for no arms.</summary>
-	public void Tick( CameraComponent camera, Item held, float dt )
+	public void Tick( CameraComponent camera, Item held, float dt, int hands = 2 )
 	{
 		float goal = held.IsValid() ? 1f : 0f;
 		_reach = MathX.Approach( _reach, goal, dt * (goal > _reach ? 6f : 4.5f) );
@@ -86,6 +86,12 @@ public sealed class StretchyArms : Component
 
 		for ( int i = 0; i < 2; i++ )
 		{
+			// a one-handed item is carried by the right hand only: the left arm stays tucked away
+			bool used = hands >= 2 || i == 1;
+			if ( _arm[i].IsValid() ) _arm[i].Enabled = used;
+			if ( _hand[i].IsValid() ) _hand[i].Enabled = used;
+			if ( !used ) continue;
+
 			float side = i == 0 ? 1f : -1f;   // +Y is left
 			var shoulder = camPos + camRot * new Vector3( 4f, side * 15f, -15f );
 			var rest = shoulder + camRot * new Vector3( 14f, side * 4f, -18f );

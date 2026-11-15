@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/props/boulder_desert/namaqualand_boulder_03_diff.png"
+	"TextureNormal"		"materials/world/props/boulder_desert/namaqualand_boulder_03_nor_gl.png"
+	"TextureRoughness"		"materials/world/props/boulder_desert/namaqualand_boulder_03_rough.png"
+}

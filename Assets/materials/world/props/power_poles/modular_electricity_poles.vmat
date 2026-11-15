@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/props/power_poles/modular_electricity_poles_diff.png"
+	"TextureNormal"		"materials/world/props/power_poles/modular_electricity_poles_nor_gl.png"
+	"TextureRoughness"		"materials/world/props/power_poles/modular_electricity_poles_rough.png"
+}

@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/propane_tank/propane_tank_diff.png"
+	"TextureNormal"		"materials/items/propane_tank/propane_tank_nor_gl.png"
+	"TextureRoughness"		"materials/items/propane_tank/propane_tank_rough.png"
+	"TextureMetalness"		"materials/items/propane_tank/propane_tank_metal.png"
+}

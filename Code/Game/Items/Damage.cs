@@ -6,16 +6,26 @@ namespace LongTrip.Gameplay;
 /// </summary>
 public sealed class Damageable : Component
 {
-	[Property] public float Health { get; set; } = 50f;
+	[Property, Sync] public float Health { get; set; } = 50f;
 	public float MaxHealth { get; set; }
 	public ExplosionConfig Explosion { get; set; }
 	public bool IsDead { get; private set; }
 
 	protected override void OnStart() => MaxHealth = MathF.Max( MaxHealth, Health );
 
+	/// <summary>Hit points are the host's to change (one referee, so two players hitting a barrel cannot both blow it up): a client's hit is sent to the host.</summary>
 	public void Damage( float amount )
 	{
 		if ( IsDead || amount <= 0f ) return;
+		if ( Networking.IsActive && !Networking.IsHost ) { DamageHost( amount ); return; }
+		ApplyDamage( amount );
+	}
+
+	[Rpc.Host] private void DamageHost( float amount ) => ApplyDamage( amount );
+
+	private void ApplyDamage( float amount )
+	{
+		if ( IsDead ) return;
 		Health -= amount;
 		if ( Health <= 0f ) Die();
 	}
@@ -25,9 +35,13 @@ public sealed class Damageable : Component
 		IsDead = true;
 		var position = WorldPosition;
 		var self = GameObject;
-		if ( Explosion is not null ) Blast.Explode( Scene, position, Explosion, self );
+		if ( Explosion is not null ) Boom( position, Explosion.Radius, Explosion.Force, Explosion.Damage );
 		if ( self.IsValid() ) self.Destroy();
 	}
+
+	/// <summary>Everyone sees and feels the blast; each machine pushes the things it owns, the host referees the damage (see <see cref="Blast.Explode"/>).</summary>
+	[Rpc.Broadcast] private void Boom( Vector3 position, float radius, float force, float damage )
+		=> Blast.Explode( Scene, position, new ExplosionConfig { Radius = radius, Force = force, Damage = damage }, GameObject );
 }
 
 /// <summary>
@@ -44,6 +58,8 @@ public sealed class ImpactDamage : Component, Component.ICollisionListener
 
 	public void OnCollisionStart( Collision collision )
 	{
+		// only the machine that simulates this object (its owner) judges its hits: a proxy would report the same hit again, late and doubled
+		if ( IsProxy ) return;
 		if ( Config is null || _lastHit < Config.Cooldown ) return;
 
 		// relative speed of the two bodies at the contact, in metres per second
@@ -84,7 +100,7 @@ public static class Blast
 
 		foreach ( var body in scene.GetAllComponents<Rigidbody>().ToList() )
 		{
-			if ( !body.IsValid() || !body.MotionEnabled || body.GameObject == source ) continue;
+			if ( !body.IsValid() || !body.MotionEnabled || body.GameObject == source || body.IsProxy ) continue;   // each machine pushes what it simulates
 			var offset = body.WorldPosition - position;
 			float distance = offset.Length;
 			if ( distance > radius ) continue;
@@ -95,9 +111,10 @@ public static class Blast
 			body.Velocity += direction * config.Force * Units.MetersToUnits * falloff / (1f + mass / 60f);
 		}
 
+		bool referee = !Networking.IsActive || Networking.IsHost;   // only the host decides who is hurt (the damage then goes to each player's owner)
 		foreach ( var target in scene.GetAllComponents<Damageable>().ToList() )
 		{
-			if ( !target.IsValid() || target.GameObject == source || target.IsDead ) continue;
+			if ( !referee || !target.IsValid() || target.GameObject == source || target.IsDead ) continue;
 			float distance = (target.WorldPosition - position).Length;
 			if ( distance > radius ) continue;
 			target.Damage( config.Damage * (1f - distance / radius) );
@@ -105,6 +122,7 @@ public static class Blast
 
 		foreach ( var player in scene.GetAllComponents<PlayerStats>().ToList() )
 		{
+			if ( !referee ) break;
 			float distance = (player.WorldPosition - position).Length;
 			if ( distance > radius ) continue;
 			player.Damage( config.Damage * (1f - distance / radius) );

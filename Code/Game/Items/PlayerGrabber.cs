@@ -214,7 +214,20 @@ public sealed class PlayerGrabber : Component
 		if ( _noticeAge < 3.5f && !string.IsNullOrEmpty( _notice ) ) _hud.Hint = _notice;
 
 		UpdateHud( assembly );
-		_arms.Tick( camera, _held, Time.Delta );
+		_arms.Tick( camera, _held, Time.Delta, _held.IsValid() ? (_held.Definition?.Hands ?? 2) : 2 );
+		ApplyCarrySpeed();
+	}
+
+	private float _baseWalk = -1f, _baseRun = -1f;
+
+	/// <summary>Heavy things slow you down: the held item's <see cref="ItemDefinition.MoveSpeed"/> scales walking and running.</summary>
+	private void ApplyCarrySpeed()
+	{
+		if ( !_player.IsValid() ) return;
+		if ( _baseWalk < 0f ) { _baseWalk = _player.WalkSpeed; _baseRun = _player.RunSpeed; }
+		float k = _held.IsValid() ? (_held.Definition?.MoveSpeed ?? 1f) : 1f;
+		_player.WalkSpeed = _baseWalk * k;
+		_player.RunSpeed = _baseRun * k;
 	}
 
 	/// <summary>Feed the HUD: stats, the car's fuel gauge (while sitting in it) and the hotbar.</summary>
@@ -482,6 +495,9 @@ public sealed class PlayerGrabber : Component
 		if ( !item.IsValid() || item.Body is null ) return;
 
 		if ( item.Unweld() ) Notify( "Weld broken" );
+
+		// networked: the one who carries it simulates it (so it follows the hand with no lag), and it is theirs until somebody else grabs it
+		if ( item.GameObject.Network.Active && item.IsProxy ) item.GameObject.Network.TakeOwnership();
 
 		_held = item;
 		_equipped = -1;

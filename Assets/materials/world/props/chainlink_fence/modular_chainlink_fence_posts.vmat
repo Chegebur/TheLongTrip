@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/props/chainlink_fence/modular_chainlink_fence_posts_diff.png"
+	"TextureNormal"		"materials/world/props/chainlink_fence/modular_chainlink_fence_posts_nor_gl.png"
+	"TextureRoughness"		"materials/world/props/chainlink_fence/modular_chainlink_fence_posts_rough.png"
+	"TextureMetalness"		"materials/world/props/chainlink_fence/modular_chainlink_fence_posts_metal.png"
+}

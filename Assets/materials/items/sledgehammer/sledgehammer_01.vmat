@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/sledgehammer/sledgehammer_01_diff.png"
+	"TextureNormal"		"materials/items/sledgehammer/sledgehammer_01_nor_gl.png"
+	"TextureRoughness"		"materials/items/sledgehammer/sledgehammer_01_rough.png"
+	"TextureMetalness"		"materials/items/sledgehammer/sledgehammer_01_metal.png"
+}

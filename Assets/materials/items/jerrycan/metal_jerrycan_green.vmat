@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/jerrycan/metal_jerrycan_green_diff.png"
+	"TextureNormal"		"materials/items/jerrycan/metal_jerrycan_green_nor_gl.png"
+	"TextureRoughness"		"materials/items/jerrycan/metal_jerrycan_green_rough.png"
+	"TextureMetalness"		"materials/items/jerrycan/metal_jerrycan_green_metal.png"
+}

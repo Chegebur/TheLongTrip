@@ -67,6 +67,12 @@ public sealed class WorldStreamer : Component
 	/// <summary>Cacti per chunk in the nearest chunks (fewer further out).</summary>
 	[Property, Group( "Props" ), Range( 0, 80 )] public int CactiPerChunk { get; set; } = 18;
 
+	/// <summary>Rocks, dead trees, barrels, tyres, lamps... (see data/scatter.json) appear in chunks this close.</summary>
+	[Property, Group( "Props" ), Range( 0, 6 )] public int ScatterRadius { get; set; } = 2;
+
+	/// <summary>Scales how much of that scatter there is (0 = none).</summary>
+	[Property, Group( "Props" ), Range( 0f, 3f )] public float ScatterDensity { get; set; } = 1f;
+
 	[Property, Group( "Road" )] public float RoadWidth { get; set; } = 300f;
 	[Property, Group( "Biomes" )] public float BiomeLength { get; set; } = 120000f;
 	[Property, Group( "Biomes" )] public float BiomeTransition { get; set; } = 14000f;
@@ -108,6 +114,7 @@ public sealed class WorldStreamer : Component
 	private readonly Dictionary<Vector2Int, GameObject> _houses = new();
 	private readonly Dictionary<Vector2Int, GameObject> _cacti = new();
 	private readonly Dictionary<int, Model> _cactusModels = new();
+	private readonly Dictionary<Vector2Int, GameObject> _scatter = new();
 
 	private bool _holdingTarget;
 	private GameObject _heldTarget;
@@ -130,6 +137,7 @@ public sealed class WorldStreamer : Component
 	{
 		Clear();
 		HouseBuilder.ClearCache();
+		ScatterLibrary.Reset();
 
 		Generator = new WorldGenerator( new WorldSettings
 		{
@@ -162,6 +170,7 @@ public sealed class WorldStreamer : Component
 		_road.Clear();
 		_houses.Clear();
 		_cacti.Clear();
+		_scatter.Clear();
 
 		if ( _root.IsValid() ) _root.Destroy();
 		_root = null;
@@ -439,9 +448,10 @@ public sealed class WorldStreamer : Component
 
 		RemoveFarProps( _houses, cx, cy, HouseRadius + 1 );
 		RemoveFarProps( _cacti, cx, cy, CactusRadius + 1 );
+		RemoveFarProps( _scatter, cx, cy, ScatterRadius + 1 );
 
 		// Add at most one chunk's worth of props per frame, nearest first, so streaming never hitches.
-		int radius = Math.Max( HouseRadius, CactusRadius );
+		int radius = Math.Max( Math.Max( HouseRadius, CactusRadius ), ScatterRadius );
 		for ( int ring = 0; ring <= radius; ring++ )
 		{
 			for ( int dy = -ring; dy <= ring; dy++ )
@@ -460,6 +470,12 @@ public sealed class WorldStreamer : Component
 					if ( ring <= CactusRadius && !_cacti.ContainsKey( key ) )
 					{
 						SpawnCacti( key, ring );
+						return;
+					}
+
+					if ( ring <= ScatterRadius && !_scatter.ContainsKey( key ) )
+					{
+						SpawnScatter( key, ring );
 						return;
 					}
 				}
@@ -549,6 +565,35 @@ public sealed class WorldStreamer : Component
 				box.Scale = new Vector3( def.Width * 0.5f, def.Width * 0.5f, def.Height );
 				box.Center = new Vector3( 0, 0, def.Height * 0.5f );
 			}
+		}
+	}
+
+	private void SpawnScatter( Vector2Int key, int ring )
+	{
+		var root = NewPropRoot( $"Scatter {key.x},{key.y}" );
+		_scatter[key] = root;
+		if ( ScatterDensity <= 0.01f ) return;
+
+		foreach ( var inst in ScatterLibrary.Place( Generator, key, ChunkSize, ScatterDensity * (ring <= 1 ? 1f : 0.6f) ) )
+		{
+			var model = ScatterLibrary.GetModel( inst.Def );
+			if ( model is null ) continue;
+
+			var go = new GameObject( true, inst.Def.Id );
+			go.Parent = root;
+			go.WorldPosition = inst.Position;
+			go.WorldRotation = Rotation.FromYaw( inst.Yaw ) * Rotation.From( inst.Lean, 0f, inst.Lean * 0.6f );
+			go.WorldScale = inst.Scale;
+
+			var renderer = go.AddComponent<ModelRenderer>();
+			renderer.Model = model;
+			renderer.RenderType = ring <= 1 ? ModelRenderer.ShadowRenderType.On : ModelRenderer.ShadowRenderType.Off;
+
+			if ( inst.Def.Collide == "none" ) continue;
+			var b = model.Bounds;
+			var box = go.AddComponent<BoxCollider>();
+			box.Center = b.Center;
+			box.Scale = inst.Def.Collide == "upright" ? new Vector3( b.Size.x * 0.7f, b.Size.y * 0.7f, b.Size.z ) : b.Size;
 		}
 	}
 

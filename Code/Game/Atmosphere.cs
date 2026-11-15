@@ -71,6 +71,7 @@ public sealed class Atmosphere : Component
 		_sun = Scene.GetAllComponents<DirectionalLight>().FirstOrDefault();
 		_ambient = Scene.GetAllComponents<AmbientLight>().FirstOrDefault();
 		_sky = Scene.GetAllComponents<SkyBox2D>().FirstOrDefault();
+		Components.GetOrCreate<Weather>();
 	}
 
 	private void FindCameraEffects()
@@ -106,7 +107,7 @@ public sealed class Atmosphere : Component
 		float k = _first ? 1f : 1f - MathF.Exp( -Follow * Time.Delta );
 		_first = false;
 		_current = _current.FogEnd == 0 ? target : Mix( _current, target, k );
-		Apply( _current );
+		Apply( WithWeather( _current ) );
 
 		// ---- camera: speed-sensitive FOV and vignette
 		float speed = _car.IsValid() && _car.Controller.IsValid() ? _car.Controller.SpeedMs : 0f;
@@ -124,6 +125,25 @@ public sealed class Atmosphere : Component
 	{
 		if ( _car.IsValid() && _car.IsDriving && _car.Car.IsValid() ) return _car.Car.WorldPosition;
 		return _camera.WorldPosition;
+	}
+
+	/// <summary>The biome look, thickened, dimmed and tinted by the current weather (and flashed by lightning).</summary>
+	private static Look WithWeather( Look l )
+	{
+		var w = Weather.Instance;
+		if ( w is null ) return l;
+
+		l.FogEnd *= w.Fog;
+		l.FogStart *= MathF.Min( 1f, w.Fog * 1.4f );
+		l.FogColor = Color.Lerp( l.FogColor, l.FogColor * w.Tint, 0.6f );
+		float lum = (l.FogColor.r + l.FogColor.g + l.FogColor.b) / 3f;
+		l.FogColor = Color.Lerp( l.FogColor, new Color( lum, lum, lum ), w.Desaturate * 0.5f ) * MathX.Lerp( 1f, 0.6f, 1f - w.Light );
+		l.Sun = l.Sun * w.Tint;
+		l.SunIntensity = l.SunIntensity * w.Light + w.Flash * 6f;
+		l.Ambient = l.Ambient * w.Dim + Color.White * (w.Flash * 0.35f);
+		l.Saturation *= 1f - w.Desaturate;
+		l.SkyTint = Color.Lerp( l.SkyTint, l.SkyTint * w.Tint, 0.8f ) * MathX.Lerp( 1f, 0.55f, 1f - w.Light );
+		return l;
 	}
 
 	private static Look LookFor( int biome ) => Looks[Math.Clamp( biome, 0, Looks.Length - 1 )];

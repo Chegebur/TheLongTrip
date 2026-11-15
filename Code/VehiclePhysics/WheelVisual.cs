@@ -15,14 +15,26 @@ public sealed class WheelVisual : Component
 	protected override void OnStart()
 	{
 		_baseRotation = LocalRotation;
+		_net = Components.Get<LongTrip.Gameplay.CarNetwork>( FindMode.EverythingInSelfAndParent );
+		if ( _net.IsValid() && Wheel is not null )
+		{
+			var car = _net.Components.Get<VehicleController>();
+			if ( car is not null ) _index = car.Wheels.IndexOf( Wheel );
+		}
 	}
+
+	LongTrip.Gameplay.CarNetwork _net;
+	int _index = -1;
 
 	protected override void OnUpdate()
 	{
 		if ( Wheel is null )
 			return;
 
-		_spinDegrees += Wheel.AngularVelocity.RadianToDegree() * Time.Delta;
+		// on a machine that does not simulate the car, the spin comes over the network
+		float spin = Wheel.AngularVelocity;
+		if ( _net.IsValid() && _net.WheelState( _index ) is { } s ) spin = s.Spin;
+		_spinDegrees += spin.RadianToDegree() * Time.Delta;
 		_spinDegrees %= 360f;
 
 		// Spin about the model-local +Y axle. FromPitch uses the Source pitch sign (positive pitch
@@ -53,6 +65,8 @@ public sealed class WheelVisual : Component
 		if ( Wheel is null )
 			return;
 
-		LocalPosition = Vector3.Down * Wheel.SuspensionLength * Units.MetersToUnits;
+		float drop = Wheel.SuspensionLength;
+		if ( _net.IsValid() && _net.WheelState( _index ) is { } s ) drop = s.Drop;
+		LocalPosition = Vector3.Down * drop * Units.MetersToUnits;
 	}
 }

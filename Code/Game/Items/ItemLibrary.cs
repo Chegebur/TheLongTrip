@@ -109,6 +109,12 @@ public sealed class ItemDefinition
 	/// <summary>How far in front of you it is held (world units). 0: where it was picked up.</summary>
 	public float HoldDistance;
 
+	/// <summary>1 = carried in one hand (the other arm stays free), 2 = carried in both.</summary>
+	public int Hands = 2;
+
+	/// <summary>Multiplier on walking speed while this is held (heavy two-handed things slow you down).</summary>
+	public float MoveSpeed = 1f;
+
 	public DamageConfig Damage = new();
 	public MeleeConfig Melee;
 
@@ -190,6 +196,8 @@ public static class ItemLibrary
 		public bool stowable { get; set; } = true;
 		public float[] hold { get; set; }
 		public float holdDistance { get; set; }
+		public int hands { get; set; } = 2;
+		public float moveSpeed { get; set; } = 1f;
 		public DamageRecord damage { get; set; }
 		public MeleeRecord melee { get; set; }
 		public float health { get; set; }
@@ -244,6 +252,8 @@ public static class ItemLibrary
 				Stowable = r.stowable,
 				HoldAngles = r.hold is { Length: 3 } ? new Angles( r.hold[0], r.hold[1], r.hold[2] ) : null,
 				HoldDistance = r.holdDistance,
+				Hands = r.hands == 1 ? 1 : 2,
+				MoveSpeed = r.moveSpeed <= 0f ? 1f : r.moveSpeed,
 				Health = r.health,
 			};
 
@@ -334,6 +344,14 @@ public static class ItemLibrary
 			damageable.Health = def.Health;
 			damageable.MaxHealth = def.Health;
 			damageable.Explosion = def.Explosion;
+		}
+
+		// in a multiplayer game the host owns it to begin with; whoever picks it up takes it over (see PlayerGrabber)
+		if ( Networking.IsActive )
+		{
+			go.Network.SetOwnerTransfer( OwnerTransfer.Takeover );
+			go.Network.SetOrphanedMode( NetworkOrphaned.Host );
+			go.NetworkSpawn();
 		}
 
 		return item;

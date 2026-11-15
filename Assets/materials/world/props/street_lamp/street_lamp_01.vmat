@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/props/street_lamp/street_lamp_01_diff.png"
+	"TextureNormal"		"materials/world/props/street_lamp/street_lamp_01_nor_gl.png"
+	"TextureRoughness"		"materials/world/props/street_lamp/street_lamp_01_rough.png"
+	"TextureMetalness"		"materials/world/props/street_lamp/street_lamp_01_metal.png"
+}

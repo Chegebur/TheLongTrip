@@ -29,6 +29,19 @@ public static class OldCarAssembler
 	public static readonly Vector3 PelvisM = new Vector3( -0.09f, 0.333f, 0.56f ) * SizeFactor;
 	public static readonly Vector3 EyeM = new Vector3( -0.06f, 0.333f, 1.17f ) * SizeFactor;
 
+	/// <summary>The seats you can sit in: the driver's (left) and the passenger's (right).</summary>
+	public static string[] SeatGroups => new[] { "seat_l", "seat_r" };
+
+	/// <summary>Where the sitter's pelvis goes and where the eyes are, for a seat (the right seat mirrors the left across the car).</summary>
+	public static Vector3 PelvisFor( string seat ) => seat == "seat_r" ? new Vector3( PelvisM.x, -PelvisM.y, PelvisM.z ) : PelvisM;
+	public static Vector3 EyeFor( string seat ) => seat == "seat_r" ? new Vector3( EyeM.x, -EyeM.y, EyeM.z ) : EyeM;
+
+	/// <summary>The door a seat is entered through.</summary>
+	public static string DoorFor( string seat ) => seat == "seat_r" ? "door_fr" : "door_fl";
+
+	/// <summary>Tuning for how the seated character lines up with the seat (metres in the car frame): forward, left, up. Edit to fit.</summary>
+	public static Vector3 SitOffsetM = new Vector3( -0.19f, 0f, -0.09f );
+
 	/// <summary>The steering wheel turns about its hub, along the column (pointing back at the driver, tilted up).</summary>
 	public static readonly Vector3 SteeringHubM = new Vector3( 0.459f, 0.419f, 0.814f ) * SizeFactor;
 	public static readonly Vector3 SteeringAxis = new Vector3( -0.94f, 0f, 0.34f ).Normal;

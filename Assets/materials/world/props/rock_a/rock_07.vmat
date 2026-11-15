@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/props/rock_a/rock_07_diff.png"
+	"TextureNormal"		"materials/world/props/rock_a/rock_07_nor_gl.png"
+	"TextureRoughness"		"materials/world/props/rock_a/rock_07_rough.png"
+}

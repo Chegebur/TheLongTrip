@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/props/fire_pit/stone_fire_pit_diff.png"
+	"TextureNormal"		"materials/world/props/fire_pit/stone_fire_pit_nor_gl.png"
+	"TextureRoughness"		"materials/world/props/fire_pit/stone_fire_pit_rough.png"
+}
