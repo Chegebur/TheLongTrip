@@ -1,0 +1,9 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/furniture/modern_arm_chair_01/modern_arm_chair_01_pillow_color.png"
+	"TextureNormal"		"materials/world/furniture/modern_arm_chair_01/modern_arm_chair_01_pillow_normal.png"
+	"TextureRoughness"		"materials/world/furniture/modern_arm_chair_01/modern_arm_chair_01_pillow_rough.png"
+	"TextureMetalness"		"materials/world/furniture/modern_arm_chair_01/modern_arm_chair_01_pillow_metal.png"
+	"TextureAmbientOcclusion"		"materials/world/furniture/modern_arm_chair_01/modern_arm_chair_01_pillow_ao.png"
+}

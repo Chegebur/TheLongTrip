@@ -1,0 +1,9 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/furniture/Television_01/Television_01_color.png"
+	"TextureNormal"		"materials/world/furniture/Television_01/Television_01_normal.png"
+	"TextureRoughness"		"materials/world/furniture/Television_01/Television_01_rough.png"
+	"TextureMetalness"		"materials/world/furniture/Television_01/Television_01_metal.png"
+	"TextureAmbientOcclusion"		"materials/world/furniture/Television_01/Television_01_ao.png"
+}

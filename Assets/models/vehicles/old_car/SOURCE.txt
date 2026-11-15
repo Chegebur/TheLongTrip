@@ -1,0 +1,12 @@
+Old car (segmented)
+
+Original model : "Old car" by solid3DDD  https://sketchfab.com/3d-models/old-car-564fc37061494294889ef420bdade877
+Original licence: Sketchfab Standard (https://sketchfab.com/licenses) - NOT a Creative Commons licence.
+                  Check what it allows for shipping inside a published game before release.
+
+This folder holds a derivative: the model was split into parts (segmented), then split further into loose pieces,
+levelled, scaled to a 4.6 m car and exported to one OBJ/vmdl per part. Textures are the original atlas.
+
+  parts/                  one model per part (naming and positions in parts_manifest.json)
+  old_car_static.vmdl     everything that never moves, merged (what the game renders)
+  old_car_assembled.vmdl  the whole car in one model, for reference

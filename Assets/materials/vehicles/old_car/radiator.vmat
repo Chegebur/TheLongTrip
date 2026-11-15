@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/vehicles/old_car/radiator_color.png"
+	"TextureNormal"		"materials/vehicles/old_car/radiator_normal.png"
+	"TextureRoughness"		"materials/vehicles/old_car/radiator_rough.png"
+	"TextureMetalness"		"materials/vehicles/old_car/radiator_metal.png"
+}

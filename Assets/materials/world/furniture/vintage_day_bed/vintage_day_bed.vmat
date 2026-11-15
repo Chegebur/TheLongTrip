@@ -1,0 +1,9 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/furniture/vintage_day_bed/vintage_day_bed_color.png"
+	"TextureNormal"		"materials/world/furniture/vintage_day_bed/vintage_day_bed_normal.png"
+	"TextureRoughness"		"materials/world/furniture/vintage_day_bed/vintage_day_bed_rough.png"
+	"TextureMetalness"		"materials/world/furniture/vintage_day_bed/vintage_day_bed_metal.png"
+	"TextureAmbientOcclusion"		"materials/world/furniture/vintage_day_bed/vintage_day_bed_ao.png"
+}

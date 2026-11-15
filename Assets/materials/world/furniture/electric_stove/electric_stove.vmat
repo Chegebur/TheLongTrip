@@ -1,0 +1,9 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/furniture/electric_stove/electric_stove_color.png"
+	"TextureNormal"		"materials/world/furniture/electric_stove/electric_stove_normal.png"
+	"TextureRoughness"		"materials/world/furniture/electric_stove/electric_stove_rough.png"
+	"TextureMetalness"		"materials/world/furniture/electric_stove/electric_stove_metal.png"
+	"TextureAmbientOcclusion"		"materials/world/furniture/electric_stove/electric_stove_ao.png"
+}

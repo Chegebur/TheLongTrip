@@ -1,0 +1,9 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/default/default_color.tga"
+	"TextureNormal"		"materials/default/default_normal.tga"
+	"TextureRoughness"		"[0.420 0.420 0.420 1.000]"
+	"g_vColorTint"		"[0.820 0.840 0.860 0.000]"
+	"g_flMetalness"		"0.700"
+}

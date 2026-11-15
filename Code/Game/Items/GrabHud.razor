@@ -1,0 +1,29 @@
+@using Sandbox;
+@using Sandbox.UI;
+@inherits PanelComponent
+@namespace LongTrip.Gameplay
+
+<root>
+	<div style="position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin-left: -3px; margin-top: -3px; border-radius: 3px; background-color: rgba(255,255,255,0.85);"></div>
+
+	@if ( !string.IsNullOrEmpty( Hint ) )
+	{
+		<div style="position: absolute; left: 50%; top: 58%; transform: translateX(-50%); padding: 8px 18px; border-radius: 8px; background-color: rgba(0,0,0,0.55); color: white; font-size: 22px; font-weight: 600; white-space: nowrap;">@Hint</div>
+	}
+
+	@if ( !string.IsNullOrEmpty( Controls ) )
+	{
+		<div style="position: absolute; left: 50%; bottom: 64px; transform: translateX(-50%); padding: 6px 16px; border-radius: 8px; background-color: rgba(0,0,0,0.45); color: rgba(255,255,255,0.9); font-size: 18px; white-space: nowrap;">@Controls</div>
+	}
+</root>
+
+@code
+{
+	/// <summary>The main line under the crosshair: what F will do right now.</summary>
+	public string Hint { get; set; }
+
+	/// <summary>The controls reminder along the bottom while carrying a part.</summary>
+	public string Controls { get; set; }
+
+	protected override int BuildHash() => System.HashCode.Combine( Hint, Controls );
+}

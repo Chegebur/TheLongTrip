@@ -1,0 +1,12 @@
+"Layer0"
+{
+	"shader"		"shaders/road_pbr.shader"
+	"TextureColor_Road0"		"materials/world/textures/asphalt_02/asphalt_02_color.png"
+	"TextureNormal_Road0"		"materials/world/textures/asphalt_02/asphalt_02_normal.png"
+	"TextureRoughness_Road0"		"materials/world/textures/asphalt_02/asphalt_02_rough.png"
+	"TextureHeight_Road0"		"materials/world/textures/asphalt_02/asphalt_02_height.png"
+	"TextureColor_Road1"		"materials/world/textures/asphalt_track/asphalt_track_color.png"
+	"TextureNormal_Road1"		"materials/world/textures/asphalt_track/asphalt_track_normal.png"
+	"TextureRoughness_Road1"		"materials/world/textures/asphalt_track/asphalt_track_rough.png"
+	"TextureHeight_Road1"		"materials/world/textures/asphalt_track/asphalt_track_height.png"
+}

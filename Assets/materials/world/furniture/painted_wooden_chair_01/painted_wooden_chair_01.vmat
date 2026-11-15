@@ -1,0 +1,9 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/furniture/painted_wooden_chair_01/painted_wooden_chair_01_color.png"
+	"TextureNormal"		"materials/world/furniture/painted_wooden_chair_01/painted_wooden_chair_01_normal.png"
+	"TextureRoughness"		"materials/world/furniture/painted_wooden_chair_01/painted_wooden_chair_01_rough.png"
+	"TextureMetalness"		"materials/world/furniture/painted_wooden_chair_01/painted_wooden_chair_01_metal.png"
+	"TextureAmbientOcclusion"		"materials/world/furniture/painted_wooden_chair_01/painted_wooden_chair_01_ao.png"
+}

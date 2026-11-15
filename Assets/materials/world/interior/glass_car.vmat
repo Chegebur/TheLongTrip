@@ -1,0 +1,16 @@
+"Layer0"
+{
+	"shader"		"shaders/glass.shader"
+	F_GLASS_QUALITY 1
+	"g_bFogEnabled"		"1"
+	"g_flRefractionStrength"		"1.005"
+	"g_flTintColor"		"[1.000000 1.000000 1.000000 0.000000]"
+	"TextureAmbientOcclusion"		"materials/default/default_ao.tga"
+	"TextureBlendMask"		"materials/default/default_blend.tga"
+	"TextureColor"		"[0.180 0.260 0.320 0.000000]"
+	"TextureMetalness"		"materials/default/default_metal.tga"
+	"TextureNormal"		"materials/default/default_normal.tga"
+	"TextureRoughness"		"[0.030 0.030 0.030 0.000000]"
+	"TextureTintMask"		"materials/default/default.tga"
+	"TextureTranslucency"		"[0.300 0.300 0.300 0.000000]"
+}

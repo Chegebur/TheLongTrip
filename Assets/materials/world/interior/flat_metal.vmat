@@ -1,0 +1,5 @@
+"Layer0"
+{
+	"shader"		"shaders/flat_lit.shader"
+	"g_flFlatMetalness"		"0.900"
+}

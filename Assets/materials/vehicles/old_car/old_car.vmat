@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/vehicles/old_car/old_car_color.png"
+	"TextureNormal"		"materials/vehicles/old_car/old_car_normal.png"
+	"TextureRoughness"		"materials/vehicles/old_car/old_car_rough.png"
+	"TextureMetalness"		"materials/vehicles/old_car/old_car_metal.png"
+}

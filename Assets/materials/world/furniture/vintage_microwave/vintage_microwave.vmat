@@ -1,0 +1,9 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/furniture/vintage_microwave/vintage_microwave_color.png"
+	"TextureNormal"		"materials/world/furniture/vintage_microwave/vintage_microwave_normal.png"
+	"TextureRoughness"		"materials/world/furniture/vintage_microwave/vintage_microwave_rough.png"
+	"TextureMetalness"		"materials/world/furniture/vintage_microwave/vintage_microwave_metal.png"
+	"TextureAmbientOcclusion"		"materials/world/furniture/vintage_microwave/vintage_microwave_ao.png"
+}

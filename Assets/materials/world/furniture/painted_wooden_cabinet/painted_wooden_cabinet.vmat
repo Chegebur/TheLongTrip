@@ -1,0 +1,9 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/furniture/painted_wooden_cabinet/painted_wooden_cabinet_color.png"
+	"TextureNormal"		"materials/world/furniture/painted_wooden_cabinet/painted_wooden_cabinet_normal.png"
+	"TextureRoughness"		"materials/world/furniture/painted_wooden_cabinet/painted_wooden_cabinet_rough.png"
+	"TextureMetalness"		"materials/world/furniture/painted_wooden_cabinet/painted_wooden_cabinet_metal.png"
+	"TextureAmbientOcclusion"		"materials/world/furniture/painted_wooden_cabinet/painted_wooden_cabinet_ao.png"
+}

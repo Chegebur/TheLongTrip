@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Editor": {
+      "commandName": "Executable",
+      "executablePath": "../../../../sbox-public/game/sbox-dev.exe",
+      "commandLineArgs": "-project \u0022D:\\s\u0026box projects\\the_long_trip\\the_long_trip.sbproj\u0022"
+    }
+  }
+}

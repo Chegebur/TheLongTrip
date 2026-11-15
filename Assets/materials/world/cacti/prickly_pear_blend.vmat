@@ -1,0 +1,9 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/cacti/prickly_pear_blend_color.png"
+	"TextureNormal"		"materials/world/cacti/prickly_pear_blend_normal.png"
+	"TextureRoughness"		"materials/world/cacti/prickly_pear_blend_rough.png"
+	"g_vColorTint"		"[0.560 0.800 0.520 0.000]"
+	"g_flMetalness"		"0.000000"
+}

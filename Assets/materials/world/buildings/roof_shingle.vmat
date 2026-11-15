@@ -1,0 +1,9 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/textures/asphalt_02/asphalt_02_color.png"
+	"TextureNormal"		"materials/world/textures/asphalt_02/asphalt_02_normal.png"
+	"TextureRoughness"		"materials/world/textures/asphalt_02/asphalt_02_rough.png"
+	"g_vColorTint"		"[0.750 0.620 0.550 0.000]"
+	"g_flMetalness"		"0.000"
+}

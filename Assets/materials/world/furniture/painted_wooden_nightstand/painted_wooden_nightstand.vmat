@@ -1,0 +1,9 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/furniture/painted_wooden_nightstand/painted_wooden_nightstand_color.png"
+	"TextureNormal"		"materials/world/furniture/painted_wooden_nightstand/painted_wooden_nightstand_normal.png"
+	"TextureRoughness"		"materials/world/furniture/painted_wooden_nightstand/painted_wooden_nightstand_rough.png"
+	"TextureMetalness"		"materials/world/furniture/painted_wooden_nightstand/painted_wooden_nightstand_metal.png"
+	"TextureAmbientOcclusion"		"materials/world/furniture/painted_wooden_nightstand/painted_wooden_nightstand_ao.png"
+}

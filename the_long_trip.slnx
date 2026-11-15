@@ -1,0 +1,16 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+  </Configurations>
+  <Project Path="Code/the_long_trip.csproj" />
+  <Project Path="Editor/the_long_trip.editor.csproj" />
+  <Folder Name="/Tools/">
+    <Project Path="../../sbox-public/game/addons/tools/Code/Base Editor Library.csproj" />
+    <Project Path="../../sbox-public/game/editor/ActionGraph/Code/actiongraph.csproj" />
+    <Project Path="../../sbox-public/game/editor/AnimGraph/Code/animgraph.csproj" />
+    <Project Path="../../sbox-public/game/editor/DooEditor/Code/dooeditor.csproj" />
+    <Project Path="../../sbox-public/game/editor/Hammer/Code/hammer.csproj" />
+    <Project Path="../../sbox-public/game/editor/MovieMaker/Code/moviemaker.csproj" />
+    <Project Path="../../sbox-public/game/editor/ShaderGraph/Code/shadergraph.csproj" />
+  </Folder>
+</Solution>

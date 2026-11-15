@@ -1,0 +1,9 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/furniture/dining_table/dining_table_color.png"
+	"TextureNormal"		"materials/world/furniture/dining_table/dining_table_normal.png"
+	"TextureRoughness"		"materials/world/furniture/dining_table/dining_table_rough.png"
+	"TextureMetalness"		"materials/world/furniture/dining_table/dining_table_metal.png"
+	"TextureAmbientOcclusion"		"materials/world/furniture/dining_table/dining_table_ao.png"
+}

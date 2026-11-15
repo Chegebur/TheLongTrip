@@ -1,0 +1,9 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/textures/exterior_wall_cladding_02/exterior_wall_cladding_02_color.png"
+	"TextureNormal"		"materials/world/textures/exterior_wall_cladding_02/exterior_wall_cladding_02_normal.png"
+	"TextureRoughness"		"materials/world/textures/exterior_wall_cladding_02/exterior_wall_cladding_02_rough.png"
+	"g_vColorTint"		"[1.350 1.200 1.100 0.000]"
+	"g_flMetalness"		"0.000"
+}

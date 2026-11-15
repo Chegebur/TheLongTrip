@@ -1,0 +1,9 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/furniture/sofa_02/sofa_02_color.png"
+	"TextureNormal"		"materials/world/furniture/sofa_02/sofa_02_normal.png"
+	"TextureRoughness"		"materials/world/furniture/sofa_02/sofa_02_rough.png"
+	"TextureMetalness"		"materials/world/furniture/sofa_02/sofa_02_metal.png"
+	"TextureAmbientOcclusion"		"materials/world/furniture/sofa_02/sofa_02_ao.png"
+}

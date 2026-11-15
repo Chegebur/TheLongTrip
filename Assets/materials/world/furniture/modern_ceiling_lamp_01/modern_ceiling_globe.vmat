@@ -1,0 +1,9 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/furniture/modern_ceiling_lamp_01/modern_ceiling_globe_color.png"
+	"TextureNormal"		"materials/world/furniture/modern_ceiling_lamp_01/modern_ceiling_globe_normal.png"
+	"TextureRoughness"		"materials/world/furniture/modern_ceiling_lamp_01/modern_ceiling_globe_rough.png"
+	"TextureMetalness"		"materials/world/furniture/modern_ceiling_lamp_01/modern_ceiling_globe_metal.png"
+	"TextureAmbientOcclusion"		"materials/world/furniture/modern_ceiling_lamp_01/modern_ceiling_globe_ao.png"
+}

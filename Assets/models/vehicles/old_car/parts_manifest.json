@@ -1,0 +1,3602 @@
+[
+ {
+  "name": "body_shell",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 16960,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.116,
+   "left": -0.001,
+   "up": 0.86
+  },
+  "size_m": {
+   "length": 4.516,
+   "width": 1.768,
+   "height": 1.319
+  }
+ },
+ {
+  "name": "bumper_front_lip_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 288,
+  "halved": true,
+  "centre_m": {
+   "forward": 2.034,
+   "left": 0.405,
+   "up": 0.406
+  },
+  "size_m": {
+   "length": 0.359,
+   "width": 0.811,
+   "height": 0.106
+  }
+ },
+ {
+  "name": "bumper_front_lip_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 288,
+  "halved": true,
+  "centre_m": {
+   "forward": 2.034,
+   "left": -0.407,
+   "up": 0.406
+  },
+  "size_m": {
+   "length": 0.359,
+   "width": 0.811,
+   "height": 0.106
+  }
+ },
+ {
+  "name": "bumper_rear_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 336,
+  "halved": true,
+  "centre_m": {
+   "forward": -2.23,
+   "left": 0.399,
+   "up": 0.487
+  },
+  "size_m": {
+   "length": 0.359,
+   "width": 0.8,
+   "height": 0.107
+  }
+ },
+ {
+  "name": "bumper_rear_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 336,
+  "halved": true,
+  "centre_m": {
+   "forward": -2.23,
+   "left": -0.401,
+   "up": 0.487
+  },
+  "size_m": {
+   "length": 0.359,
+   "width": 0.8,
+   "height": 0.107
+  }
+ },
+ {
+  "name": "trim_rear_r_08",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 53,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.133,
+   "left": -0.796,
+   "up": 0.485
+  },
+  "size_m": {
+   "length": 0.021,
+   "width": 0.007,
+   "height": 0.021
+  }
+ },
+ {
+  "name": "trim_front_r_14",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 53,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.023,
+   "left": -0.788,
+   "up": 0.406
+  },
+  "size_m": {
+   "length": 0.019,
+   "width": 0.015,
+   "height": 0.021
+  }
+ },
+ {
+  "name": "bumper_front_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 884,
+  "halved": true,
+  "centre_m": {
+   "forward": 2.038,
+   "left": 0.387,
+   "up": 0.629
+  },
+  "size_m": {
+   "length": 0.274,
+   "width": 0.775,
+   "height": 0.23
+  }
+ },
+ {
+  "name": "bumper_front_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 884,
+  "halved": true,
+  "centre_m": {
+   "forward": 2.038,
+   "left": -0.388,
+   "up": 0.629
+  },
+  "size_m": {
+   "length": 0.274,
+   "width": 0.775,
+   "height": 0.23
+  }
+ },
+ {
+  "name": "trim_front_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 243,
+  "halved": true,
+  "centre_m": {
+   "forward": 1.505,
+   "left": 0.38,
+   "up": 0.617
+  },
+  "size_m": {
+   "length": 1.12,
+   "width": 0.761,
+   "height": 0.668
+  }
+ },
+ {
+  "name": "trim_front_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 243,
+  "halved": true,
+  "centre_m": {
+   "forward": 1.505,
+   "left": -0.381,
+   "up": 0.617
+  },
+  "size_m": {
+   "length": 1.12,
+   "width": 0.761,
+   "height": 0.668
+  }
+ },
+ {
+  "name": "pillar_b_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 624,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.231,
+   "left": -0.686,
+   "up": 0.861
+  },
+  "size_m": {
+   "length": 0.125,
+   "width": 0.117,
+   "height": 1.14
+  }
+ },
+ {
+  "name": "trim_front_r_08",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 1024,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.012,
+   "left": -0.658,
+   "up": 0.635
+  },
+  "size_m": {
+   "length": 0.048,
+   "width": 0.166,
+   "height": 0.166
+  }
+ },
+ {
+  "name": "dashboard",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 4196,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.743,
+   "left": 0.001,
+   "up": 0.792
+  },
+  "size_m": {
+   "length": 0.288,
+   "width": 1.465,
+   "height": 0.401
+  }
+ },
+ {
+  "name": "trim_rear_r_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 784,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.315,
+   "left": -0.555,
+   "up": 0.629
+  },
+  "size_m": {
+   "length": 0.101,
+   "width": 0.348,
+   "height": 0.14
+  }
+ },
+ {
+  "name": "trim_cabin_c",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 344,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.006,
+   "left": -0.001,
+   "up": 0.939
+  },
+  "size_m": {
+   "length": 0.211,
+   "width": 1.445,
+   "height": 0.061
+  }
+ },
+ {
+  "name": "trim_cabin_c_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 432,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.857,
+   "left": -0.001,
+   "up": 0.975
+  },
+  "size_m": {
+   "length": 0.277,
+   "width": 1.442,
+   "height": 0.09
+  }
+ },
+ {
+  "name": "trim_rear_c",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 168,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.678,
+   "left": -0.001,
+   "up": 0.571
+  },
+  "size_m": {
+   "length": 1.049,
+   "width": 1.435,
+   "height": 0.392
+  }
+ },
+ {
+  "name": "axle_rear",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 2000,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.319,
+   "left": -0.001,
+   "up": 0.315
+  },
+  "size_m": {
+   "length": 0.291,
+   "width": 1.379,
+   "height": 0.291
+  }
+ },
+ {
+  "name": "trim_cabin_c_03",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 1632,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.298,
+   "left": -0.001,
+   "up": 0.315
+  },
+  "size_m": {
+   "length": 0.291,
+   "width": 1.379,
+   "height": 0.291
+  }
+ },
+ {
+  "name": "rear_window_frame",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 768,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.415,
+   "left": -0.001,
+   "up": 1.25
+  },
+  "size_m": {
+   "length": 0.508,
+   "width": 1.365,
+   "height": 0.434
+  }
+ },
+ {
+  "name": "trim_front_r_09",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 86,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.014,
+   "left": -0.662,
+   "up": 0.638
+  },
+  "size_m": {
+   "length": 0.027,
+   "width": 0.03,
+   "height": 0.03
+  }
+ },
+ {
+  "name": "rear_shelf",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 384,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.676,
+   "left": -0.001,
+   "up": 1.047
+  },
+  "size_m": {
+   "length": 0.049,
+   "width": 1.339,
+   "height": 0.026
+  }
+ },
+ {
+  "name": "trim_front_r_13",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 86,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.034,
+   "left": -0.643,
+   "up": 0.484
+  },
+  "size_m": {
+   "length": 0.014,
+   "width": 0.015,
+   "height": 0.015
+  }
+ },
+ {
+  "name": "trim_floor_r_04",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 44,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.053,
+   "left": -0.354,
+   "up": 0.238
+  },
+  "size_m": {
+   "length": 1.204,
+   "width": 0.52,
+   "height": 0.079
+  }
+ },
+ {
+  "name": "trim_rear_r_03",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 53,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.372,
+   "left": -0.602,
+   "up": 0.485
+  },
+  "size_m": {
+   "length": 0.009,
+   "width": 0.021,
+   "height": 0.021
+  }
+ },
+ {
+  "name": "trim_cabin_r_07",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 54,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.203,
+   "left": -0.435,
+   "up": 0.242
+  },
+  "size_m": {
+   "length": 0.067,
+   "width": 0.33,
+   "height": 0.084
+  }
+ },
+ {
+  "name": "trim_front_r_04",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 54,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.39,
+   "left": -0.435,
+   "up": 0.242
+  },
+  "size_m": {
+   "length": 0.067,
+   "width": 0.33,
+   "height": 0.084
+  }
+ },
+ {
+  "name": "trim_floor_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 54,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.418,
+   "left": -0.435,
+   "up": 0.256
+  },
+  "size_m": {
+   "length": 0.067,
+   "width": 0.33,
+   "height": 0.084
+  }
+ },
+ {
+  "name": "trim_floor_r_03",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 54,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.231,
+   "left": -0.435,
+   "up": 0.256
+  },
+  "size_m": {
+   "length": 0.067,
+   "width": 0.33,
+   "height": 0.084
+  }
+ },
+ {
+  "name": "trim_floor_r_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 16,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.32,
+   "left": -0.546,
+   "up": 0.478
+  },
+  "size_m": {
+   "length": 0.078,
+   "width": 0.079,
+   "height": 0.316
+  }
+ },
+ {
+  "name": "trim_cabin_r_08",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 16,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.291,
+   "left": -0.546,
+   "up": 0.48
+  },
+  "size_m": {
+   "length": 0.079,
+   "width": 0.079,
+   "height": 0.321
+  }
+ },
+ {
+  "name": "trim_front_r_10",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 1024,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.036,
+   "left": -0.476,
+   "up": 0.635
+  },
+  "size_m": {
+   "length": 0.048,
+   "width": 0.166,
+   "height": 0.166
+  }
+ },
+ {
+  "name": "trim_roof_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 84,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.306,
+   "left": -0.39,
+   "up": 1.368
+  },
+  "size_m": {
+   "length": 0.057,
+   "width": 0.336,
+   "height": 0.091
+  }
+ },
+ {
+  "name": "trim_cabin_r_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 156,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.815,
+   "left": -0.37,
+   "up": 1.048
+  },
+  "size_m": {
+   "length": 0.091,
+   "width": 0.356,
+   "height": 0.04
+  }
+ },
+ {
+  "name": "trim_front_r_11",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 86,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.04,
+   "left": -0.48,
+   "up": 0.638
+  },
+  "size_m": {
+   "length": 0.027,
+   "width": 0.03,
+   "height": 0.03
+  }
+ },
+ {
+  "name": "trim_front_r_17",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 86,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.079,
+   "left": -0.479,
+   "up": 0.484
+  },
+  "size_m": {
+   "length": 0.014,
+   "width": 0.015,
+   "height": 0.015
+  }
+ },
+ {
+  "name": "trim_front_r_18",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 53,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.161,
+   "left": -0.472,
+   "up": 0.406
+  },
+  "size_m": {
+   "length": 0.009,
+   "width": 0.021,
+   "height": 0.021
+  }
+ },
+ {
+  "name": "trim_cabin_r_03",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 300,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.873,
+   "left": -0.195,
+   "up": 1.023
+  },
+  "size_m": {
+   "length": 0.12,
+   "width": 0.392,
+   "height": 0.079
+  }
+ },
+ {
+  "name": "grille_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 640,
+  "halved": true,
+  "centre_m": {
+   "forward": 2.069,
+   "left": 0.177,
+   "up": 0.628
+  },
+  "size_m": {
+   "length": 0.078,
+   "width": 0.355,
+   "height": 0.148
+  }
+ },
+ {
+  "name": "grille_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 640,
+  "halved": true,
+  "centre_m": {
+   "forward": 2.069,
+   "left": -0.179,
+   "up": 0.628
+  },
+  "size_m": {
+   "length": 0.078,
+   "width": 0.355,
+   "height": 0.148
+  }
+ },
+ {
+  "name": "trim_front_c",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 12,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.084,
+   "left": -0.001,
+   "up": 0.585
+  },
+  "size_m": {
+   "length": 0.047,
+   "width": 0.693,
+   "height": 0.028
+  }
+ },
+ {
+  "name": "trim_front_c_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 12,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.084,
+   "left": -0.001,
+   "up": 0.625
+  },
+  "size_m": {
+   "length": 0.047,
+   "width": 0.693,
+   "height": 0.028
+  }
+ },
+ {
+  "name": "trim_front_c_03",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 12,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.084,
+   "left": -0.001,
+   "up": 0.665
+  },
+  "size_m": {
+   "length": 0.047,
+   "width": 0.693,
+   "height": 0.028
+  }
+ },
+ {
+  "name": "trim_rear_r_04",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 106,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.323,
+   "left": -0.276,
+   "up": 0.4
+  },
+  "size_m": {
+   "length": 0.048,
+   "width": 0.141,
+   "height": 0.081
+  }
+ },
+ {
+  "name": "trim_front_c_04",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 28,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.933,
+   "left": 0.002,
+   "up": 0.339
+  },
+  "size_m": {
+   "length": 0.06,
+   "width": 0.689,
+   "height": 0.004
+  }
+ },
+ {
+  "name": "trim_rear_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 53,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.402,
+   "left": -0.287,
+   "up": 0.487
+  },
+  "size_m": {
+   "length": 0.007,
+   "width": 0.021,
+   "height": 0.021
+  }
+ },
+ {
+  "name": "trim_front_c_02_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 656,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.709,
+   "left": -0.001,
+   "up": 0.264
+  },
+  "size_m": {
+   "length": 0.39,
+   "width": 0.508,
+   "height": 0.057
+  }
+ },
+ {
+  "name": "trim_front_c_05",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 36,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.212,
+   "left": -0.001,
+   "up": 0.386
+  },
+  "size_m": {
+   "length": 0.077,
+   "width": 0.482,
+   "height": 0.131
+  }
+ },
+ {
+  "name": "trim_rear_c_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 36,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.294,
+   "left": -0.001,
+   "up": 0.605
+  },
+  "size_m": {
+   "length": 0.019,
+   "width": 0.482,
+   "height": 0.141
+  }
+ },
+ {
+  "name": "trim_rear_r_05",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 53,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.301,
+   "left": -0.224,
+   "up": 0.597
+  },
+  "size_m": {
+   "length": 0.007,
+   "width": 0.021,
+   "height": 0.021
+  }
+ },
+ {
+  "name": "trim_front_r_19",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 53,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.221,
+   "left": -0.224,
+   "up": 0.391
+  },
+  "size_m": {
+   "length": 0.013,
+   "width": 0.021,
+   "height": 0.02
+  }
+ },
+ {
+  "name": "center_console",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 944,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.404,
+   "left": -0.001,
+   "up": 0.451
+  },
+  "size_m": {
+   "length": 1.03,
+   "width": 0.319,
+   "height": 0.302
+  }
+ },
+ {
+  "name": "trim_roof_c_03",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 368,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.278,
+   "left": 0.014,
+   "up": 1.337
+  },
+  "size_m": {
+   "length": 0.07,
+   "width": 0.175,
+   "height": 0.065
+  }
+ },
+ {
+  "name": "trim_rear_c_02_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 144,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.348,
+   "left": -0.001,
+   "up": 0.548
+  },
+  "size_m": {
+   "length": 0.035,
+   "width": 0.104,
+   "height": 0.038
+  }
+ },
+ {
+  "name": "trim_cabin_c_04",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 76,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.914,
+   "left": -0.019,
+   "up": 0.994
+  },
+  "size_m": {
+   "length": 0.019,
+   "width": 0.024,
+   "height": 0.021
+  }
+ },
+ {
+  "name": "trim_roof_c_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 128,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.184,
+   "left": -0.001,
+   "up": 1.463
+  },
+  "size_m": {
+   "length": 0.071,
+   "width": 0.031,
+   "height": 0.025
+  }
+ },
+ {
+  "name": "trim_roof_c",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 112,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.01,
+   "left": 0.0,
+   "up": 1.556
+  },
+  "size_m": {
+   "length": 0.364,
+   "width": 0.008,
+   "height": 0.183
+  }
+ },
+ {
+  "name": "trim_roof_c_04",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 128,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.308,
+   "left": 0.006,
+   "up": 1.379
+  },
+  "size_m": {
+   "length": 0.029,
+   "width": 0.017,
+   "height": 0.093
+  }
+ },
+ {
+  "name": "trim_cabin_l_12",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 156,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.849,
+   "left": 0.191,
+   "up": 1.044
+  },
+  "size_m": {
+   "length": 0.049,
+   "width": 0.36,
+   "height": 0.043
+  }
+ },
+ {
+  "name": "trim_cabin_l_10",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 124,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.599,
+   "left": 0.084,
+   "up": 0.815
+  },
+  "size_m": {
+   "length": 0.012,
+   "width": 0.023,
+   "height": 0.047
+  }
+ },
+ {
+  "name": "trim_floor_l_04",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 44,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.053,
+   "left": 0.352,
+   "up": 0.238
+  },
+  "size_m": {
+   "length": 1.204,
+   "width": 0.52,
+   "height": 0.079
+  }
+ },
+ {
+  "name": "trim_cabin_l_09",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 124,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.599,
+   "left": 0.124,
+   "up": 0.815
+  },
+  "size_m": {
+   "length": 0.012,
+   "width": 0.023,
+   "height": 0.047
+  }
+ },
+ {
+  "name": "trim_cabin_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 1,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.098,
+   "left": 0.116,
+   "up": 0.728
+  },
+  "size_m": {
+   "length": 0.002,
+   "width": 0.002,
+   "height": 0.002
+  }
+ },
+ {
+  "name": "trim_cabin_l_14",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 300,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.848,
+   "left": 0.374,
+   "up": 1.016
+  },
+  "size_m": {
+   "length": 0.042,
+   "width": 0.401,
+   "height": 0.085
+  }
+ },
+ {
+  "name": "trim_rear_l_04",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 106,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.323,
+   "left": 0.275,
+   "up": 0.4
+  },
+  "size_m": {
+   "length": 0.048,
+   "width": 0.141,
+   "height": 0.081
+  }
+ },
+ {
+  "name": "trim_front_l_18",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 53,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.221,
+   "left": 0.222,
+   "up": 0.391
+  },
+  "size_m": {
+   "length": 0.013,
+   "width": 0.021,
+   "height": 0.02
+  }
+ },
+ {
+  "name": "trim_rear_l_05",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 53,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.301,
+   "left": 0.222,
+   "up": 0.597
+  },
+  "size_m": {
+   "length": 0.007,
+   "width": 0.021,
+   "height": 0.021
+  }
+ },
+ {
+  "name": "trim_roof_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 84,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.306,
+   "left": 0.388,
+   "up": 1.368
+  },
+  "size_m": {
+   "length": 0.057,
+   "width": 0.336,
+   "height": 0.091
+  }
+ },
+ {
+  "name": "trim_cabin_l_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 33,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.527,
+   "left": 0.297,
+   "up": 0.807
+  },
+  "size_m": {
+   "length": 0.028,
+   "width": 0.111,
+   "height": 0.038
+  }
+ },
+ {
+  "name": "trim_cabin_l_20",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 12,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.913,
+   "left": 0.273,
+   "up": 0.473
+  },
+  "size_m": {
+   "length": 0.029,
+   "width": 0.035,
+   "height": 0.047
+  }
+ },
+ {
+  "name": "trim_cabin_l_24",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 54,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.203,
+   "left": 0.433,
+   "up": 0.242
+  },
+  "size_m": {
+   "length": 0.067,
+   "width": 0.33,
+   "height": 0.084
+  }
+ },
+ {
+  "name": "trim_front_l_04",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 54,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.39,
+   "left": 0.433,
+   "up": 0.242
+  },
+  "size_m": {
+   "length": 0.067,
+   "width": 0.33,
+   "height": 0.084
+  }
+ },
+ {
+  "name": "trim_floor_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 54,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.418,
+   "left": 0.433,
+   "up": 0.256
+  },
+  "size_m": {
+   "length": 0.067,
+   "width": 0.33,
+   "height": 0.084
+  }
+ },
+ {
+  "name": "trim_floor_l_03",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 54,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.231,
+   "left": 0.433,
+   "up": 0.256
+  },
+  "size_m": {
+   "length": 0.067,
+   "width": 0.33,
+   "height": 0.084
+  }
+ },
+ {
+  "name": "trim_cabin_l_21",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 18,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.952,
+   "left": 0.273,
+   "up": 0.481
+  },
+  "size_m": {
+   "length": 0.078,
+   "width": 0.006,
+   "height": 0.024
+  }
+ },
+ {
+  "name": "trim_rear_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 53,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.402,
+   "left": 0.285,
+   "up": 0.487
+  },
+  "size_m": {
+   "length": 0.007,
+   "width": 0.021,
+   "height": 0.021
+  }
+ },
+ {
+  "name": "trim_cabin_l_02_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 208,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.535,
+   "left": 0.414,
+   "up": 0.775
+  },
+  "size_m": {
+   "length": 0.129,
+   "width": 0.161,
+   "height": 0.131
+  }
+ },
+ {
+  "name": "trim_cabin_l_17",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 12,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.886,
+   "left": 0.383,
+   "up": 0.463
+  },
+  "size_m": {
+   "length": 0.045,
+   "width": 0.055,
+   "height": 0.073
+  }
+ },
+ {
+  "name": "trim_cabin_l_19",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 18,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.937,
+   "left": 0.383,
+   "up": 0.476
+  },
+  "size_m": {
+   "length": 0.102,
+   "width": 0.01,
+   "height": 0.038
+  }
+ },
+ {
+  "name": "trim_rear_l_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 784,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.315,
+   "left": 0.553,
+   "up": 0.629
+  },
+  "size_m": {
+   "length": 0.101,
+   "width": 0.348,
+   "height": 0.14
+  }
+ },
+ {
+  "name": "exhaust",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 1072,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.988,
+   "left": 0.482,
+   "up": 0.308
+  },
+  "size_m": {
+   "length": 0.538,
+   "width": 0.19,
+   "height": 0.108
+  }
+ },
+ {
+  "name": "trim_front_l_09",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 1024,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.036,
+   "left": 0.474,
+   "up": 0.635
+  },
+  "size_m": {
+   "length": 0.048,
+   "width": 0.166,
+   "height": 0.166
+  }
+ },
+ {
+  "name": "trim_front_l_17",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 53,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.161,
+   "left": 0.47,
+   "up": 0.406
+  },
+  "size_m": {
+   "length": 0.009,
+   "width": 0.021,
+   "height": 0.021
+  }
+ },
+ {
+  "name": "trim_front_l_10",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 86,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.04,
+   "left": 0.479,
+   "up": 0.638
+  },
+  "size_m": {
+   "length": 0.027,
+   "width": 0.03,
+   "height": 0.03
+  }
+ },
+ {
+  "name": "trim_cabin_l_16",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 12,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.886,
+   "left": 0.495,
+   "up": 0.463
+  },
+  "size_m": {
+   "length": 0.045,
+   "width": 0.055,
+   "height": 0.073
+  }
+ },
+ {
+  "name": "trim_front_l_16",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 86,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.079,
+   "left": 0.477,
+   "up": 0.484
+  },
+  "size_m": {
+   "length": 0.014,
+   "width": 0.015,
+   "height": 0.015
+  }
+ },
+ {
+  "name": "trim_cabin_l_03",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 33,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.527,
+   "left": 0.531,
+   "up": 0.806
+  },
+  "size_m": {
+   "length": 0.022,
+   "width": 0.113,
+   "height": 0.027
+  }
+ },
+ {
+  "name": "trim_cabin_l_18",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 18,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.936,
+   "left": 0.495,
+   "up": 0.476
+  },
+  "size_m": {
+   "length": 0.1,
+   "width": 0.01,
+   "height": 0.038
+  }
+ },
+ {
+  "name": "trim_floor_l_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 16,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.32,
+   "left": 0.544,
+   "up": 0.478
+  },
+  "size_m": {
+   "length": 0.078,
+   "width": 0.078,
+   "height": 0.316
+  }
+ },
+ {
+  "name": "trim_cabin_l_25",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 16,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.291,
+   "left": 0.544,
+   "up": 0.48
+  },
+  "size_m": {
+   "length": 0.079,
+   "width": 0.078,
+   "height": 0.321
+  }
+ },
+ {
+  "name": "trim_cabin_l_13",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 76,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.835,
+   "left": 0.555,
+   "up": 0.985
+  },
+  "size_m": {
+   "length": 0.019,
+   "width": 0.023,
+   "height": 0.022
+  }
+ },
+ {
+  "name": "trim_front_l_07",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 1024,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.012,
+   "left": 0.656,
+   "up": 0.635
+  },
+  "size_m": {
+   "length": 0.048,
+   "width": 0.166,
+   "height": 0.166
+  }
+ },
+ {
+  "name": "trim_cabin_l_04",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 114,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.589,
+   "left": 0.597,
+   "up": 0.809
+  },
+  "size_m": {
+   "length": 0.026,
+   "width": 0.045,
+   "height": 0.045
+  }
+ },
+ {
+  "name": "trim_rear_l_03",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 53,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.372,
+   "left": 0.6,
+   "up": 0.485
+  },
+  "size_m": {
+   "length": 0.009,
+   "width": 0.021,
+   "height": 0.021
+  }
+ },
+ {
+  "name": "pillar_b_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 624,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.231,
+   "left": 0.684,
+   "up": 0.861
+  },
+  "size_m": {
+   "length": 0.125,
+   "width": 0.117,
+   "height": 1.14
+  }
+ },
+ {
+  "name": "trim_front_l_12",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 86,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.034,
+   "left": 0.641,
+   "up": 0.484
+  },
+  "size_m": {
+   "length": 0.014,
+   "width": 0.015,
+   "height": 0.015
+  }
+ },
+ {
+  "name": "trim_cabin_l_08",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 124,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.599,
+   "left": 0.648,
+   "up": 0.815
+  },
+  "size_m": {
+   "length": 0.012,
+   "width": 0.023,
+   "height": 0.047
+  }
+ },
+ {
+  "name": "trim_front_l_08",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 86,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.014,
+   "left": 0.66,
+   "up": 0.638
+  },
+  "size_m": {
+   "length": 0.027,
+   "width": 0.03,
+   "height": 0.03
+  }
+ },
+ {
+  "name": "trim_front_l_13",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 53,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.023,
+   "left": 0.786,
+   "up": 0.406
+  },
+  "size_m": {
+   "length": 0.019,
+   "width": 0.015,
+   "height": 0.021
+  }
+ },
+ {
+  "name": "trim_rear_l_07",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 53,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.133,
+   "left": 0.794,
+   "up": 0.485
+  },
+  "size_m": {
+   "length": 0.021,
+   "width": 0.007,
+   "height": 0.021
+  }
+ },
+ {
+  "name": "lens_front_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car_glass",
+  "tris": 1008,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.045,
+   "left": -0.658,
+   "up": 0.635
+  },
+  "size_m": {
+   "length": 0.026,
+   "width": 0.16,
+   "height": 0.16
+  }
+ },
+ {
+  "name": "lens_rear_r_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car_glass",
+  "tris": 432,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.318,
+   "left": -0.643,
+   "up": 0.624
+  },
+  "size_m": {
+   "length": 0.044,
+   "width": 0.125,
+   "height": 0.088
+  }
+ },
+ {
+  "name": "lens_front_r_03",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car_glass",
+  "tris": 1040,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.069,
+   "left": -0.56,
+   "up": 0.486
+  },
+  "size_m": {
+   "length": 0.076,
+   "width": 0.271,
+   "height": 0.048
+  }
+ },
+ {
+  "name": "lens_front_r_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car_glass",
+  "tris": 1008,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.069,
+   "left": -0.476,
+   "up": 0.635
+  },
+  "size_m": {
+   "length": 0.026,
+   "width": 0.16,
+   "height": 0.16
+  }
+ },
+ {
+  "name": "lens_rear_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car_glass",
+  "tris": 432,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.338,
+   "left": -0.471,
+   "up": 0.624
+  },
+  "size_m": {
+   "length": 0.044,
+   "width": 0.125,
+   "height": 0.088
+  }
+ },
+ {
+  "name": "lens_rear_r_03",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car_glass",
+  "tris": 60,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.338,
+   "left": -0.277,
+   "up": 0.398
+  },
+  "size_m": {
+   "length": 0.02,
+   "width": 0.121,
+   "height": 0.06
+  }
+ },
+ {
+  "name": "lens_rear_l_03",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car_glass",
+  "tris": 60,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.338,
+   "left": 0.276,
+   "up": 0.398
+  },
+  "size_m": {
+   "length": 0.02,
+   "width": 0.121,
+   "height": 0.06
+  }
+ },
+ {
+  "name": "lens_front_l_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car_glass",
+  "tris": 1008,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.069,
+   "left": 0.474,
+   "up": 0.635
+  },
+  "size_m": {
+   "length": 0.026,
+   "width": 0.16,
+   "height": 0.16
+  }
+ },
+ {
+  "name": "lens_rear_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car_glass",
+  "tris": 432,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.338,
+   "left": 0.469,
+   "up": 0.624
+  },
+  "size_m": {
+   "length": 0.044,
+   "width": 0.125,
+   "height": 0.088
+  }
+ },
+ {
+  "name": "lens_front_l_03",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car_glass",
+  "tris": 1040,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.069,
+   "left": 0.558,
+   "up": 0.486
+  },
+  "size_m": {
+   "length": 0.076,
+   "width": 0.271,
+   "height": 0.048
+  }
+ },
+ {
+  "name": "lens_front_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car_glass",
+  "tris": 1008,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.045,
+   "left": 0.656,
+   "up": 0.635
+  },
+  "size_m": {
+   "length": 0.026,
+   "width": 0.16,
+   "height": 0.16
+  }
+ },
+ {
+  "name": "lens_rear_l_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car_glass",
+  "tris": 432,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.318,
+   "left": 0.641,
+   "up": 0.624
+  },
+  "size_m": {
+   "length": 0.044,
+   "width": 0.125,
+   "height": 0.088
+  }
+ },
+ {
+  "name": "reverse_light_rear_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 2,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.312,
+   "left": -0.276,
+   "up": 0.401
+  },
+  "size_m": {
+   "length": 0.014,
+   "width": 0.11,
+   "height": 0.053
+  }
+ },
+ {
+  "name": "blinker_front_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 344,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.04,
+   "left": -0.626,
+   "up": 0.486
+  },
+  "size_m": {
+   "length": 0.06,
+   "width": 0.142,
+   "height": 0.048
+  }
+ },
+ {
+  "name": "blinker_rear_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 168,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.322,
+   "left": -0.47,
+   "up": 0.628
+  },
+  "size_m": {
+   "length": 0.041,
+   "width": 0.124,
+   "height": 0.089
+  }
+ },
+ {
+  "name": "taillight_rear_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 168,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.302,
+   "left": -0.642,
+   "up": 0.628
+  },
+  "size_m": {
+   "length": 0.041,
+   "width": 0.124,
+   "height": 0.089
+  }
+ },
+ {
+  "name": "taillight_rear_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 168,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.302,
+   "left": 0.64,
+   "up": 0.628
+  },
+  "size_m": {
+   "length": 0.041,
+   "width": 0.124,
+   "height": 0.089
+  }
+ },
+ {
+  "name": "blinker_rear_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 168,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.322,
+   "left": 0.468,
+   "up": 0.628
+  },
+  "size_m": {
+   "length": 0.041,
+   "width": 0.124,
+   "height": 0.089
+  }
+ },
+ {
+  "name": "blinker_front_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 344,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.04,
+   "left": 0.624,
+   "up": 0.486
+  },
+  "size_m": {
+   "length": 0.06,
+   "width": 0.143,
+   "height": 0.048
+  }
+ },
+ {
+  "name": "fog_light_rear_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 2,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.312,
+   "left": 0.274,
+   "up": 0.401
+  },
+  "size_m": {
+   "length": 0.014,
+   "width": 0.11,
+   "height": 0.053
+  }
+ },
+ {
+  "name": "headlight_front_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 78,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.042,
+   "left": -0.476,
+   "up": 0.635
+  },
+  "size_m": {
+   "length": 0.017,
+   "width": 0.153,
+   "height": 0.153
+  }
+ },
+ {
+  "name": "headlight_front_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 78,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.042,
+   "left": 0.474,
+   "up": 0.635
+  },
+  "size_m": {
+   "length": 0.017,
+   "width": 0.153,
+   "height": 0.153
+  }
+ },
+ {
+  "name": "headlight_lens_front_r",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 78,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.013,
+   "left": -0.658,
+   "up": 0.635
+  },
+  "size_m": {
+   "length": 0.017,
+   "width": 0.153,
+   "height": 0.153
+  }
+ },
+ {
+  "name": "headlight_lens_front_r_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 344,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.076,
+   "left": -0.491,
+   "up": 0.485
+  },
+  "size_m": {
+   "length": 0.058,
+   "width": 0.135,
+   "height": 0.047
+  }
+ },
+ {
+  "name": "headlight_lens_front_l_02",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 344,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.076,
+   "left": 0.489,
+   "up": 0.485
+  },
+  "size_m": {
+   "length": 0.058,
+   "width": 0.135,
+   "height": 0.047
+  }
+ },
+ {
+  "name": "headlight_lens_front_l",
+  "source": "Object_7",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 78,
+  "halved": false,
+  "centre_m": {
+   "forward": 2.013,
+   "left": 0.656,
+   "up": 0.635
+  },
+  "size_m": {
+   "length": 0.017,
+   "width": 0.153,
+   "height": 0.153
+  }
+ },
+ {
+  "name": "seat_r",
+  "source": "Object_7.001",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 2126,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.048,
+   "left": -0.331,
+   "up": 0.664
+  },
+  "size_m": {
+   "length": 0.748,
+   "width": 0.577,
+   "height": 0.722
+  }
+ },
+ {
+  "name": "seat_l",
+  "source": "Object_7.002",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 2126,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.048,
+   "left": 0.329,
+   "up": 0.664
+  },
+  "size_m": {
+   "length": 0.748,
+   "width": 0.577,
+   "height": 0.722
+  }
+ },
+ {
+  "name": "gear_shifter",
+  "source": "Object_7.003",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 560,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.43,
+   "left": -0.001,
+   "up": 0.454
+  },
+  "size_m": {
+   "length": 0.157,
+   "width": 0.129,
+   "height": 0.081
+  }
+ },
+ {
+  "name": "handbrake",
+  "source": "Object_7.003",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 592,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.43,
+   "left": -0.001,
+   "up": 0.525
+  },
+  "size_m": {
+   "length": 0.053,
+   "width": 0.053,
+   "height": 0.074
+  }
+ },
+ {
+  "name": "pedal_plate",
+  "source": "Object_7.004",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 304,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.115,
+   "left": -0.001,
+   "up": 0.435
+  },
+  "size_m": {
+   "length": 0.302,
+   "width": 0.02,
+   "height": 0.051
+  }
+ },
+ {
+  "name": "steering_wheel",
+  "source": "Object_7.005",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 6600,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.386,
+   "left": 0.415,
+   "up": 0.838
+  },
+  "size_m": {
+   "length": 0.122,
+   "width": 0.367,
+   "height": 0.351
+  }
+ },
+ {
+  "name": "steering_hub",
+  "source": "Object_7.005",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 322,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.459,
+   "left": 0.415,
+   "up": 0.814
+  },
+  "size_m": {
+   "length": 0.077,
+   "width": 0.038,
+   "height": 0.055
+  }
+ },
+ {
+  "name": "trim_cabin_l_07",
+  "source": "Object_7.006",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 638,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.63,
+   "left": 0.289,
+   "up": 0.913
+  },
+  "size_m": {
+   "length": 0.052,
+   "width": 0.105,
+   "height": 0.105
+  }
+ },
+ {
+  "name": "trim_cabin_l_06",
+  "source": "Object_7.006",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 638,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.63,
+   "left": 0.398,
+   "up": 0.913
+  },
+  "size_m": {
+   "length": 0.052,
+   "width": 0.105,
+   "height": 0.105
+  }
+ },
+ {
+  "name": "trim_cabin_l_05",
+  "source": "Object_7.006",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 638,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.63,
+   "left": 0.508,
+   "up": 0.913
+  },
+  "size_m": {
+   "length": 0.052,
+   "width": 0.105,
+   "height": 0.105
+  }
+ },
+ {
+  "name": "trim_rear_r_06",
+  "source": "Object_7.007",
+  "bone": "Root_10",
+  "material": "old_car",
+  "tris": 734,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.129,
+   "left": -0.75,
+   "up": 0.776
+  },
+  "size_m": {
+   "length": 0.094,
+   "width": 0.06,
+   "height": 0.093
+  }
+ },
+ {
+  "name": "windshield",
+  "source": "Object_8.012",
+  "bone": "Root_10",
+  "material": "old_car_glass",
+  "tris": 1664,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.619,
+   "left": -0.001,
+   "up": 1.197
+  },
+  "size_m": {
+   "length": 0.556,
+   "width": 1.354,
+   "height": 0.424
+  }
+ },
+ {
+  "name": "rear_window",
+  "source": "Object_8.013",
+  "bone": "Root_10",
+  "material": "old_car_glass",
+  "tris": 1216,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.426,
+   "left": -0.001,
+   "up": 1.247
+  },
+  "size_m": {
+   "length": 0.521,
+   "width": 1.362,
+   "height": 0.422
+  }
+ },
+ {
+  "name": "door_fl_panel_2",
+  "source": "Object_17",
+  "bone": "DFL_8",
+  "material": "old_car",
+  "tris": 880,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.22,
+   "left": 0.69,
+   "up": 1.173
+  },
+  "size_m": {
+   "length": 0.856,
+   "width": 0.115,
+   "height": 0.476
+  }
+ },
+ {
+  "name": "door_fl_panel_5",
+  "source": "Object_17",
+  "bone": "DFL_8",
+  "material": "old_car",
+  "tris": 704,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.221,
+   "left": 0.692,
+   "up": 1.165
+  },
+  "size_m": {
+   "length": 0.833,
+   "width": 0.097,
+   "height": 0.476
+  }
+ },
+ {
+  "name": "door_fl_panel_3",
+  "source": "Object_17",
+  "bone": "DFL_8",
+  "material": "old_car",
+  "tris": 848,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.142,
+   "left": 0.693,
+   "up": 0.783
+  },
+  "size_m": {
+   "length": 0.473,
+   "width": 0.074,
+   "height": 0.222
+  }
+ },
+ {
+  "name": "door_fl_panel_6",
+  "source": "Object_17",
+  "bone": "DFL_8",
+  "material": "old_car",
+  "tris": 640,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.322,
+   "left": 0.788,
+   "up": 0.643
+  },
+  "size_m": {
+   "length": 1.069,
+   "width": 0.158,
+   "height": 0.677
+  }
+ },
+ {
+  "name": "door_fl_panel_8",
+  "source": "Object_17",
+  "bone": "DFL_8",
+  "material": "old_car",
+  "tris": 58,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.481,
+   "left": 0.717,
+   "up": 0.838
+  },
+  "size_m": {
+   "length": 0.158,
+   "width": 0.014,
+   "height": 0.052
+  }
+ },
+ {
+  "name": "door_fl_panel_4",
+  "source": "Object_17",
+  "bone": "DFL_8",
+  "material": "old_car",
+  "tris": 720,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.318,
+   "left": 0.799,
+   "up": 0.645
+  },
+  "size_m": {
+   "length": 1.078,
+   "width": 0.152,
+   "height": 0.682
+  }
+ },
+ {
+  "name": "door_fl_panel_1",
+  "source": "Object_17",
+  "bone": "DFL_8",
+  "material": "old_car",
+  "tris": 1358,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.598,
+   "left": 0.841,
+   "up": 0.979
+  },
+  "size_m": {
+   "length": 0.223,
+   "width": 0.176,
+   "height": 0.124
+  }
+ },
+ {
+  "name": "door_fl_panel_7",
+  "source": "Object_17",
+  "bone": "DFL_8",
+  "material": "old_car",
+  "tris": 600,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.059,
+   "left": 0.809,
+   "up": 0.858
+  },
+  "size_m": {
+   "length": 0.259,
+   "width": 0.037,
+   "height": 0.048
+  }
+ },
+ {
+  "name": "door_fl_window",
+  "source": "Object_18",
+  "bone": "DFL_8",
+  "material": "old_car_glass",
+  "tris": 596,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.22,
+   "left": 0.692,
+   "up": 1.162
+  },
+  "size_m": {
+   "length": 0.798,
+   "width": 0.09,
+   "height": 0.451
+  }
+ },
+ {
+  "name": "door_fr_panel_3",
+  "source": "Object_20",
+  "bone": "DFR_6",
+  "material": "old_car",
+  "tris": 720,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.318,
+   "left": -0.801,
+   "up": 0.645
+  },
+  "size_m": {
+   "length": 1.078,
+   "width": 0.152,
+   "height": 0.682
+  }
+ },
+ {
+  "name": "door_fr_panel_5",
+  "source": "Object_20",
+  "bone": "DFR_6",
+  "material": "old_car",
+  "tris": 640,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.322,
+   "left": -0.79,
+   "up": 0.643
+  },
+  "size_m": {
+   "length": 1.069,
+   "width": 0.158,
+   "height": 0.677
+  }
+ },
+ {
+  "name": "door_fr_panel_6",
+  "source": "Object_20",
+  "bone": "DFR_6",
+  "material": "old_car",
+  "tris": 600,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.059,
+   "left": -0.811,
+   "up": 0.858
+  },
+  "size_m": {
+   "length": 0.259,
+   "width": 0.037,
+   "height": 0.048
+  }
+ },
+ {
+  "name": "door_fr_panel_1",
+  "source": "Object_20",
+  "bone": "DFR_6",
+  "material": "old_car",
+  "tris": 880,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.22,
+   "left": -0.692,
+   "up": 1.173
+  },
+  "size_m": {
+   "length": 0.856,
+   "width": 0.115,
+   "height": 0.476
+  }
+ },
+ {
+  "name": "door_fr_panel_4",
+  "source": "Object_20",
+  "bone": "DFR_6",
+  "material": "old_car",
+  "tris": 704,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.221,
+   "left": -0.693,
+   "up": 1.165
+  },
+  "size_m": {
+   "length": 0.833,
+   "width": 0.097,
+   "height": 0.476
+  }
+ },
+ {
+  "name": "door_fr_panel_2",
+  "source": "Object_20",
+  "bone": "DFR_6",
+  "material": "old_car",
+  "tris": 848,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.142,
+   "left": -0.695,
+   "up": 0.783
+  },
+  "size_m": {
+   "length": 0.473,
+   "width": 0.074,
+   "height": 0.222
+  }
+ },
+ {
+  "name": "door_fr_panel_7",
+  "source": "Object_20",
+  "bone": "DFR_6",
+  "material": "old_car",
+  "tris": 58,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.481,
+   "left": -0.719,
+   "up": 0.838
+  },
+  "size_m": {
+   "length": 0.158,
+   "width": 0.014,
+   "height": 0.052
+  }
+ },
+ {
+  "name": "door_fr_window",
+  "source": "Object_21",
+  "bone": "DFR_6",
+  "material": "old_car_glass",
+  "tris": 596,
+  "halved": false,
+  "centre_m": {
+   "forward": 0.22,
+   "left": -0.694,
+   "up": 1.162
+  },
+  "size_m": {
+   "length": 0.798,
+   "width": 0.09,
+   "height": 0.451
+  }
+ },
+ {
+  "name": "door_rl_panel_1",
+  "source": "Object_23",
+  "bone": "DRL_9",
+  "material": "old_car",
+  "tris": 880,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.688,
+   "left": 0.69,
+   "up": 1.182
+  },
+  "size_m": {
+   "length": 0.867,
+   "width": 0.117,
+   "height": 0.49
+  }
+ },
+ {
+  "name": "door_rl_panel_3",
+  "source": "Object_23",
+  "bone": "DRL_9",
+  "material": "old_car",
+  "tris": 640,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.694,
+   "left": 0.692,
+   "up": 1.178
+  },
+  "size_m": {
+   "length": 0.858,
+   "width": 0.098,
+   "height": 0.48
+  }
+ },
+ {
+  "name": "door_rl_panel_6",
+  "source": "Object_23",
+  "bone": "DRL_9",
+  "material": "old_car",
+  "tris": 82,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.612,
+   "left": 0.696,
+   "up": 0.696
+  },
+  "size_m": {
+   "length": 0.349,
+   "width": 0.054,
+   "height": 0.021
+  }
+ },
+ {
+  "name": "door_rl_panel_7",
+  "source": "Object_23",
+  "bone": "DRL_9",
+  "material": "old_car",
+  "tris": 58,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.359,
+   "left": 0.716,
+   "up": 0.812
+  },
+  "size_m": {
+   "length": 0.158,
+   "width": 0.014,
+   "height": 0.052
+  }
+ },
+ {
+  "name": "door_rl_panel_2",
+  "source": "Object_23",
+  "bone": "DRL_9",
+  "material": "old_car",
+  "tris": 712,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.688,
+   "left": 0.789,
+   "up": 0.651
+  },
+  "size_m": {
+   "length": 0.984,
+   "width": 0.154,
+   "height": 0.687
+  }
+ },
+ {
+  "name": "door_rl_panel_5",
+  "source": "Object_23",
+  "bone": "DRL_9",
+  "material": "old_car",
+  "tris": 584,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.689,
+   "left": 0.804,
+   "up": 0.653
+  },
+  "size_m": {
+   "length": 0.986,
+   "width": 0.139,
+   "height": 0.689
+  }
+ },
+ {
+  "name": "door_rl_panel_4",
+  "source": "Object_23",
+  "bone": "DRL_9",
+  "material": "old_car",
+  "tris": 600,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.031,
+   "left": 0.809,
+   "up": 0.858
+  },
+  "size_m": {
+   "length": 0.259,
+   "width": 0.037,
+   "height": 0.048
+  }
+ },
+ {
+  "name": "door_rl_window",
+  "source": "Object_24",
+  "bone": "DRL_9",
+  "material": "old_car_glass",
+  "tris": 560,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.691,
+   "left": 0.692,
+   "up": 1.179
+  },
+  "size_m": {
+   "length": 0.819,
+   "width": 0.092,
+   "height": 0.456
+  }
+ },
+ {
+  "name": "door_rr_panel_5",
+  "source": "Object_26",
+  "bone": "DRR_7",
+  "material": "old_car",
+  "tris": 584,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.689,
+   "left": -0.806,
+   "up": 0.653
+  },
+  "size_m": {
+   "length": 0.986,
+   "width": 0.139,
+   "height": 0.689
+  }
+ },
+ {
+  "name": "door_rr_panel_2",
+  "source": "Object_26",
+  "bone": "DRR_7",
+  "material": "old_car",
+  "tris": 712,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.688,
+   "left": -0.791,
+   "up": 0.651
+  },
+  "size_m": {
+   "length": 0.984,
+   "width": 0.154,
+   "height": 0.687
+  }
+ },
+ {
+  "name": "door_rr_panel_4",
+  "source": "Object_26",
+  "bone": "DRR_7",
+  "material": "old_car",
+  "tris": 600,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.031,
+   "left": -0.811,
+   "up": 0.858
+  },
+  "size_m": {
+   "length": 0.259,
+   "width": 0.037,
+   "height": 0.048
+  }
+ },
+ {
+  "name": "door_rr_panel_1",
+  "source": "Object_26",
+  "bone": "DRR_7",
+  "material": "old_car",
+  "tris": 880,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.688,
+   "left": -0.692,
+   "up": 1.182
+  },
+  "size_m": {
+   "length": 0.867,
+   "width": 0.117,
+   "height": 0.49
+  }
+ },
+ {
+  "name": "door_rr_panel_3",
+  "source": "Object_26",
+  "bone": "DRR_7",
+  "material": "old_car",
+  "tris": 640,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.694,
+   "left": -0.694,
+   "up": 1.178
+  },
+  "size_m": {
+   "length": 0.858,
+   "width": 0.098,
+   "height": 0.48
+  }
+ },
+ {
+  "name": "door_rr_panel_7",
+  "source": "Object_26",
+  "bone": "DRR_7",
+  "material": "old_car",
+  "tris": 58,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.359,
+   "left": -0.718,
+   "up": 0.812
+  },
+  "size_m": {
+   "length": 0.158,
+   "width": 0.014,
+   "height": 0.052
+  }
+ },
+ {
+  "name": "door_rr_panel_6",
+  "source": "Object_26",
+  "bone": "DRR_7",
+  "material": "old_car",
+  "tris": 82,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.612,
+   "left": -0.698,
+   "up": 0.696
+  },
+  "size_m": {
+   "length": 0.349,
+   "width": 0.054,
+   "height": 0.021
+  }
+ },
+ {
+  "name": "door_rr_window",
+  "source": "Object_27",
+  "bone": "DRR_7",
+  "material": "old_car_glass",
+  "tris": 560,
+  "halved": false,
+  "centre_m": {
+   "forward": -0.691,
+   "left": -0.694,
+   "up": 1.179
+  },
+  "size_m": {
+   "length": 0.819,
+   "width": 0.091,
+   "height": 0.456
+  }
+ },
+ {
+  "name": "hood",
+  "source": "Object_29",
+  "bone": "Hood_4",
+  "material": "old_car",
+  "tris": 1760,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.607,
+   "left": -0.001,
+   "up": 0.837
+  },
+  "size_m": {
+   "length": 1.121,
+   "width": 1.434,
+   "height": 0.238
+  }
+ },
+ {
+  "name": "trunk_lid",
+  "source": "Object_31",
+  "bone": "Trunk_5",
+  "material": "old_car",
+  "tris": 1848,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.02,
+   "left": -0.001,
+   "up": 0.908
+  },
+  "size_m": {
+   "length": 0.733,
+   "width": 1.388,
+   "height": 0.295
+  }
+ },
+ {
+  "name": "trunk_emblem",
+  "source": "Object_31",
+  "bone": "Trunk_5",
+  "material": "old_car",
+  "tris": 216,
+  "halved": false,
+  "centre_m": {
+   "forward": -2.385,
+   "left": -0.0,
+   "up": 0.797
+  },
+  "size_m": {
+   "length": 0.013,
+   "width": 0.028,
+   "height": 0.028
+  }
+ },
+ {
+  "name": "wheel_fl_rim_inner",
+  "source": "Object_33",
+  "bone": "FL_2",
+  "material": "old_car",
+  "tris": 5528,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.297,
+   "left": 0.673,
+   "up": 0.314
+  },
+  "size_m": {
+   "length": 0.385,
+   "width": 0.102,
+   "height": 0.385
+  }
+ },
+ {
+  "name": "wheel_fl_tire",
+  "source": "Object_33",
+  "bone": "FL_2",
+  "material": "old_car",
+  "tris": 1024,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.298,
+   "left": 0.741,
+   "up": 0.314
+  },
+  "size_m": {
+   "length": 0.628,
+   "width": 0.197,
+   "height": 0.628
+  }
+ },
+ {
+  "name": "wheel_fl_rim_outer",
+  "source": "Object_33",
+  "bone": "FL_2",
+  "material": "old_car",
+  "tris": 5528,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.297,
+   "left": 0.814,
+   "up": 0.314
+  },
+  "size_m": {
+   "length": 0.385,
+   "width": 0.102,
+   "height": 0.385
+  }
+ },
+ {
+  "name": "wheel_fl_hub_3",
+  "source": "Object_33",
+  "bone": "FL_2",
+  "material": "old_car",
+  "tris": 70,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.459,
+   "left": 0.806,
+   "up": 0.391
+  },
+  "size_m": {
+   "length": 0.008,
+   "width": 0.01,
+   "height": 0.009
+  }
+ },
+ {
+  "name": "wheel_fl_hub_2",
+  "source": "Object_33",
+  "bone": "FL_2",
+  "material": "old_car",
+  "tris": 144,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.45,
+   "left": 0.808,
+   "up": 0.387
+  },
+  "size_m": {
+   "length": 0.018,
+   "width": 0.008,
+   "height": 0.012
+  }
+ },
+ {
+  "name": "wheel_fl_hub_1",
+  "source": "Object_33",
+  "bone": "FL_2",
+  "material": "old_car",
+  "tris": 418,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.444,
+   "left": 0.809,
+   "up": 0.384
+  },
+  "size_m": {
+   "length": 0.009,
+   "width": 0.007,
+   "height": 0.008
+  }
+ },
+ {
+  "name": "wheel_fr_rim_outer",
+  "source": "Object_35",
+  "bone": "FR_0",
+  "material": "old_car",
+  "tris": 5528,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.297,
+   "left": -0.813,
+   "up": 0.314
+  },
+  "size_m": {
+   "length": 0.386,
+   "width": 0.102,
+   "height": 0.386
+  }
+ },
+ {
+  "name": "wheel_fr_tire",
+  "source": "Object_35",
+  "bone": "FR_0",
+  "material": "old_car",
+  "tris": 1024,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.297,
+   "left": -0.74,
+   "up": 0.314
+  },
+  "size_m": {
+   "length": 0.628,
+   "width": 0.197,
+   "height": 0.628
+  }
+ },
+ {
+  "name": "wheel_fr_hub_1",
+  "source": "Object_35",
+  "bone": "FR_0",
+  "material": "old_car",
+  "tris": 418,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.296,
+   "left": -0.808,
+   "up": 0.477
+  },
+  "size_m": {
+   "length": 0.006,
+   "width": 0.007,
+   "height": 0.009
+  }
+ },
+ {
+  "name": "wheel_fr_hub_2",
+  "source": "Object_35",
+  "bone": "FR_0",
+  "material": "old_car",
+  "tris": 144,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.296,
+   "left": -0.806,
+   "up": 0.483
+  },
+  "size_m": {
+   "length": 0.005,
+   "width": 0.008,
+   "height": 0.019
+  }
+ },
+ {
+  "name": "wheel_fr_hub_3",
+  "source": "Object_35",
+  "bone": "FR_0",
+  "material": "old_car",
+  "tris": 70,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.296,
+   "left": -0.804,
+   "up": 0.494
+  },
+  "size_m": {
+   "length": 0.008,
+   "width": 0.01,
+   "height": 0.006
+  }
+ },
+ {
+  "name": "wheel_fr_rim_inner",
+  "source": "Object_35",
+  "bone": "FR_0",
+  "material": "old_car",
+  "tris": 5528,
+  "halved": false,
+  "centre_m": {
+   "forward": 1.297,
+   "left": -0.672,
+   "up": 0.314
+  },
+  "size_m": {
+   "length": 0.386,
+   "width": 0.102,
+   "height": 0.386
+  }
+ },
+ {
+  "name": "wheel_rl_rim_inner",
+  "source": "Object_37",
+  "bone": "RL_3",
+  "material": "old_car",
+  "tris": 5528,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.297,
+   "left": 0.646,
+   "up": 0.314
+  },
+  "size_m": {
+   "length": 0.385,
+   "width": 0.102,
+   "height": 0.385
+  }
+ },
+ {
+  "name": "wheel_rl_tire",
+  "source": "Object_37",
+  "bone": "RL_3",
+  "material": "old_car",
+  "tris": 1024,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.298,
+   "left": 0.714,
+   "up": 0.314
+  },
+  "size_m": {
+   "length": 0.628,
+   "width": 0.197,
+   "height": 0.628
+  }
+ },
+ {
+  "name": "wheel_rl_rim_outer",
+  "source": "Object_37",
+  "bone": "RL_3",
+  "material": "old_car",
+  "tris": 5528,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.297,
+   "left": 0.787,
+   "up": 0.314
+  },
+  "size_m": {
+   "length": 0.385,
+   "width": 0.102,
+   "height": 0.385
+  }
+ },
+ {
+  "name": "wheel_rl_hub_3",
+  "source": "Object_37",
+  "bone": "RL_3",
+  "material": "old_car",
+  "tris": 70,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.418,
+   "left": 0.778,
+   "up": 0.182
+  },
+  "size_m": {
+   "length": 0.009,
+   "width": 0.009,
+   "height": 0.009
+  }
+ },
+ {
+  "name": "wheel_rl_hub_2",
+  "source": "Object_37",
+  "bone": "RL_3",
+  "material": "old_car",
+  "tris": 144,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.412,
+   "left": 0.78,
+   "up": 0.189
+  },
+  "size_m": {
+   "length": 0.015,
+   "width": 0.008,
+   "height": 0.016
+  }
+ },
+ {
+  "name": "wheel_rl_hub_1",
+  "source": "Object_37",
+  "bone": "RL_3",
+  "material": "old_car",
+  "tris": 418,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.407,
+   "left": 0.782,
+   "up": 0.194
+  },
+  "size_m": {
+   "length": 0.009,
+   "width": 0.007,
+   "height": 0.009
+  }
+ },
+ {
+  "name": "wheel_rr_rim_outer",
+  "source": "Object_39",
+  "bone": "RR_1",
+  "material": "old_car",
+  "tris": 5528,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.297,
+   "left": -0.788,
+   "up": 0.314
+  },
+  "size_m": {
+   "length": 0.385,
+   "width": 0.102,
+   "height": 0.385
+  }
+ },
+ {
+  "name": "wheel_rr_tire",
+  "source": "Object_39",
+  "bone": "RR_1",
+  "material": "old_car",
+  "tris": 1024,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.298,
+   "left": -0.715,
+   "up": 0.314
+  },
+  "size_m": {
+   "length": 0.628,
+   "width": 0.197,
+   "height": 0.628
+  }
+ },
+ {
+  "name": "wheel_rr_hub_1",
+  "source": "Object_39",
+  "bone": "RR_1",
+  "material": "old_car",
+  "tris": 418,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.146,
+   "left": -0.783,
+   "up": 0.373
+  },
+  "size_m": {
+   "length": 0.009,
+   "width": 0.007,
+   "height": 0.008
+  }
+ },
+ {
+  "name": "wheel_rr_hub_2",
+  "source": "Object_39",
+  "bone": "RR_1",
+  "material": "old_car",
+  "tris": 144,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.14,
+   "left": -0.782,
+   "up": 0.375
+  },
+  "size_m": {
+   "length": 0.018,
+   "width": 0.008,
+   "height": 0.011
+  }
+ },
+ {
+  "name": "wheel_rr_hub_3",
+  "source": "Object_39",
+  "bone": "RR_1",
+  "material": "old_car",
+  "tris": 70,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.13,
+   "left": -0.78,
+   "up": 0.378
+  },
+  "size_m": {
+   "length": 0.007,
+   "width": 0.01,
+   "height": 0.009
+  }
+ },
+ {
+  "name": "wheel_rr_rim_inner",
+  "source": "Object_39",
+  "bone": "RR_1",
+  "material": "old_car",
+  "tris": 5528,
+  "halved": false,
+  "centre_m": {
+   "forward": -1.297,
+   "left": -0.647,
+   "up": 0.314
+  },
+  "size_m": {
+   "length": 0.385,
+   "width": 0.102,
+   "height": 0.385
+  }
+ }
+]
