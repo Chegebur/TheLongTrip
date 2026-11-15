@@ -67,8 +67,19 @@ public sealed class MeleeConfig
 }
 
 /// <summary>One kind of item: what it is called, how big and heavy, what it looks like, what using it does and how it hurts.</summary>
+/// <summary>An item that holds liquid: how much (litres), and what it starts with.</summary>
+public sealed class ContainerConfig
+{
+	public float Capacity = 50f;
+	public string Liquid;       // what it starts holding (null: empty)
+	public float StartFill;     // 0..1
+}
+
 public sealed class ItemDefinition
 {
+	/// <summary>Set for barrels, jugs and the like: they hold <see cref="ContainerConfig.Capacity"/> litres of a liquid (use and pouring come later).</summary>
+	public ContainerConfig Container;
+
 	public string Id;
 	public string Name;
 	public string Category;
@@ -176,6 +187,7 @@ public static class ItemLibrary
 	private sealed class DamageRecord { public float scale { get; set; } = 0.12f; public float minSpeed { get; set; } = 3f; public float cap { get; set; } = 12f; public float cooldown { get; set; } = 0.2f; }
 	private sealed class ExplosionRecord { public float radius { get; set; } = 8f; public float force { get; set; } = 14f; public float damage { get; set; } = 45f; }
 	private sealed class MeleeRecord { public float swingSeconds { get; set; } = 0.3f; public float startAngle { get; set; } = -50f; public float endAngle { get; set; } = 55f; public float cooldown { get; set; } = 0.5f; }
+	private sealed class ContainerRecord { public float capacity { get; set; } = 50f; public string liquid { get; set; } public float fill { get; set; } }
 	private sealed class LootRecord { public string id { get; set; } public int count { get; set; } = 1; }
 
 	private sealed class ItemRecord
@@ -201,6 +213,7 @@ public static class ItemLibrary
 		public DamageRecord damage { get; set; }
 		public MeleeRecord melee { get; set; }
 		public float health { get; set; }
+		public ContainerRecord container { get; set; }
 		public ExplosionRecord explosion { get; set; }
 	}
 
@@ -261,6 +274,7 @@ public static class ItemLibrary
 			def.Damage = new DamageConfig { Scale = d.scale, MinSpeed = d.minSpeed, Cap = d.cap, Cooldown = d.cooldown };
 			if ( r.melee is { } m ) def.Melee = new MeleeConfig { SwingSeconds = m.swingSeconds, StartAngle = m.startAngle, EndAngle = m.endAngle, Cooldown = m.cooldown };
 			if ( r.explosion is { } x ) def.Explosion = new ExplosionConfig { Radius = x.radius, Force = x.force, Damage = x.damage };
+			if ( r.container is { } k ) def.Container = new ContainerConfig { Capacity = k.capacity, Liquid = k.liquid, StartFill = k.fill };
 			if ( def.Use == UseKind.Melee && def.Melee is null ) def.Melee = new MeleeConfig();
 
 			_definitions[def.Id] = def;
@@ -330,7 +344,8 @@ public static class ItemLibrary
 		item.ItemId = id;
 		item.Display = def.Name;
 		item.HalfExtents = size * def.ModelScale * 0.5f;
-		item.Amount = Math.Clamp( amount, 0f, 1f );
+		item.Amount = def.Container is { } box ? box.StartFill : Math.Clamp( amount, 0f, 1f );
+		if ( def.Container is { } held ) item.Liquid = held.StartFill > 0f ? held.Liquid : null;
 		item.Body = body;
 
 		// everything hurts a little when it hits hard enough; weapons hurt a lot

@@ -1,132 +1,590 @@
 {
   "items": [
     {
-      "id": "water_bottle", "name": "Water jug", "category": "Drink", "description": "A few sips each.",
-      "mass": 0.9, "model": "models/items/water_jug/water_jug.vmdl", "hands": 1,
-      "use": "drink", "restore": 40, "portionPerUse": 0.25,
-      "damage": { "scale": 0.08, "minSpeed": 3, "cap": 6 }
+      "id": "water_bottle",
+      "name": "Water jug",
+      "category": "Drink",
+      "description": "A few sips each.",
+      "mass": 0.9,
+      "model": "models/items/water_jug/water_jug.vmdl",
+      "hands": 1,
+      "use": "drink",
+      "restore": 40,
+      "portionPerUse": 0.25,
+      "damage": {
+        "scale": 0.08,
+        "minSpeed": 3,
+        "cap": 6
+      }
     },
     {
-      "id": "canned_food", "name": "Canned food", "category": "Food", "description": "Eat it in one go.",
-      "mass": 0.4, "model": "models/items/tin_food/tin_food.vmdl", "hands": 1,
-      "use": "eat", "restore": 35, "portionPerUse": 1, "consumedWhenEmpty": true,
-      "damage": { "scale": 0.1, "minSpeed": 3, "cap": 8 }
+      "id": "canned_food",
+      "name": "Canned food",
+      "category": "Food",
+      "description": "Eat it in one go.",
+      "mass": 0.4,
+      "model": "models/items/tin_food/tin_food.vmdl",
+      "hands": 1,
+      "use": "eat",
+      "restore": 35,
+      "portionPerUse": 1,
+      "consumedWhenEmpty": true,
+      "damage": {
+        "scale": 0.1,
+        "minSpeed": 3,
+        "cap": 8
+      }
     },
     {
-      "id": "apple", "name": "Apple", "category": "Food", "description": "Crisp.",
-      "mass": 0.15, "model": "models/items/apple/apple.vmdl", "hands": 1,
-      "use": "eat", "restore": 12, "portionPerUse": 1, "consumedWhenEmpty": true,
-      "damage": { "scale": 0.05, "minSpeed": 4, "cap": 2 }
+      "id": "apple",
+      "name": "Apple",
+      "category": "Food",
+      "description": "Crisp.",
+      "mass": 0.15,
+      "model": "models/items/apple/apple.vmdl",
+      "hands": 1,
+      "use": "eat",
+      "restore": 12,
+      "portionPerUse": 1,
+      "consumedWhenEmpty": true,
+      "damage": {
+        "scale": 0.05,
+        "minSpeed": 4,
+        "cap": 2
+      }
     },
     {
-      "id": "banana", "name": "Banana", "category": "Food", "description": "A quick snack.",
-      "mass": 0.12, "model": "models/items/banana/banana.vmdl", "hands": 1,
-      "use": "eat", "restore": 10, "portionPerUse": 1, "consumedWhenEmpty": true,
-      "damage": { "scale": 0.05, "minSpeed": 4, "cap": 2 }
+      "id": "banana",
+      "name": "Banana",
+      "category": "Food",
+      "description": "A quick snack.",
+      "mass": 0.12,
+      "model": "models/items/banana/banana.vmdl",
+      "hands": 1,
+      "use": "eat",
+      "restore": 10,
+      "portionPerUse": 1,
+      "consumedWhenEmpty": true,
+      "damage": {
+        "scale": 0.05,
+        "minSpeed": 4,
+        "cap": 2
+      }
     },
     {
-      "id": "banana_bunch", "name": "Bananas", "category": "Food", "description": "A bunch: a few bites each.",
-      "mass": 0.5, "model": "models/items/banana_bunch/banana_bunch.vmdl", "hands": 1,
-      "use": "eat", "restore": 42, "portionPerUse": 0.25, "consumedWhenEmpty": true,
-      "damage": { "scale": 0.05, "minSpeed": 4, "cap": 3 }
+      "id": "banana_bunch",
+      "name": "Bananas",
+      "category": "Food",
+      "description": "A bunch: a few bites each.",
+      "mass": 0.5,
+      "model": "models/items/banana_bunch/banana_bunch.vmdl",
+      "hands": 1,
+      "use": "eat",
+      "restore": 42,
+      "portionPerUse": 0.25,
+      "consumedWhenEmpty": true,
+      "damage": {
+        "scale": 0.05,
+        "minSpeed": 4,
+        "cap": 3
+      }
     },
     {
-      "id": "fuel_can", "name": "Fuel can", "category": "Fuel", "description": "Aim at the car and click to pour.",
-      "mass": 3, "model": "models/items/jerrycan/jerrycan.vmdl", "hands": 2, "moveSpeed": 0.85,
-      "use": "refuel", "capacity": 20, "portionPerUse": 0.1, "stowable": false,
-      "damage": { "scale": 0.05, "minSpeed": 3, "cap": 10 }
+      "id": "fuel_can",
+      "name": "Fuel can",
+      "category": "Fuel",
+      "description": "Aim at the car and click to pour.",
+      "mass": 3,
+      "model": "models/items/jerrycan/jerrycan.vmdl",
+      "hands": 2,
+      "moveSpeed": 0.85,
+      "use": "refuel",
+      "capacity": 20,
+      "portionPerUse": 0.1,
+      "stowable": false,
+      "damage": {
+        "scale": 0.05,
+        "minSpeed": 3,
+        "cap": 10
+      }
     },
     {
-      "id": "baseball_bat", "name": "Baseball bat", "category": "Weapon", "description": "Swing it hard.",
-      "mass": 1.1, "model": "models/items/baseball_bat/baseball_bat.vmdl", "hands": 2,
-      "use": "melee", "hold": [60, 0, 0], "holdDistance": 95,
-      "melee": { "swingSeconds": 0.3, "startAngle": -50, "endAngle": 55, "cooldown": 0.5 },
-      "damage": { "scale": 0.12, "minSpeed": 4, "cap": 45, "cooldown": 0.25 }
+      "id": "baseball_bat",
+      "name": "Baseball bat",
+      "category": "Weapon",
+      "description": "Swing it hard.",
+      "mass": 1.1,
+      "model": "models/items/baseball_bat/baseball_bat.vmdl",
+      "hands": 2,
+      "use": "melee",
+      "hold": [
+        60,
+        0,
+        0
+      ],
+      "holdDistance": 95,
+      "melee": {
+        "swingSeconds": 0.3,
+        "startAngle": -50,
+        "endAngle": 55,
+        "cooldown": 0.5
+      },
+      "damage": {
+        "scale": 0.12,
+        "minSpeed": 4,
+        "cap": 45,
+        "cooldown": 0.25
+      }
     },
     {
-      "id": "crowbar", "name": "Crowbar", "category": "Weapon", "description": "Light enough for one hand.",
-      "mass": 1.5, "model": "models/items/crowbar/crowbar.vmdl", "hands": 1,
-      "use": "melee", "hold": [60, 0, 0], "holdDistance": 85,
-      "melee": { "swingSeconds": 0.26, "startAngle": -45, "endAngle": 55, "cooldown": 0.45 },
-      "damage": { "scale": 0.1, "minSpeed": 4, "cap": 40, "cooldown": 0.25 }
+      "id": "crowbar",
+      "name": "Crowbar",
+      "category": "Weapon",
+      "description": "Light enough for one hand.",
+      "mass": 1.5,
+      "model": "models/items/crowbar/crowbar.vmdl",
+      "hands": 1,
+      "use": "melee",
+      "hold": [
+        60,
+        0,
+        0
+      ],
+      "holdDistance": 85,
+      "melee": {
+        "swingSeconds": 0.26,
+        "startAngle": -45,
+        "endAngle": 55,
+        "cooldown": 0.45
+      },
+      "damage": {
+        "scale": 0.1,
+        "minSpeed": 4,
+        "cap": 40,
+        "cooldown": 0.25
+      }
     },
     {
-      "id": "pipe_wrench", "name": "Pipe wrench", "category": "Weapon", "description": "One hand, quick.",
-      "mass": 1.2, "model": "models/items/pipe_wrench/pipe_wrench.vmdl", "hands": 1,
-      "use": "melee", "hold": [60, 0, 0], "holdDistance": 75,
-      "melee": { "swingSeconds": 0.22, "startAngle": -40, "endAngle": 50, "cooldown": 0.35 },
-      "damage": { "scale": 0.1, "minSpeed": 4, "cap": 30, "cooldown": 0.22 }
+      "id": "pipe_wrench",
+      "name": "Pipe wrench",
+      "category": "Weapon",
+      "description": "One hand, quick.",
+      "mass": 1.2,
+      "model": "models/items/pipe_wrench/pipe_wrench.vmdl",
+      "hands": 1,
+      "use": "melee",
+      "hold": [
+        60,
+        0,
+        0
+      ],
+      "holdDistance": 75,
+      "melee": {
+        "swingSeconds": 0.22,
+        "startAngle": -40,
+        "endAngle": 50,
+        "cooldown": 0.35
+      },
+      "damage": {
+        "scale": 0.1,
+        "minSpeed": 4,
+        "cap": 30,
+        "cooldown": 0.22
+      }
     },
     {
-      "id": "hacksaw", "name": "Rusted hacksaw", "category": "Weapon", "description": "Not a great weapon.",
-      "mass": 0.5, "model": "models/items/hacksaw/hacksaw.vmdl", "hands": 1,
-      "use": "melee", "hold": [0, 0, 0], "holdDistance": 70,
-      "melee": { "swingSeconds": 0.2, "startAngle": -35, "endAngle": 45, "cooldown": 0.3 },
-      "damage": { "scale": 0.08, "minSpeed": 4, "cap": 18, "cooldown": 0.2 }
+      "id": "hacksaw",
+      "name": "Rusted hacksaw",
+      "category": "Weapon",
+      "description": "Not a great weapon.",
+      "mass": 0.5,
+      "model": "models/items/hacksaw/hacksaw.vmdl",
+      "hands": 1,
+      "use": "melee",
+      "hold": [
+        0,
+        0,
+        0
+      ],
+      "holdDistance": 70,
+      "melee": {
+        "swingSeconds": 0.2,
+        "startAngle": -35,
+        "endAngle": 45,
+        "cooldown": 0.3
+      },
+      "damage": {
+        "scale": 0.08,
+        "minSpeed": 4,
+        "cap": 18,
+        "cooldown": 0.2
+      }
     },
     {
-      "id": "rusted_spade", "name": "Rusted spade", "category": "Weapon", "description": "Slow, but it hits like a truck.",
-      "mass": 2.4, "model": "models/items/rusted_spade/rusted_spade.vmdl", "hands": 2, "moveSpeed": 0.92,
-      "use": "melee", "hold": [60, 0, 0], "holdDistance": 105,
-      "melee": { "swingSeconds": 0.38, "startAngle": -55, "endAngle": 55, "cooldown": 0.7 },
-      "damage": { "scale": 0.08, "minSpeed": 4, "cap": 60, "cooldown": 0.3 }
+      "id": "rusted_spade",
+      "name": "Rusted spade",
+      "category": "Weapon",
+      "description": "Slow, but it hits like a truck.",
+      "mass": 2.4,
+      "model": "models/items/rusted_spade/rusted_spade.vmdl",
+      "hands": 2,
+      "moveSpeed": 0.92,
+      "use": "melee",
+      "hold": [
+        60,
+        0,
+        0
+      ],
+      "holdDistance": 105,
+      "melee": {
+        "swingSeconds": 0.38,
+        "startAngle": -55,
+        "endAngle": 55,
+        "cooldown": 0.7
+      },
+      "damage": {
+        "scale": 0.08,
+        "minSpeed": 4,
+        "cap": 60,
+        "cooldown": 0.3
+      }
     },
     {
-      "id": "pickaxe", "name": "Pickaxe", "category": "Weapon", "description": "Heavy, two hands.",
-      "mass": 3.2, "model": "models/items/pickaxe/pickaxe.vmdl", "hands": 2, "moveSpeed": 0.9,
-      "use": "melee", "hold": [60, 0, 0], "holdDistance": 110,
-      "melee": { "swingSeconds": 0.42, "startAngle": -60, "endAngle": 55, "cooldown": 0.8 },
-      "damage": { "scale": 0.08, "minSpeed": 4, "cap": 65, "cooldown": 0.3 }
+      "id": "pickaxe",
+      "name": "Pickaxe",
+      "category": "Weapon",
+      "description": "Heavy, two hands.",
+      "mass": 3.2,
+      "model": "models/items/pickaxe/pickaxe.vmdl",
+      "hands": 2,
+      "moveSpeed": 0.9,
+      "use": "melee",
+      "hold": [
+        60,
+        0,
+        0
+      ],
+      "holdDistance": 110,
+      "melee": {
+        "swingSeconds": 0.42,
+        "startAngle": -60,
+        "endAngle": 55,
+        "cooldown": 0.8
+      },
+      "damage": {
+        "scale": 0.08,
+        "minSpeed": 4,
+        "cap": 65,
+        "cooldown": 0.3
+      }
     },
     {
-      "id": "sledgehammer", "name": "Sledgehammer", "category": "Weapon", "description": "Very slow, very hard.",
-      "mass": 5, "model": "models/items/sledgehammer/sledgehammer.vmdl", "hands": 2, "moveSpeed": 0.8,
-      "use": "melee", "hold": [60, 0, 0], "holdDistance": 105,
-      "melee": { "swingSeconds": 0.5, "startAngle": -65, "endAngle": 55, "cooldown": 1.0 },
-      "damage": { "scale": 0.07, "minSpeed": 4, "cap": 80, "cooldown": 0.4 }
+      "id": "sledgehammer",
+      "name": "Sledgehammer",
+      "category": "Weapon",
+      "description": "Very slow, very hard.",
+      "mass": 5,
+      "model": "models/items/sledgehammer/sledgehammer.vmdl",
+      "hands": 2,
+      "moveSpeed": 0.8,
+      "use": "melee",
+      "hold": [
+        60,
+        0,
+        0
+      ],
+      "holdDistance": 105,
+      "melee": {
+        "swingSeconds": 0.5,
+        "startAngle": -65,
+        "endAngle": 55,
+        "cooldown": 1.0
+      },
+      "damage": {
+        "scale": 0.07,
+        "minSpeed": 4,
+        "cap": 80,
+        "cooldown": 0.4
+      }
     },
     {
-      "id": "barrel", "name": "Explosive barrel", "category": "Prop", "description": "Hit it hard enough and it goes off.",
-      "mass": 25, "model": "models/items/barrel/barrel.vmdl", "hands": 2, "moveSpeed": 0.7,
-      "stowable": false, "health": 40,
-      "explosion": { "radius": 7, "force": 12, "damage": 55 },
-      "damage": { "scale": 0.02, "minSpeed": 4, "cap": 20 }
+      "id": "explosive_barrel",
+      "name": "Explosive barrel",
+      "category": "Prop",
+      "description": "Hit it hard enough and it goes off.",
+      "mass": 25,
+      "model": "models/items/barrel/barrel.vmdl",
+      "hands": 2,
+      "moveSpeed": 0.7,
+      "stowable": false,
+      "health": 40,
+      "explosion": {
+        "radius": 7,
+        "force": 12,
+        "damage": 55
+      },
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 4,
+        "cap": 20
+      }
     },
     {
-      "id": "propane_tank", "name": "Propane tank", "category": "Prop", "description": "Dented. Keep it away from fire.",
-      "mass": 8, "model": "models/items/propane_tank/propane_tank.vmdl", "hands": 2, "moveSpeed": 0.85,
-      "stowable": false, "health": 25,
-      "explosion": { "radius": 5, "force": 9, "damage": 40 },
-      "damage": { "scale": 0.03, "minSpeed": 4, "cap": 15 }
+      "id": "propane_tank",
+      "name": "Propane tank",
+      "category": "Prop",
+      "description": "Dented. Keep it away from fire.",
+      "mass": 8,
+      "model": "models/items/propane_tank/propane_tank.vmdl",
+      "hands": 2,
+      "moveSpeed": 0.85,
+      "stowable": false,
+      "health": 25,
+      "explosion": {
+        "radius": 5,
+        "force": 9,
+        "damage": 40
+      },
+      "damage": {
+        "scale": 0.03,
+        "minSpeed": 4,
+        "cap": 15
+      }
     },
     {
-      "id": "plastic_crate", "name": "Plastic crate", "category": "Prop", "description": "Carry things in it, or throw it.",
-      "mass": 1.5, "model": "models/items/plastic_crate/plastic_crate.vmdl", "hands": 2,
-      "stowable": false, "damage": { "scale": 0.03, "minSpeed": 4, "cap": 8 }
+      "id": "plastic_crate",
+      "name": "Plastic crate",
+      "category": "Prop",
+      "description": "Carry things in it, or throw it.",
+      "mass": 1.5,
+      "model": "models/items/plastic_crate/plastic_crate.vmdl",
+      "hands": 2,
+      "stowable": false,
+      "damage": {
+        "scale": 0.03,
+        "minSpeed": 4,
+        "cap": 8
+      }
     },
     {
-      "id": "military_crate", "name": "Military crate", "category": "Prop", "description": "Heavy.",
-      "mass": 22, "model": "models/items/military_crate/military_crate.vmdl", "hands": 2, "moveSpeed": 0.65,
-      "stowable": false, "damage": { "scale": 0.02, "minSpeed": 4, "cap": 25 }
+      "id": "military_crate",
+      "name": "Military crate",
+      "category": "Prop",
+      "description": "Heavy.",
+      "mass": 22,
+      "model": "models/items/military_crate/military_crate.vmdl",
+      "hands": 2,
+      "moveSpeed": 0.65,
+      "stowable": false,
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 4,
+        "cap": 25
+      }
+    },
+    {
+      "id": "barrel",
+      "name": "Barrel",
+      "category": "Container",
+      "description": "Holds liquids (200 L). Empty for now.",
+      "mass": 18,
+      "model": "models/world/props/barrel_rust/barrel_rust.vmdl",
+      "modelScale": 1.4,
+      "hands": 2,
+      "moveSpeed": 0.7,
+      "stowable": false,
+      "container": {
+        "capacity": 200,
+        "liquid": null,
+        "fill": 0
+      },
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 4,
+        "cap": 20
+      }
+    },
+    {
+      "id": "barrel_blue",
+      "name": "Blue barrel",
+      "category": "Container",
+      "description": "Plastic drum, holds liquids (200 L).",
+      "mass": 9,
+      "model": "models/world/props/barrel_blue/barrel_blue.vmdl",
+      "modelScale": 1.4,
+      "hands": 2,
+      "moveSpeed": 0.75,
+      "stowable": false,
+      "container": {
+        "capacity": 200,
+        "liquid": null,
+        "fill": 0
+      },
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 4,
+        "cap": 20
+      }
+    },
+    {
+      "id": "tyre",
+      "name": "Old tyre",
+      "category": "Junk",
+      "description": "Worn smooth.",
+      "mass": 8,
+      "model": "models/world/props/old_tyre/old_tyre.vmdl",
+      "modelScale": 1.5,
+      "hands": 2,
+      "moveSpeed": 0.9,
+      "stowable": false,
+      "damage": {
+        "scale": 0.03,
+        "minSpeed": 4,
+        "cap": 8
+      }
+    },
+    {
+      "id": "wheel_rim",
+      "name": "Rusted rim",
+      "category": "Junk",
+      "description": "A bare steel rim.",
+      "mass": 6,
+      "model": "models/world/props/wheel_rim/wheel_rim.vmdl",
+      "modelScale": 1.5,
+      "hands": 2,
+      "stowable": false,
+      "damage": {
+        "scale": 0.04,
+        "minSpeed": 4,
+        "cap": 14
+      }
+    },
+    {
+      "id": "cardboard_box",
+      "name": "Cardboard box",
+      "category": "Container",
+      "description": "Empty.",
+      "mass": 0.6,
+      "model": "models/world/props/cardboard_box/cardboard_box.vmdl",
+      "modelScale": 1.4,
+      "hands": 2,
+      "stowable": false,
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "trash_can",
+      "name": "Metal bin",
+      "category": "Container",
+      "description": "Dented.",
+      "mass": 5,
+      "model": "models/world/props/trash_can/trash_can.vmdl",
+      "modelScale": 1.3,
+      "hands": 2,
+      "moveSpeed": 0.9,
+      "stowable": false,
+      "damage": {
+        "scale": 0.03,
+        "minSpeed": 4,
+        "cap": 10
+      }
     }
   ],
   "loot": [
-    { "id": "fuel_can", "count": 3 },
-    { "id": "water_bottle", "count": 4 },
-    { "id": "canned_food", "count": 4 },
-    { "id": "apple", "count": 3 },
-    { "id": "banana", "count": 3 },
-    { "id": "banana_bunch", "count": 1 },
-    { "id": "baseball_bat", "count": 1 },
-    { "id": "crowbar", "count": 1 },
-    { "id": "pipe_wrench", "count": 1 },
-    { "id": "hacksaw", "count": 1 },
-    { "id": "rusted_spade", "count": 1 },
-    { "id": "pickaxe", "count": 1 },
-    { "id": "sledgehammer", "count": 1 },
-    { "id": "barrel", "count": 2 },
-    { "id": "propane_tank", "count": 2 },
-    { "id": "plastic_crate", "count": 1 },
-    { "id": "military_crate", "count": 1 }
+    {
+      "id": "fuel_can",
+      "count": 3
+    },
+    {
+      "id": "water_bottle",
+      "count": 4
+    },
+    {
+      "id": "canned_food",
+      "count": 4
+    },
+    {
+      "id": "apple",
+      "count": 3
+    },
+    {
+      "id": "banana",
+      "count": 3
+    },
+    {
+      "id": "banana_bunch",
+      "count": 1
+    },
+    {
+      "id": "baseball_bat",
+      "count": 1
+    },
+    {
+      "id": "crowbar",
+      "count": 1
+    },
+    {
+      "id": "pipe_wrench",
+      "count": 1
+    },
+    {
+      "id": "hacksaw",
+      "count": 1
+    },
+    {
+      "id": "rusted_spade",
+      "count": 1
+    },
+    {
+      "id": "pickaxe",
+      "count": 1
+    },
+    {
+      "id": "sledgehammer",
+      "count": 1
+    },
+    {
+      "id": "explosive_barrel",
+      "count": 2
+    },
+    {
+      "id": "propane_tank",
+      "count": 2
+    },
+    {
+      "id": "plastic_crate",
+      "count": 1
+    },
+    {
+      "id": "military_crate",
+      "count": 1
+    },
+    {
+      "id": "barrel",
+      "count": 2
+    },
+    {
+      "id": "barrel_blue",
+      "count": 1
+    },
+    {
+      "id": "tyre",
+      "count": 2
+    },
+    {
+      "id": "wheel_rim",
+      "count": 1
+    },
+    {
+      "id": "cardboard_box",
+      "count": 2
+    },
+    {
+      "id": "trash_can",
+      "count": 1
+    }
   ]
 }

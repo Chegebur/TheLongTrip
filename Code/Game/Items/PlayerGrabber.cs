@@ -311,6 +311,7 @@ public sealed class PlayerGrabber : Component
 	{
 		var def = item.Definition;
 		if ( def is null ) return "";
+		if ( def.Container is { } c ) return item.Amount > 0.01f ? $"  ({item.Amount * c.Capacity:F0} / {c.Capacity:F0} L {item.Liquid})" : $"  (empty, {c.Capacity:F0} L)";
 		if ( def.Use == UseKind.Refuel ) return $"  ({item.Amount * def.Capacity:F0} L)";
 		if ( def.Use == UseKind.Drink || def.Use == UseKind.Eat ) return $"  ({(int)(item.Amount * 100f)}%)";
 		return "";

@@ -20,6 +20,9 @@ public class Item : Component
 	/// <summary>How full / how much is left, from 0 to 1 (a water bottle's water, a fuel can's fuel).</summary>
 	[Sync] public float Amount { get; set; } = 1f;
 
+	/// <summary>What a container item holds ("water", "fuel"...), or null while it is empty. Amount is then how full it is.</summary>
+	[Sync] public string Liquid { get; set; }
+
 	/// <summary>Set by the grabber while somebody is carrying it.</summary>
 	[Sync] public bool IsHeld { get; set; }
 
