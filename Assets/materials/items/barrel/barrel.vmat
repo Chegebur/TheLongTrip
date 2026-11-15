@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/barrel/barrel_color.png"
+	"TextureNormal"		"materials/items/barrel/barrel_normal.png"
+	"TextureRoughness"		"materials/items/barrel/barrel_rough.png"
+	"TextureMetalness"		"materials/items/barrel/barrel_metal.png"
+}

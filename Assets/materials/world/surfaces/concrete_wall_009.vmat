@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/textures/concrete_wall_009/concrete_wall_009_color.jpg"
+	"TextureNormal"		"materials/world/textures/concrete_wall_009/concrete_wall_009_normal.png"
+	"TextureRoughness"		"materials/world/textures/concrete_wall_009/concrete_wall_009_rough.png"
+}

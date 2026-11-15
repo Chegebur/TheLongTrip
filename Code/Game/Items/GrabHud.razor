@@ -11,9 +11,26 @@
 		<div style="position: absolute; left: 50%; top: 58%; transform: translateX(-50%); padding: 8px 18px; border-radius: 8px; background-color: rgba(0,0,0,0.55); color: white; font-size: 22px; font-weight: 600; white-space: nowrap;">@Hint</div>
 	}
 
+	<div style="position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); display: flex; flex-direction: row;">
+		@for ( int i = 0; i < SlotNames.Length; i++ )
+		{
+			int slot = i;
+			<div style="position: relative; width: 84px; height: 84px; margin: 0 5px; border-radius: 10px; background-color: rgba(0,0,0,@(slot == Equipped ? "0.65" : "0.45")); border: 3px solid @(slot == Selected ? "rgba(255,255,255,0.95)" : (slot == Equipped ? "rgba(120,200,255,0.9)" : "rgba(255,255,255,0.18)")); color: white;">
+				<div style="position: absolute; left: 7px; top: 3px; font-size: 15px; opacity: 0.75;">@(slot + 1)</div>
+				<div style="position: absolute; left: 4px; right: 4px; top: 26px; text-align: center; font-size: 15px; font-weight: 600; line-height: 17px;">@SlotNames[slot]</div>
+				@if ( SlotAmounts[slot] >= 0f )
+				{
+					<div style="position: absolute; left: 8px; right: 8px; bottom: 7px; height: 6px; border-radius: 3px; background-color: rgba(255,255,255,0.18);">
+						<div style="width: @(Percent( SlotAmounts[slot] * 100f ))%; height: 6px; border-radius: 3px; background-color: rgba(120,200,255,0.95);"></div>
+					</div>
+				}
+			</div>
+		}
+	</div>
+
 	@if ( !string.IsNullOrEmpty( Controls ) )
 	{
-		<div style="position: absolute; left: 50%; bottom: 64px; transform: translateX(-50%); padding: 6px 16px; border-radius: 8px; background-color: rgba(0,0,0,0.45); color: rgba(255,255,255,0.9); font-size: 18px; white-space: nowrap;">@Controls</div>
+		<div style="position: absolute; left: 50%; bottom: 122px; transform: translateX(-50%); padding: 6px 16px; border-radius: 8px; background-color: rgba(0,0,0,0.45); color: rgba(255,255,255,0.9); font-size: 18px; white-space: nowrap;">@Controls</div>
 	}
 
 	<div style="position: absolute; left: 28px; bottom: 28px; width: 420px; display: flex; flex-direction: column; align-items: stretch; padding: 14px 16px; border-radius: 10px; background-color: rgba(0,0,0,0.4); color: white; font-size: 17px; font-weight: 600;">
@@ -39,10 +56,6 @@
 		{
 			<div style="margin-top: 6px; font-size: 16px; font-weight: 600;">@Fuel</div>
 		}
-		@if ( !string.IsNullOrEmpty( Pack ) )
-		{
-			<div style="margin-top: 2px; opacity: 0.8;">@Pack</div>
-		}
 	</div>
 </root>
 
@@ -61,10 +74,20 @@
 	/// <summary>The car's fuel, as text, while sitting in it.</summary>
 	public string Fuel { get; set; }
 
-	/// <summary>The backpack, as text.</summary>
-	public string Pack { get; set; }
+	/// <summary>The hotbar: what is in each slot ("" when empty), how full it is (-1 when empty), which slot is selected and which one is in your hands.</summary>
+	public string[] SlotNames { get; set; } = new string[6] { "", "", "", "", "", "" };
+	public float[] SlotAmounts { get; set; } = new float[6] { -1f, -1f, -1f, -1f, -1f, -1f };
+	public int Selected { get; set; }
+	public int Equipped { get; set; } = -1;
 
 	private static int Percent( float value ) => (int)Math.Clamp( value, 0f, 100f );
 
-	protected override int BuildHash() => System.HashCode.Combine( Hint, Controls, Percent( Health ), Percent( Food ), Percent( Water ), Fuel, Pack );
+	protected override int BuildHash()
+	{
+		var hash = new System.HashCode();
+		hash.Add( Hint ); hash.Add( Controls ); hash.Add( Percent( Health ) ); hash.Add( Percent( Food ) ); hash.Add( Percent( Water ) );
+		hash.Add( Fuel ); hash.Add( Selected ); hash.Add( Equipped );
+		for ( int i = 0; i < SlotNames.Length; i++ ) { hash.Add( SlotNames[i] ); hash.Add( Percent( SlotAmounts[i] * 100f ) ); }
+		return hash.ToHashCode();
+	}
 }

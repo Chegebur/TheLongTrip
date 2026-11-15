@@ -23,6 +23,9 @@ public class Item : Component
 	/// <summary>Set by the grabber while somebody is carrying it.</summary>
 	public bool IsHeld { get; set; }
 
+	/// <summary>Time since it was last let go of (so a thrown item doesn't hurt the one who threw it).</summary>
+	public TimeSince SinceReleased { get; set; } = 999f;
+
 	/// <summary>The weld holding this item to something else (the car, another item), or null.</summary>
 	public FixedJoint Weld { get; set; }
 

@@ -178,15 +178,18 @@ public sealed class CarSession : Component
 			CarPartItem.Spawn( Scene, groups[i], position, Rotation.FromYaw( random.Next( 360 ) ) );
 		}
 
-		// and a few things to eat, drink and fill the tank with, in a row beside the parts
-		string[] supplies = { "fuel_can", "fuel_can", "water_bottle", "water_bottle", "water_bottle", "canned_food", "canned_food", "canned_food" };
+		// and the loot from the item data file (food, drink, fuel, weapons, barrels...), in rows beside the parts
 		ItemLibrary.Reset();
-		for ( int i = 0; i < supplies.Length; i++ )
+		int n = 0;
+		foreach ( var (id, count) in ItemLibrary.Loot )
 		{
-			float x = baseX + i * 60f;
-			float y = gen.RoadCenterY( x ) - 330f + 190f;
-			float ground = GroundGuard.SurfaceHeight( gen, x, y );
-			ItemLibrary.Spawn( Scene, supplies[i], new Vector3( x, y, ground + 30f ), Rotation.FromYaw( random.Next( 360 ) ), supplies[i] == "water_bottle" && i == 3 ? 0.5f : 1f );
+			for ( int c = 0; c < count; c++, n++ )
+			{
+				float x = baseX + (n % 9) * 75f;
+				float y = gen.RoadCenterY( x ) - 330f + 190f + (n / 9) * 75f;
+				float ground = GroundGuard.SurfaceHeight( gen, x, y );
+				ItemLibrary.Spawn( Scene, id, new Vector3( x, y, ground + 40f ), Rotation.FromYaw( random.Next( 360 ) ) );
+			}
 		}
 	}
 

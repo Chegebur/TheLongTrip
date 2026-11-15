@@ -3,10 +3,13 @@ namespace LongTrip.Gameplay;
 /// <summary>
 /// Picking things up, The Long Drive style. Look at an item (or a part that is on the car) and press F to grab it; your arms
 /// stretch out to it. While you carry it: hold the right mouse button and move the mouse to turn it, the wheel pushes it away or
-/// pulls it close, the left button uses it (eat, drink, pour fuel; anything else is thrown), T throws it, R puts it in the
-/// backpack (with empty hands R takes the last thing out), Z welds it to what is behind it, and F lets go, or fits a car part
-/// onto the car when its green ghost is showing. Hold the left mouse on a door or the handbrake lever and move the mouse to swing it.
-/// Goes on the player object.
+/// pulls it close, the left button uses it (eat, drink, pour fuel, swing a weapon; anything else is thrown), T throws it, Z welds it
+/// to what is behind it, and F lets go, or fits a car part onto the car when its green ghost is showing.
+/// <para>
+/// The hotbar: keys 1-6 are slots. A number takes that slot's item into your hands (the same number again, or R, puts it back; another
+/// number swaps). With empty hands the wheel picks a slot and R equips it. Hold the left mouse on a door or the handbrake lever and move
+/// the mouse to swing it. Goes on the player object.
+/// </para>
 /// </summary>
 public sealed class PlayerGrabber : Component
 {
@@ -32,6 +35,16 @@ public sealed class PlayerGrabber : Component
 	private float _holdDistance = 130f;
 	private bool _rotating;
 
+	// the hotbar
+	private int _selected;
+	private int _equipped = -1;   // the slot the held item came out of
+
+	// swinging a weapon
+	private bool _swinging;
+	private TimeSince _swingTime = 999f;
+	private float _swingReadyAt;
+	private MeleeConfig _swing;
+
 	private Item _hoverItem;
 	private CarAssembly.Socket _hoverSocket;
 
@@ -55,11 +68,12 @@ public sealed class PlayerGrabber : Component
 	protected override void OnStart()
 	{
 		Instance = this;
-		ItemLibrary.Reset();   // pick up any change to the item definitions
+		ItemLibrary.Reset();   // pick up any change to the item data
 		_player = Components.Get<PlayerController>( true );
 		_arms = Components.GetOrCreate<StretchyArms>();
 		_stats = Components.GetOrCreate<PlayerStats>();
 		_pack = Components.GetOrCreate<ItemContainer>();
+		_pack.Capacity = 6;
 
 		var hudObject = Scene.CreateObject();
 		hudObject.Name = "Grab HUD";
@@ -94,6 +108,14 @@ public sealed class PlayerGrabber : Component
 
 	private static CarAssembly FindAssembly( Scene scene ) => scene.GetAllComponents<CarAssembly>().FirstOrDefault();
 
+	/// <summary>Which slot key (1-6) was pressed this frame, as 0-5, or -1.</summary>
+	private int PressedSlot()
+	{
+		for ( int i = 0; i < _pack.Capacity; i++ )
+			if ( Input.Pressed( $"Slot{i + 1}" ) ) return i;
+		return -1;
+	}
+
 	protected override void OnUpdate()
 	{
 		var camera = Scene.Camera;
@@ -101,8 +123,11 @@ public sealed class PlayerGrabber : Component
 
 		bool pressedF = Input.Keyboard.Pressed( "f" );
 		bool pressedR = Input.Keyboard.Pressed( "r" );
+		int slotKey = PressedSlot();
 		var assembly = FindAssembly( Scene );
 		LookSuppressed = false;
+
+		if ( slotKey >= 0 ) { OnSlotKey( camera, slotKey ); }
 
 		if ( _held.IsValid() )
 		{
@@ -133,18 +158,22 @@ public sealed class PlayerGrabber : Component
 			if ( pressedF ) Release( true );
 			else if ( Input.Pressed( "Attack1" ) ) { if ( !usable || !UseHeld( def ) ) Throw( camera ); }
 			else if ( Input.Keyboard.Pressed( "t" ) ) Throw( camera );
-			else if ( pressedR ) Stow();
+			else if ( pressedR ) Holster();
 			else if ( Input.Keyboard.Pressed( "z" ) && _weldTarget.IsValid() ) WeldHeld();
 
 			_hud.Hint = _held.IsValid() && snap is not null ? $"F   Fit {snap.Display}"
 				: _held.IsValid() && _weldTarget.IsValid() ? $"Z   Weld to {_weldTargetName}" : null;
 			_hud.Controls = _held.IsValid()
-				? $"Right mouse (hold): turn     Wheel: distance     Left mouse: {(usable ? UsePrompt( def ) : "throw")}     T: throw     R: stow     Z: weld     F: drop / fit"
+				? $"Right mouse (hold): turn     Wheel: distance     Left mouse: {(usable ? UsePrompt( def ) : "throw")}     T: throw     R: holster     Z: weld     F: drop / fit"
 				: null;
 		}
 		else
 		{
 			FindTarget( camera, assembly );
+
+			// the wheel picks a hotbar slot while your hands are empty
+			float wheel = Input.MouseWheel.y;
+			if ( wheel != 0f ) _selected = ((_selected - Math.Sign( wheel )) % _pack.Capacity + _pack.Capacity) % _pack.Capacity;
 
 			// hold the left mouse button on a door (or the hood, the trunk) and move the mouse to swing it
 			bool dragButton = Input.Down( "Attack1" );
@@ -172,10 +201,7 @@ public sealed class PlayerGrabber : Component
 			}
 			else if ( pressedR )
 			{
-				// empty hands: take the last thing out of the backpack
-				var taken = _pack.TakeLast( camera.WorldPosition + camera.WorldRotation.Forward * 90f, camera.WorldRotation );
-				if ( taken.IsValid() ) Pickup( camera, taken );
-				else Notify( "The backpack is empty" );
+				Equip( camera, _selected );   // empty hands: equip the selected slot
 			}
 
 			_hud.Hint = _hoverItem.IsValid() ? $"F   Pick up {_hoverItem.Display}{Describe( _hoverItem )}{(_hoverItem.IsWelded ? " (breaks the weld)" : "")}"
@@ -187,20 +213,94 @@ public sealed class PlayerGrabber : Component
 
 		if ( _noticeAge < 3.5f && !string.IsNullOrEmpty( _notice ) ) _hud.Hint = _notice;
 
-		// the stats, the car's fuel gauge (while sitting in it) and the backpack
+		UpdateHud( assembly );
+		_arms.Tick( camera, _held, Time.Delta );
+	}
+
+	/// <summary>Feed the HUD: stats, the car's fuel gauge (while sitting in it) and the hotbar.</summary>
+	private void UpdateHud( CarAssembly assembly )
+	{
 		if ( _stats.IsValid() ) { _hud.Health = _stats.Health; _hud.Food = _stats.Food; _hud.Water = _stats.Water; }
 		_hud.Fuel = assembly is { Occupied: true } ? $"Fuel  {assembly.Fuel:F0} / {CarAssembly.TankCapacity:F0} L" : null;
-		_hud.Pack = _pack.IsValid() ? $"Backpack  {_pack.Contents.Count} / {_pack.Capacity}" : null;
 
-		_arms.Tick( camera, _held, Time.Delta );
+		var slots = _pack.Slots;
+		var names = new string[slots.Count];
+		var amounts = new float[slots.Count];
+		for ( int i = 0; i < slots.Count; i++ )
+		{
+			var stored = slots[i];
+			names[i] = stored is null ? "" : (ItemLibrary.Get( stored.ItemId )?.Name ?? stored.ItemId);
+			amounts[i] = stored is null ? -1f : stored.Amount;
+		}
+
+		// the slot the held item came from shows its item as "in hand"
+		if ( _equipped >= 0 && _equipped < names.Length && _held.IsValid() )
+		{
+			names[_equipped] = _held.Display;
+			amounts[_equipped] = _held.Amount;
+		}
+
+		_hud.SlotNames = names;
+		_hud.SlotAmounts = amounts;
+		_hud.Selected = _selected;
+		_hud.Equipped = _held.IsValid() ? _equipped : -1;
+	}
+
+	// ---- the hotbar --------------------------------------------------------------------------------------------------
+
+	/// <summary>A number key: put the same slot's item back, or swap to this slot's item, or equip it with empty hands.</summary>
+	private void OnSlotKey( CameraComponent camera, int slot )
+	{
+		_selected = slot;
+
+		if ( _held.IsValid() )
+		{
+			if ( _equipped == slot ) { Holster(); return; }   // the same number again: put it away
+			if ( !Holster() ) return;                          // different number: put the held item away first, then take this slot's
+		}
+
+		Equip( camera, slot );
+	}
+
+	/// <summary>Take the item out of a slot and hold it.</summary>
+	private void Equip( CameraComponent camera, int slot )
+	{
+		if ( _held.IsValid() ) return;
+		if ( _pack.IsEmpty( slot ) ) { Notify( $"Slot {slot + 1} is empty" ); return; }
+
+		var item = _pack.Take( slot, camera.WorldPosition + camera.WorldRotation.Forward * 90f, camera.WorldRotation );
+		if ( !item.IsValid() ) return;
+
+		Pickup( camera, item );
+		_equipped = slot;
+	}
+
+	/// <summary>Put the held item away: back in the slot it came from if that is free, otherwise the first free slot.</summary>
+	private bool Holster()
+	{
+		var item = _held;
+		if ( !item.IsValid() ) return false;
+
+		var def = item.Definition;
+		if ( def is null || !def.Stowable ) { Notify( $"The {item.Display.ToLowerInvariant()} doesn't fit in a slot" ); return false; }
+
+		int slot = _equipped >= 0 && _pack.IsEmpty( _equipped ) ? _equipped : _pack.FirstFree();
+		if ( slot < 0 ) { Notify( "All the slots are full" ); return false; }
+
+		Release( false );
+		_pack.TryStore( item, slot );
+		Notify( $"{def.Name} put in slot {slot + 1}" );
+		return true;
 	}
 
 	/// <summary>How full / how much is left, for the "Pick up" hint.</summary>
 	private static string Describe( Item item )
 	{
 		var def = item.Definition;
-		if ( def is null || def.Use == UseKind.None ) return "";
-		return def.Use == UseKind.Refuel ? $"  ({item.Amount * def.Capacity:F0} L)" : $"  ({(int)(item.Amount * 100f)}%)";
+		if ( def is null ) return "";
+		if ( def.Use == UseKind.Refuel ) return $"  ({item.Amount * def.Capacity:F0} L)";
+		if ( def.Use == UseKind.Drink || def.Use == UseKind.Eat ) return $"  ({(int)(item.Amount * 100f)}%)";
+		return "";
 	}
 
 	private static string UsePrompt( ItemDefinition def ) => def.Use switch
@@ -208,6 +308,7 @@ public sealed class PlayerGrabber : Component
 		UseKind.Eat => "eat",
 		UseKind.Drink => "drink",
 		UseKind.Refuel => "pour fuel into the car",
+		UseKind.Melee => "swing",
 		_ => "use",
 	};
 
@@ -319,6 +420,17 @@ public sealed class PlayerGrabber : Component
 	{
 		if ( !_held.IsValid() ) return false;
 
+		// a weapon is swung; how hard it hits comes from its speed (see ImpactDamage)
+		if ( def.Use == UseKind.Melee )
+		{
+			if ( _swinging || Time.Now < _swingReadyAt ) return true;
+			_swing = def.Melee ?? new MeleeConfig();
+			_swinging = true;
+			_swingTime = 0f;
+			_swingReadyAt = Time.Now + _swing.Cooldown;
+			return true;
+		}
+
 		if ( _held.Amount <= 0.01f )
 		{
 			Notify( $"{_held.Display} is empty" );
@@ -365,20 +477,6 @@ public sealed class PlayerGrabber : Component
 		return true;
 	}
 
-	/// <summary>Put the held item in the backpack.</summary>
-	private void Stow()
-	{
-		var item = _held;
-		if ( !item.IsValid() ) return;
-
-		var def = item.Definition;
-		if ( def is null || !def.Stowable ) { Notify( $"The {item.Display.ToLowerInvariant()} won't fit in the backpack" ); return; }
-		if ( _pack.IsFull ) { Notify( "The backpack is full" ); return; }
-
-		Release( false );
-		if ( _pack.TryStore( item ) ) Notify( $"{def.Name} put in the backpack" );
-	}
-
 	private void Pickup( CameraComponent camera, Item item )
 	{
 		if ( !item.IsValid() || item.Body is null ) return;
@@ -386,6 +484,8 @@ public sealed class PlayerGrabber : Component
 		if ( item.Unweld() ) Notify( "Weld broken" );
 
 		_held = item;
+		_equipped = -1;
+		_swinging = false;
 		item.GameObject.Tags.Add( "held" );
 		item.IsHeld = true;
 		item.Body.Gravity = false;
@@ -393,6 +493,11 @@ public sealed class PlayerGrabber : Component
 
 		_relative = camera.WorldRotation.Inverse * item.WorldRotation;
 		_holdDistance = Math.Clamp( (item.WorldPosition - camera.WorldPosition).Length, MinHoldDistance, MaxHoldDistance );
+
+		// items that are held a certain way (a weapon, tip forward) are turned into that pose and held at their own distance
+		var def = item.Definition;
+		if ( def?.HoldAngles is { } angles ) _relative = Rotation.From( angles );
+		if ( def is not null && def.HoldDistance > 0f ) _holdDistance = def.HoldDistance;
 	}
 
 	private void Rotate( Vector2 mouse )
@@ -409,9 +514,12 @@ public sealed class PlayerGrabber : Component
 		var item = _held;
 		_held = null;
 		_rotating = false;
+		_swinging = false;
+		_equipped = -1;
 		if ( !item.IsValid() ) return;
 
 		item.IsHeld = false;
+		item.SinceReleased = 0f;
 		item.GameObject.Tags.Remove( "held" );
 		if ( item.Body is not null )
 		{
@@ -445,7 +553,30 @@ public sealed class PlayerGrabber : Component
 		if ( body is null ) return;
 
 		// carried a little way in front of you, where you left it; the item is pulled there by its velocity, so walls still stop it
-		var target = camera.WorldPosition + camera.WorldRotation.Forward * _holdDistance;
+		var forward = camera.WorldRotation.Forward;
+		var want = camera.WorldRotation * _relative;
+		float gain = 14f, maxSpeed = 2600f, turn = 18f;
+
+		// a swing sweeps the item through an arc about your left axis; it is the speed of that sweep that hurts
+		if ( _swinging && _swing is not null )
+		{
+			float p = _swingTime / MathF.Max( 0.05f, _swing.SwingSeconds );
+			if ( p >= 1f )
+			{
+				_swinging = false;
+			}
+			else
+			{
+				float eased = p * p * (3f - 2f * p);
+				float arc = MathX.Lerp( _swing.StartAngle, _swing.EndAngle, eased );
+				var tilt = Rotation.FromAxis( camera.WorldRotation.Left, arc );
+				forward = tilt * forward;
+				want = tilt * want;
+				gain = 42f; maxSpeed = 4200f; turn = 40f;
+			}
+		}
+
+		var target = camera.WorldPosition + forward * _holdDistance;
 		var toTarget = target - body.WorldPosition;
 
 		if ( toTarget.Length > 450f )
@@ -454,12 +585,11 @@ public sealed class PlayerGrabber : Component
 			return;
 		}
 
-		var velocity = toTarget * 14f;
-		if ( velocity.Length > 2600f ) velocity = velocity.Normal * 2600f;
+		var velocity = toTarget * gain;
+		if ( velocity.Length > maxSpeed ) velocity = velocity.Normal * maxSpeed;
 		body.Velocity = velocity;
 		body.AngularVelocity = Vector3.Zero;
 
-		var want = camera.WorldRotation * _relative;
-		_held.WorldRotation = Rotation.Slerp( _held.WorldRotation, want, 1f - MathF.Exp( -18f * Time.Delta ) );
+		_held.WorldRotation = Rotation.Slerp( _held.WorldRotation, want, 1f - MathF.Exp( -turn * Time.Delta ) );
 	}
 }

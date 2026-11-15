@@ -16,6 +16,8 @@ public sealed class PlayerStats : Component
 	[Property] public float FoodDecay { get; set; } = 0.033f;
 	[Property] public float WaterDecay { get; set; } = 0.05f;
 
+	public void Damage( float amount ) => Health = MathF.Max( 0f, Health - amount );
+
 	public void Eat( float amount ) => Food = Math.Clamp( Food + amount, 0f, Max );
 	public void Drink( float amount ) => Water = Math.Clamp( Water + amount, 0f, Max );
 

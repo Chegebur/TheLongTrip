@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/banana_bunch/banana_bunch_color.png"
+	"TextureNormal"		"materials/items/banana_bunch/banana_bunch_normal.png"
+	"TextureRoughness"		"materials/items/banana_bunch/banana_bunch_rough.png"
+}

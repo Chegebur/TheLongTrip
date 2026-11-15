@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/baseball_bat/baseball_bat_color.png"
+	"TextureNormal"		"materials/items/baseball_bat/baseball_bat_normal.png"
+	"TextureRoughness"		"materials/items/baseball_bat/baseball_bat_rough.png"
+}

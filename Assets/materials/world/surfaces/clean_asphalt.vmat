@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/textures/clean_asphalt/clean_asphalt_color.jpg"
+	"TextureNormal"		"materials/world/textures/clean_asphalt/clean_asphalt_normal.png"
+	"TextureRoughness"		"materials/world/textures/clean_asphalt/clean_asphalt_rough.png"
+}

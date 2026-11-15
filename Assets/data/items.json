@@ -1,0 +1,133 @@
+{
+  "items": [
+    {
+      "id": "water_bottle",
+      "name": "Water bottle",
+      "category": "Drink",
+      "description": "A few sips each.",
+      "mass": 0.6,
+      "model": "builtin:water_bottle",
+      "size": [2.8, 2.8, 9],
+      "use": "drink",
+      "restore": 40,
+      "portionPerUse": 0.25,
+      "damage": { "scale": 0.08, "minSpeed": 3, "cap": 6 }
+    },
+    {
+      "id": "canned_food",
+      "name": "Canned food",
+      "category": "Food",
+      "description": "Eat it in one go.",
+      "mass": 0.4,
+      "model": "builtin:can",
+      "size": [3, 3, 4.5],
+      "use": "eat",
+      "restore": 35,
+      "portionPerUse": 1,
+      "consumedWhenEmpty": true,
+      "damage": { "scale": 0.1, "minSpeed": 3, "cap": 8 }
+    },
+    {
+      "id": "banana",
+      "name": "Banana",
+      "category": "Food",
+      "description": "A quick snack.",
+      "mass": 0.12,
+      "model": "models/items/banana/banana.vmdl",
+      "use": "eat",
+      "restore": 10,
+      "portionPerUse": 1,
+      "consumedWhenEmpty": true,
+      "damage": { "scale": 0.05, "minSpeed": 4, "cap": 2 }
+    },
+    {
+      "id": "banana_bunch",
+      "name": "Bananas",
+      "category": "Food",
+      "description": "A bunch: a few bites each.",
+      "mass": 0.5,
+      "model": "models/items/banana_bunch/banana_bunch.vmdl",
+      "use": "eat",
+      "restore": 42,
+      "portionPerUse": 0.25,
+      "consumedWhenEmpty": true,
+      "damage": { "scale": 0.05, "minSpeed": 4, "cap": 3 }
+    },
+    {
+      "id": "fuel_can",
+      "name": "Fuel can",
+      "category": "Fuel",
+      "description": "Aim at the car and click to pour.",
+      "mass": 3,
+      "model": "builtin:fuel_can",
+      "size": [6, 13, 15],
+      "use": "refuel",
+      "capacity": 20,
+      "portionPerUse": 0.1,
+      "stowable": false,
+      "damage": { "scale": 0.05, "minSpeed": 3, "cap": 10 }
+    },
+    {
+      "id": "baseball_bat",
+      "name": "Baseball bat",
+      "category": "Weapon",
+      "description": "Swing it hard.",
+      "mass": 1.1,
+      "model": "models/items/baseball_bat/baseball_bat.vmdl",
+      "use": "melee",
+      "hold": [60, 0, 0],
+      "holdDistance": 95,
+      "melee": { "swingSeconds": 0.3, "startAngle": -50, "endAngle": 55, "cooldown": 0.5 },
+      "damage": { "scale": 0.12, "minSpeed": 4, "cap": 45, "cooldown": 0.25 }
+    },
+    {
+      "id": "crowbar",
+      "name": "Crowbar",
+      "category": "Weapon",
+      "description": "Heavy and quick.",
+      "mass": 1.5,
+      "model": "models/items/crowbar/crowbar.vmdl",
+      "use": "melee",
+      "hold": [60, 0, 0],
+      "holdDistance": 85,
+      "melee": { "swingSeconds": 0.26, "startAngle": -45, "endAngle": 55, "cooldown": 0.45 },
+      "damage": { "scale": 0.1, "minSpeed": 4, "cap": 50, "cooldown": 0.25 }
+    },
+    {
+      "id": "rusted_spade",
+      "name": "Rusted spade",
+      "category": "Weapon",
+      "description": "Slow, but it hits like a truck.",
+      "mass": 2.4,
+      "model": "models/items/rusted_spade/rusted_spade.vmdl",
+      "use": "melee",
+      "hold": [60, 0, 0],
+      "holdDistance": 105,
+      "melee": { "swingSeconds": 0.38, "startAngle": -55, "endAngle": 55, "cooldown": 0.7 },
+      "damage": { "scale": 0.08, "minSpeed": 4, "cap": 60, "cooldown": 0.3 }
+    },
+    {
+      "id": "barrel",
+      "name": "Explosive barrel",
+      "category": "Prop",
+      "description": "Hit it hard enough and it goes off.",
+      "mass": 25,
+      "model": "models/items/barrel/barrel.vmdl",
+      "stowable": false,
+      "health": 40,
+      "explosion": { "radius": 7, "force": 12, "damage": 55 },
+      "damage": { "scale": 0.02, "minSpeed": 4, "cap": 20 }
+    }
+  ],
+  "loot": [
+    { "id": "fuel_can", "count": 2 },
+    { "id": "water_bottle", "count": 3 },
+    { "id": "canned_food", "count": 3 },
+    { "id": "banana", "count": 3 },
+    { "id": "banana_bunch", "count": 1 },
+    { "id": "baseball_bat", "count": 1 },
+    { "id": "crowbar", "count": 1 },
+    { "id": "rusted_spade", "count": 1 },
+    { "id": "barrel", "count": 3 }
+  ]
+}

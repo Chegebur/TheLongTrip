@@ -1,39 +1,63 @@
 namespace LongTrip.Gameplay;
 
 /// <summary>
-/// Somewhere items can be put away: the player's backpack, and later the car's trunk or glovebox. Putting an item in removes its
-/// object from the world and remembers its kind and how full it is; taking one out makes it again. Only items whose definition is
-/// <see cref="ItemDefinition.Stowable"/> fit (car parts and fuel cans do not).
+/// A row of numbered slots items can be put away in: the player's hotbar, and later the car's trunk or glovebox. Putting an item in removes
+/// its object from the world and remembers its kind and how full it is; taking one out makes it again. Only items the data file allows
+/// (<see cref="ItemDefinition.Stowable"/>) fit; car parts and big things do not.
 /// </summary>
 public sealed class ItemContainer : Component
 {
 	public sealed record Stored( string ItemId, float Amount );
 
-	[Property] public int Capacity { get; set; } = 12;
+	[Property] public int Capacity { get; set; } = 6;
 
-	public List<Stored> Contents { get; } = new();
+	private Stored[] _slots = new Stored[6];
 
-	public bool IsFull => Contents.Count >= Capacity;
-
-	/// <summary>Put an item away. Returns false (and leaves the item alone) if it doesn't fit.</summary>
-	public bool TryStore( Item item )
+	/// <summary>The slots, in order; an empty slot is null.</summary>
+	public IReadOnlyList<Stored> Slots
 	{
-		var def = item.IsValid() ? item.Definition : null;
-		if ( def is null || !def.Stowable || IsFull ) return false;
-
-		Contents.Add( new Stored( item.ItemId, item.Amount ) );
-		item.Unweld();
-		item.GameObject.Destroy();
-		return true;
+		get
+		{
+			if ( _slots.Length != Capacity ) System.Array.Resize( ref _slots, Math.Max( 1, Capacity ) );
+			return _slots;
+		}
 	}
 
-	/// <summary>Take the most recently stored item out, as a new object at a place. Null when the container is empty.</summary>
-	public Item TakeLast( Vector3 position, Rotation rotation )
-	{
-		if ( Contents.Count == 0 ) return null;
+	public int Count => Slots.Count( s => s is not null );
 
-		var last = Contents[^1];
-		Contents.RemoveAt( Contents.Count - 1 );
-		return ItemLibrary.Spawn( Scene, last.ItemId, position, rotation, last.Amount );
+	/// <summary>The lowest-numbered empty slot, or -1 when all are taken.</summary>
+	public int FirstFree()
+	{
+		var slots = Slots;
+		for ( int i = 0; i < slots.Count; i++ )
+			if ( slots[i] is null ) return i;
+		return -1;
+	}
+
+	public bool IsEmpty( int slot ) => slot >= 0 && slot < Slots.Count && _slots[slot] is null;
+
+	/// <summary>Put an item away in a slot (the first free one when <paramref name="slot"/> is -1). Returns the slot used, or -1 if it doesn't fit.</summary>
+	public int TryStore( Item item, int slot = -1 )
+	{
+		var def = item.IsValid() ? item.Definition : null;
+		if ( def is null || !def.Stowable ) return -1;
+
+		if ( slot < 0 || slot >= Slots.Count || _slots[slot] is not null ) slot = FirstFree();
+		if ( slot < 0 ) return -1;
+
+		_slots[slot] = new Stored( item.ItemId, item.Amount );
+		item.Unweld();
+		item.GameObject.Destroy();
+		return slot;
+	}
+
+	/// <summary>Take the item out of a slot, as a new object at a place. Null when the slot is empty.</summary>
+	public Item Take( int slot, Vector3 position, Rotation rotation )
+	{
+		if ( slot < 0 || slot >= Slots.Count || _slots[slot] is null ) return null;
+
+		var stored = _slots[slot];
+		_slots[slot] = null;
+		return ItemLibrary.Spawn( Scene, stored.ItemId, position, rotation, stored.Amount );
 	}
 }

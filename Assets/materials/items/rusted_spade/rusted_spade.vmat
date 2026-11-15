@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/rusted_spade/rusted_spade_color.png"
+	"TextureNormal"		"materials/items/rusted_spade/rusted_spade_normal.png"
+	"TextureRoughness"		"materials/items/rusted_spade/rusted_spade_rough.png"
+	"TextureMetalness"		"materials/items/rusted_spade/rusted_spade_metal.png"
+}
