@@ -1,0 +1,70 @@
+name: Import Zip from Google Drive
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download and extract zip from Google Drive
+        run: |
+          set -euo pipefail
+          pip install -q gdown
+          gdown "https://drive.google.com/uc?id=19oOLyBE2PejnfzDsNB50hbzzMNOhdQ59" -O project.zip
+
+          mkdir -p extracted
+          unzip -q project.zip -d extracted
+          rm -f project.zip
+
+          # Remove macOS zip junk
+          rm -rf extracted/__MACOSX
+
+          # If the zip wrapped everything in a single top-level folder, unwrap it
+          shopt -s dotglob nullglob
+          items=(extracted/*)
+          if [ ${#items[@]} -eq 1 ] && [ -d "${items[0]}" ]; then
+            inner="${items[0]}"
+            mv "$inner"/* extracted/
+            rmdir "$inner"
+          fi
+          shopt -u dotglob nullglob
+
+          # Clean heavy s&box cache folders if present
+          rm -rf extracted/.sbox extracted/.vs extracted/.vscode extracted/.idea extracted/obj extracted/bin
+
+          # Don't let the zip overwrite git metadata or this workflow
+          rm -rf extracted/.git extracted/.github
+
+          cp -r extracted/. .
+          rm -rf extracted
+
+      - name: Create .gitignore
+        run: |
+          cat << 'EOF' > .gitignore
+          .vs/
+          .vscode/
+          .idea/
+          obj/
+          bin/
+          .sbox/
+          *.user
+          EOF
+
+      - name: Commit and push files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Import s&box project from Google Drive"
+            git push
+          fi
