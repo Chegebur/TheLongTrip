@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/suitcase_a/vintage_suitcase_01_diff.png"
+	"TextureNormal"		"materials/items/suitcase_a/vintage_suitcase_01_nor_gl.png"
+	"TextureRoughness"		"materials/items/suitcase_a/vintage_suitcase_01_rough.png"
+	"TextureMetalness"		"materials/items/suitcase_a/vintage_suitcase_01_metal.png"
+}

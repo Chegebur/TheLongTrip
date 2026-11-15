@@ -1,8 +1,0 @@
-"Layer0"
-{
-	"shader"		"shaders/complex.shader"
-	"TextureColor"		"materials/items/tin_food/long_life_food_diff.png"
-	"TextureNormal"		"materials/items/tin_food/long_life_food_nor_gl.png"
-	"TextureRoughness"		"materials/items/tin_food/long_life_food_rough.png"
-	"TextureMetalness"		"materials/items/tin_food/long_life_food_metal.png"
-}

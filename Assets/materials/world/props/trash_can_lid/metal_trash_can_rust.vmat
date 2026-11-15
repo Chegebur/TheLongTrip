@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/props/trash_can_lid/metal_trash_can_rust_diff.png"
+	"TextureNormal"		"materials/world/props/trash_can_lid/metal_trash_can_rust_nor_gl.png"
+	"TextureRoughness"		"materials/world/props/trash_can_lid/metal_trash_can_rust_rough.png"
+	"TextureMetalness"		"materials/world/props/trash_can_lid/metal_trash_can_rust_metal.png"
+}

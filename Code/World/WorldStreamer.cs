@@ -589,6 +589,33 @@ public sealed class WorldStreamer : Component
 			renderer.Model = model;
 			renderer.RenderType = ring <= 1 ? ModelRenderer.ShadowRenderType.On : ModelRenderer.ShadowRenderType.Off;
 
+			// a bin has its own lid: on it, or knocked off and lying beside it
+			if ( !string.IsNullOrEmpty( inst.Def.LidOn ) )
+			{
+				bool off = (inst.Yaw * 0.0137f) % 1f < inst.Def.LidOffChance;
+				var lidModel = ScatterLibrary.GetModel( off ? inst.Def.LidOff : inst.Def.LidOn );
+				if ( lidModel is not null )
+				{
+					var lid = new GameObject( true, "Lid" );
+					lid.Parent = root;
+					lid.WorldScale = inst.Scale;
+					if ( off )
+					{
+						var side = Rotation.FromYaw( inst.Yaw + 70f ).Forward * 55f * inst.Scale;
+						lid.WorldPosition = inst.Position + side + Vector3.Up * lidModel.Bounds.Size.z * 0.5f * inst.Scale;
+						lid.WorldRotation = Rotation.FromYaw( inst.Yaw * 3f );
+					}
+					else
+					{
+						lid.WorldPosition = inst.Position;
+						lid.WorldRotation = go.WorldRotation;
+					}
+					var lr = lid.AddComponent<ModelRenderer>();
+					lr.Model = lidModel;
+					lr.RenderType = renderer.RenderType;
+				}
+			}
+
 			if ( inst.Def.Collide == "none" ) continue;
 			var b = model.Bounds;
 			var box = go.AddComponent<BoxCollider>();

@@ -18,10 +18,6 @@
 							from = "fire_hydrant"
 							to = "materials/world/props/fire_hydrant/fire_hydrant_aged.vmat"
 						},
-						{
-							from = "fire_hydrant_aged"
-							to = "materials/world/props/fire_hydrant/fire_hydrant_aged.vmat"
-						},
 						]
 						use_global_default = false
 						global_default_material = ""

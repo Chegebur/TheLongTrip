@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/props/fire_hydrant_aged/fire_hydrant_diff.png"
+	"TextureNormal"		"materials/world/props/fire_hydrant_aged/fire_hydrant_nor_gl.png"
+	"TextureRoughness"		"materials/world/props/fire_hydrant_aged/fire_hydrant_rough.png"
+	"TextureMetalness"		"materials/world/props/fire_hydrant_aged/fire_hydrant_metal.png"
+}

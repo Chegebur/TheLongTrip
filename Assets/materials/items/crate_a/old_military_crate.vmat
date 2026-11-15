@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/crate_a/old_military_crate_diff.png"
+	"TextureNormal"		"materials/items/crate_a/old_military_crate_nor_gl.png"
+	"TextureRoughness"		"materials/items/crate_a/old_military_crate_rough.png"
+	"TextureMetalness"		"materials/items/crate_a/old_military_crate_metal.png"
+}

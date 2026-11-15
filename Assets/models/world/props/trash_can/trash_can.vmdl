@@ -18,10 +18,6 @@
 							from = "metal_trash_can"
 							to = "materials/world/props/trash_can/metal_trash_can.vmat"
 						},
-						{
-							from = "metal_trash_can_rust"
-							to = "materials/world/props/trash_can/metal_trash_can.vmat"
-						},
 						]
 						use_global_default = false
 						global_default_material = ""

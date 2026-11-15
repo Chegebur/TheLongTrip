@@ -530,7 +530,7 @@
           ],
           "Children": [
             {
-              "__guid": "2e545d2f-0eb3-4bce-958d-d2af262554bb",
+              "__guid": "7d38ec20-dbd2-41bd-b87e-ac7dddfd8d27",
               "__version": 2,
               "Flags": 0,
               "Name": "Clothing - y_front_pants_white",
@@ -547,7 +547,7 @@
               "Components": [
                 {
                   "__type": "Sandbox.SkinnedModelRenderer",
-                  "__guid": "f64f1695-3c2d-4e6c-9b48-4adff415a24c",
+                  "__guid": "2dad94dd-692f-45a6-aa25-1096c337c14b",
                   "__enabled": true,
                   "Flags": 0,
                   "Animation": {
@@ -1748,6 +1748,8 @@
           "Resolution": 64,
           "RoadMaterial": null,
           "RoadWidth": 300,
+          "ScatterDensity": 1,
+          "ScatterRadius": 2,
           "Seed": 1337,
           "ShadowRadius": 3,
           "SpawnProps": true,

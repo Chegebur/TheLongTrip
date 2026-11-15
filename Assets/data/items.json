@@ -19,11 +19,11 @@
     },
     {
       "id": "canned_food",
-      "name": "Canned food",
+      "name": "Canned beans",
       "category": "Food",
       "description": "Eat it in one go.",
       "mass": 0.4,
-      "model": "models/items/tin_food/tin_food.vmdl",
+      "model": "models/items/can_beans/can_beans.vmdl",
       "hands": 1,
       "use": "eat",
       "restore": 35,
@@ -372,7 +372,7 @@
       "category": "Prop",
       "description": "Heavy.",
       "mass": 22,
-      "model": "models/items/military_crate/military_crate.vmdl",
+      "model": "models/items/crate_b/crate_b.vmdl",
       "hands": 2,
       "moveSpeed": 0.65,
       "stowable": false,
@@ -380,7 +380,8 @@
         "scale": 0.02,
         "minSpeed": 4,
         "cap": 25
-      }
+      },
+      "modelScale": 1.3
     },
     {
       "id": "barrel",
@@ -479,7 +480,7 @@
       "id": "trash_can",
       "name": "Metal bin",
       "category": "Container",
-      "description": "Dented.",
+      "description": "Dented. The lid is separate.",
       "mass": 5,
       "model": "models/world/props/trash_can/trash_can.vmdl",
       "modelScale": 1.3,
@@ -550,7 +551,7 @@
       "category": "Armor",
       "description": "Waterproof, thick soles.",
       "mass": 1.5,
-      "model": "models/items/boots/boots.vmdl",
+      "model": "models/items/boots_clean/boots_clean.vmdl",
       "hands": 2,
       "use": "wear",
       "armorSlot": "feet",
@@ -559,7 +560,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "modelScale": 1.0
     },
     {
       "id": "sack_pack",
@@ -584,8 +586,8 @@
       "category": "Backpack",
       "description": "A medium pack: eight more slots.",
       "mass": 1.6,
-      "model": "models/items/suitcase/suitcase.vmdl",
-      "modelScale": 0.6,
+      "model": "models/items/suitcase_a/suitcase_a.vmdl",
+      "modelScale": 1.0,
       "hands": 2,
       "use": "wear",
       "backpack": 2,
@@ -597,12 +599,12 @@
     },
     {
       "id": "footlocker_pack",
-      "name": "Footlocker",
+      "name": "Military crate (pack)",
       "category": "Backpack",
       "description": "A large pack: twelve more slots.",
       "mass": 4,
-      "model": "models/items/military_crate/military_crate.vmdl",
-      "modelScale": 0.6,
+      "model": "models/items/crate_a/crate_a.vmdl",
+      "modelScale": 1.2,
       "hands": 2,
       "use": "wear",
       "backpack": 3,
@@ -610,6 +612,157 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
+      }
+    },
+    {
+      "id": "canned_tomatoes",
+      "name": "Canned tomatoes",
+      "description": "Tinned and tangy.",
+      "mass": 0.4,
+      "model": "models/items/can_tomatoes/can_tomatoes.vmdl",
+      "restore": 30,
+      "damage": {
+        "scale": 0.1,
+        "minSpeed": 3,
+        "cap": 8
+      },
+      "category": "Food",
+      "hands": 1,
+      "use": "eat",
+      "portionPerUse": 1,
+      "consumedWhenEmpty": true
+    },
+    {
+      "id": "sardines",
+      "name": "Sardines",
+      "description": "Oily and filling.",
+      "mass": 0.15,
+      "model": "models/items/can_sardines/can_sardines.vmdl",
+      "restore": 25,
+      "damage": {
+        "scale": 0.05,
+        "minSpeed": 4,
+        "cap": 3
+      },
+      "category": "Food",
+      "hands": 1,
+      "use": "eat",
+      "portionPerUse": 1,
+      "consumedWhenEmpty": true
+    },
+    {
+      "id": "milk_carton",
+      "name": "Milk carton",
+      "description": "Long life, a few gulps each.",
+      "mass": 0.5,
+      "model": "models/items/carton_milk/carton_milk.vmdl",
+      "category": "Drink",
+      "hands": 1,
+      "use": "drink",
+      "restore": 30,
+      "portionPerUse": 0.25,
+      "damage": {
+        "scale": 0.05,
+        "minSpeed": 4,
+        "cap": 3
+      }
+    },
+    {
+      "id": "rubber_boots_dirty",
+      "name": "Muddy rubber boots",
+      "category": "Armor",
+      "description": "Seen some mud, still solid.",
+      "mass": 1.5,
+      "model": "models/items/boots_dirty/boots_dirty.vmdl",
+      "hands": 2,
+      "use": "wear",
+      "armorSlot": "feet",
+      "defense": 0.06,
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "suitcase_pack_2",
+      "name": "Old suitcase",
+      "category": "Backpack",
+      "description": "A medium pack: eight more slots.",
+      "mass": 1.6,
+      "model": "models/items/suitcase_b/suitcase_b.vmdl",
+      "hands": 2,
+      "use": "wear",
+      "backpack": 2,
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "crate_lid",
+      "name": "Crate lid",
+      "category": "Junk",
+      "description": "Wooden, with rope handles. Fits a military crate.",
+      "mass": 1.2,
+      "model": "models/items/crate_lid_a/crate_lid_a.vmdl",
+      "modelScale": 1.3,
+      "hands": 2,
+      "stowable": false,
+      "damage": {
+        "scale": 0.03,
+        "minSpeed": 4,
+        "cap": 6
+      }
+    },
+    {
+      "id": "trash_can_rust",
+      "name": "Rusty bin",
+      "category": "Container",
+      "description": "Rusted through in places.",
+      "mass": 5,
+      "model": "models/world/props/trash_can_rust/trash_can_rust.vmdl",
+      "modelScale": 1.3,
+      "hands": 2,
+      "moveSpeed": 0.9,
+      "stowable": false,
+      "damage": {
+        "scale": 0.03,
+        "minSpeed": 4,
+        "cap": 10
+      }
+    },
+    {
+      "id": "bin_lid",
+      "name": "Bin lid",
+      "category": "Junk",
+      "description": "Flat steel. Good shield, bad weapon.",
+      "mass": 1,
+      "model": "models/world/props/trash_can_lid/trash_can_lid.vmdl",
+      "modelScale": 1.3,
+      "hands": 1,
+      "stowable": false,
+      "damage": {
+        "scale": 0.06,
+        "minSpeed": 4,
+        "cap": 12
+      }
+    },
+    {
+      "id": "bin_lid_rust",
+      "name": "Rusty bin lid",
+      "category": "Junk",
+      "description": "Rusty, with sharp edges.",
+      "mass": 1,
+      "model": "models/world/props/trash_can_rust_lid/trash_can_rust_lid.vmdl",
+      "modelScale": 1.3,
+      "hands": 1,
+      "stowable": false,
+      "damage": {
+        "scale": 0.06,
+        "minSpeed": 4,
+        "cap": 14
       }
     }
   ],
@@ -732,6 +885,42 @@
     },
     {
       "id": "footlocker_pack",
+      "count": 1
+    },
+    {
+      "id": "canned_tomatoes",
+      "count": 3
+    },
+    {
+      "id": "sardines",
+      "count": 2
+    },
+    {
+      "id": "milk_carton",
+      "count": 2
+    },
+    {
+      "id": "rubber_boots_dirty",
+      "count": 1
+    },
+    {
+      "id": "suitcase_pack_2",
+      "count": 1
+    },
+    {
+      "id": "crate_lid",
+      "count": 1
+    },
+    {
+      "id": "trash_can_rust",
+      "count": 1
+    },
+    {
+      "id": "bin_lid",
+      "count": 1
+    },
+    {
+      "id": "bin_lid_rust",
       "count": 1
     }
   ]

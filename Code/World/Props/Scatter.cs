@@ -29,6 +29,10 @@ public sealed class ScatterDefinition
 
 	/// <summary>Plants and dry growth: only where the land supports vegetation, thicker the more it does.</summary>
 	public bool Vegetation;
+
+	/// <summary>A separate lid: the model that sits on the body (same origin), the one that lies flat beside it, and how often it has been knocked off.</summary>
+	public string LidOn, LidOff;
+	public float LidOffChance;
 }
 
 public readonly record struct ScatterInstance( ScatterDefinition Def, Vector3 Position, float Yaw, float Scale, float Lean );
@@ -53,6 +57,9 @@ public static class ScatterLibrary
 		public float sink { get; set; }
 		public float lean { get; set; }
 		public bool vegetation { get; set; }
+		public string lidOn { get; set; }
+		public string lidOff { get; set; }
+		public float lidOffChance { get; set; }
 	}
 
 	private sealed class ScatterFile
@@ -92,7 +99,7 @@ public static class ScatterLibrary
 					Weight = MathF.Max( 0.01f, r.weight ),
 					MinScale = r.scale is { Length: > 0 } ? r.scale[0] : 1f,
 					MaxScale = r.scale is { Length: > 1 } ? r.scale[1] : (r.scale is { Length: 1 } ? r.scale[0] : 1f),
-					Collide = (r.collide ?? "box").ToLowerInvariant(), Sink = r.sink, Lean = r.lean, Vegetation = r.vegetation,
+					Collide = (r.collide ?? "box").ToLowerInvariant(), Sink = r.sink, Lean = r.lean, Vegetation = r.vegetation, LidOn = r.lidOn, LidOff = r.lidOff, LidOffChance = r.lidOffChance,
 				} );
 			}
 			Log.Info( $"[scatter] {_all.Count} prop kinds loaded" );
@@ -100,12 +107,15 @@ public static class ScatterLibrary
 		catch ( System.Exception e ) { Log.Warning( $"[scatter] {DataPath} could not be read ({e.Message})" ); }
 	}
 
-	public static Model GetModel( ScatterDefinition def )
+	public static Model GetModel( ScatterDefinition def ) => GetModel( def.Model );
+
+	public static Model GetModel( string path )
 	{
-		if ( _models.TryGetValue( def.Model, out var m ) && m.IsValid() ) return m;
-		m = Model.Load( def.Model );
+		if ( string.IsNullOrEmpty( path ) ) return null;
+		if ( _models.TryGetValue( path, out var m ) && m.IsValid() ) return m;
+		m = Model.Load( path );
 		if ( m is null || m.IsError ) m = null;
-		_models[def.Model] = m;
+		_models[path] = m;
 		return m;
 	}
 
