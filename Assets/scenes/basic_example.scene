@@ -205,7 +205,7 @@
           "FogMode": "Enabled",
           "FogStrength": 1,
           "IncludeStaticShadowCasters": false,
-          "Intensity": 1.8,
+          "Intensity": 2.5,
           "LightColor": "1,0.95,0.85,1",
           "MixedShadows": false,
           "OnComponentDestroy": null,
@@ -217,7 +217,7 @@
           "ShadowBias": 0.0005,
           "ShadowCascadeCount": 4,
           "ShadowCascadeSplitRatio": 0.91,
-          "ShadowHardness": 0,
+          "ShadowHardness": 0.7418033,
           "Shadows": true,
           "SkyColor": "0,0,0,0",
           "Temperature": 6500,
@@ -484,7 +484,7 @@
                 "Parameters": {}
               },
               "AnimationGraph": null,
-              "BodyGroups": 5441,
+              "BodyGroups": 5185,
               "BoneMergeTarget": null,
               "CreateAttachments": false,
               "CreateBoneObjects": false,
@@ -530,7 +530,7 @@
           ],
           "Children": [
             {
-              "__guid": "466ca078-ef97-4192-b6c6-f22d9c3eded0",
+              "__guid": "2e545d2f-0eb3-4bce-958d-d2af262554bb",
               "__version": 2,
               "Flags": 0,
               "Name": "Clothing - y_front_pants_white",
@@ -547,7 +547,7 @@
               "Components": [
                 {
                   "__type": "Sandbox.SkinnedModelRenderer",
-                  "__guid": "c0fbb8a5-d348-41c6-85ee-40a797ab9c05",
+                  "__guid": "f64f1695-3c2d-4e6c-9b48-4adff415a24c",
                   "__enabled": true,
                   "Flags": 0,
                   "Animation": {
@@ -1020,7 +1020,7 @@
                               "FlipHorizontal": false,
                               "FormatOverride": null
                             },
-                            "compiled": null
+                            "compiled": "textures/generated/svgsource/f12f200bf2fa61ef.vtex"
                           },
                           "BroadcastMessages": []
                         }
@@ -1203,7 +1203,7 @@
                               "FlipHorizontal": false,
                               "FormatOverride": null
                             },
-                            "compiled": null
+                            "compiled": "textures/generated/svgsource/3c1adbc6f9208da.vtex"
                           },
                           "BroadcastMessages": []
                         }
@@ -1386,7 +1386,7 @@
                               "FlipHorizontal": false,
                               "FormatOverride": null
                             },
-                            "compiled": null
+                            "compiled": "textures/generated/svgsource/5e5ffe5425fbdc5e.vtex"
                           },
                           "BroadcastMessages": []
                         }
@@ -1649,7 +1649,7 @@
                               "FlipHorizontal": false,
                               "FormatOverride": null
                             },
-                            "compiled": null
+                            "compiled": "textures/generated/svgsource/e24a8d94e8cc2e4.vtex"
                           },
                           "BroadcastMessages": []
                         }
