@@ -16,17 +16,15 @@
 					{
 						int armor = a;
 						var worn = Inv?.Armor[armor];
-						<div onmousedown=@(() => BeginDrag( "arm", armor )) onmouseup=@(() => EndDrag( "arm", armor )) onrightclick=@(() => RightClick( "arm", armor )) style="display: flex; flex-direction: column; align-items: center; justify-content: space-between; width: 92px; height: 92px; padding: 6px 4px; overflow: hidden; border-radius: 10px; background-color: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.22); pointer-events: all;">
-							<div style="font-size: 12px; line-height: 14px; opacity: 0.5; pointer-events: none;">@(new[] { "HEAD", "CHEST", "LEGS", "FEET" }[armor])</div>
-							@if ( worn is not null )
+						var pic = IconOf( worn );
+						<div onmousedown=@(() => BeginDrag( "arm", armor )) onmouseup=@(() => EndDrag( "arm", armor )) onmouseover=@(() => Hover( "arm", armor )) onmouseout=@Unhover onrightclick=@(() => RightClick( "arm", armor )) style="position: relative; display: flex; align-items: center; justify-content: center; width: 92px; height: 92px; overflow: hidden; border-radius: 10px; @Rarity.SlotLook( worn?.ItemId ) pointer-events: all;">
+							@if ( worn is null )
 							{
-								@{ var pic = IconOf( worn ); }
-								@if ( pic is not null ) { <Image Texture=@pic style="width: 40px; height: 40px; pointer-events: none;" /> }
-								<div style="width: 100%; max-height: 28px; overflow: hidden; text-align: center; font-size: 12px; font-weight: 600; line-height: 14px; pointer-events: none;">@NameOf( worn )</div>
+								<div style="font-size: 13px; line-height: 15px; letter-spacing: 1px; opacity: 0.35; pointer-events: none;">@(new[] { "HEAD", "CHEST", "LEGS", "FEET" }[armor])</div>
 							}
-							else
+							else if ( pic is not null )
 							{
-								<div style="font-size: 12px; line-height: 14px; opacity: 0.25; pointer-events: none;">empty</div>
+								<Image Texture=@pic style="width: 68px; height: 68px; pointer-events: none;" />
 							}
 						</div>
 					}
@@ -48,22 +46,15 @@
 								int idx = r * 4 + col;
 								bool open = Unlocked( idx );
 								var stored = Inv?.Storage[idx];
-								<div onmousedown=@(() => BeginDrag( "bag", idx )) onmouseup=@(() => EndDrag( "bag", idx )) onrightclick=@(() => RightClick( "bag", idx )) style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 82px; height: 82px; flex-shrink: 0; margin-right: 8px; padding: 4px; overflow: hidden; border-radius: 10px; background-color: rgba(255,255,255,@(open ? "0.06" : "0.015")); border: 2px solid rgba(255,255,255,@(open ? "0.22" : "0.07")); pointer-events: all;">
+								var pic = IconOf( stored );
+								<div onmousedown=@(() => BeginDrag( "bag", idx )) onmouseup=@(() => EndDrag( "bag", idx )) onmouseover=@(() => Hover( "bag", idx )) onmouseout=@Unhover onrightclick=@(() => RightClick( "bag", idx )) style="display: flex; align-items: center; justify-content: center; width: 82px; height: 82px; flex-shrink: 0; margin-right: 8px; overflow: hidden; border-radius: 10px; @Rarity.SlotLook( open ? stored?.ItemId : null, open ) pointer-events: all;">
 									@if ( !open )
 									{
-										<div style="font-size: 12px; opacity: 0.25; pointer-events: none;">locked</div>
+										<div style="font-size: 12px; opacity: 0.22; pointer-events: none;">locked</div>
 									}
-									else if ( stored is not null )
+									else if ( stored is not null && pic is not null )
 									{
-										@{ var pic = IconOf( stored ); }
-								@if ( pic is not null ) { <Image Texture=@pic style="width: 46px; height: 46px; pointer-events: none;" /> }
-								<div style="width: 100%; max-height: 28px; overflow: hidden; text-align: center; font-size: 12px; font-weight: 600; line-height: 14px; pointer-events: none;">@NameOf( stored )</div>
-										@if ( HasBar( stored ) )
-										{
-											<div style="width: 100%; height: 5px; margin-top: 6px; border-radius: 3px; background-color: rgba(255,255,255,0.18); pointer-events: none;">
-												<div style="width: @((int)(stored.Amount * 100f))%; height: 5px; border-radius: 3px; background-color: rgba(120,200,255,0.95);"></div>
-											</div>
-										}
+										<Image Texture=@pic style="width: 60px; height: 60px; pointer-events: none;" />
 									}
 								</div>
 							}
@@ -82,7 +73,12 @@
 						{
 							int recipe = i;
 							bool can = CanCraft( Recipes[recipe] );
-							<div onclick=@(() => SelectRecipe( recipe )) style="display: flex; flex-direction: column; justify-content: center; width: 132px; height: 60px; flex-shrink: 0; margin: 0 6px 6px 0; padding: 4px 8px; overflow: hidden; border-radius: 8px; background-color: rgba(255,255,255,@(recipe == _recipe ? "0.16" : "0.06")); border: 2px solid rgba(255,255,255,@(recipe == _recipe ? "0.8" : "0.2")); font-size: 14px; font-weight: 600; line-height: 16px; opacity: @(can ? "1" : "0.55"); pointer-events: all;">@Recipes[recipe].Name</div>
+							int rarity = Rarity.Of( Recipes[recipe].Output );
+							var pic = ItemIcons.Icon( Recipes[recipe].Output );
+							<div onclick=@(() => SelectRecipe( recipe )) style="display: flex; flex-direction: row; align-items: center; width: 132px; height: 60px; flex-shrink: 0; margin: 0 6px 6px 0; padding: 4px 8px; overflow: hidden; border-radius: 8px; background-image: radial-gradient(circle, @Rarity.Css( rarity, recipe == _recipe ? 0.35f : 0.16f ) 0%, @Rarity.Css( rarity, 0.04f ) 80%); border: 2px solid @Rarity.Css( rarity, recipe == _recipe ? 0.9f : 0.35f ); font-size: 13px; font-weight: 600; line-height: 15px; opacity: @(can ? "1" : "0.5"); pointer-events: all;">
+								@if ( pic is not null ) { <Image Texture=@pic style="width: 40px; height: 40px; flex-shrink: 0; margin-right: 6px; pointer-events: none;" /> }
+								<div style="min-width: 0; overflow: hidden; pointer-events: none;">@Recipes[recipe].Name</div>
+							</div>
 						}
 					</div>
 				</div>
@@ -97,7 +93,7 @@
 					<div style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0; margin-left: 14px; overflow: hidden; font-size: 14px; line-height: 18px;">
 						@if ( Selected is not null )
 						{
-							<div style="font-size: 19px; line-height: 22px; font-weight: 700;">@Selected.Name@(Selected.OutputCount > 1 ? $" x{Selected.OutputCount}" : "")</div>
+							<div style="font-size: 19px; line-height: 22px; font-weight: 700; color: @Rarity.Css( Rarity.Of( Selected.Output ), 1f );">@Selected.Name@(Selected.OutputCount > 1 ? $" x{Selected.OutputCount}" : "")</div>
 							<div style="margin-top: 4px; opacity: 0.8;">@Selected.Description</div>
 							<div style="margin-top: 10px; font-size: 12px; line-height: 14px; opacity: 0.55;">NEEDS</div>
 							@foreach ( var (item, count) in Selected.Inputs )
@@ -120,23 +116,16 @@
 				{
 					int slot = h;
 					var hot = Inv?.Hotbar?.Get( slot );
-					<div onmousedown=@(() => BeginDrag( "hot", slot )) onmouseup=@(() => EndDrag( "hot", slot )) onrightclick=@(() => RightClick( "hot", slot )) style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 82px; height: 82px; flex-shrink: 0; margin: 0 5px; padding: 14px 4px 4px 4px; overflow: hidden; border-radius: 10px; background-color: rgba(255,255,255,0.07); border: 2px solid rgba(255,255,255,@(slot == HotSelected ? "0.85" : "0.25")); pointer-events: all;">
-						<div style="position: absolute; left: 7px; top: 2px; font-size: 12px; line-height: 14px; opacity: 0.6; pointer-events: none;">@(slot + 1)</div>
-						@if ( hot is not null )
+					var pic = IconOf( hot );
+					<div onmousedown=@(() => BeginDrag( "hot", slot )) onmouseup=@(() => EndDrag( "hot", slot )) onmouseover=@(() => Hover( "hot", slot )) onmouseout=@Unhover onrightclick=@(() => RightClick( "hot", slot )) style="position: relative; display: flex; align-items: center; justify-content: center; width: 82px; height: 82px; flex-shrink: 0; margin: 0 5px; overflow: hidden; border-radius: 10px; @Rarity.SlotLook( hot?.ItemId ) @(slot == HotSelected ? "border: 2px solid rgba(255,255,255,0.9);" : "") pointer-events: all;">
+						<div style="position: absolute; left: 7px; top: 3px; font-size: 12px; line-height: 14px; opacity: 0.6; pointer-events: none;">@(slot + 1)</div>
+						@if ( hot is not null && pic is not null )
 						{
-							@{ var pic = IconOf( hot ); }
-								@if ( pic is not null ) { <Image Texture=@pic style="width: 40px; height: 40px; pointer-events: none;" /> }
-								<div style="width: 100%; max-height: 28px; overflow: hidden; text-align: center; font-size: 12px; font-weight: 600; line-height: 14px; pointer-events: none;">@NameOf( hot )</div>
-							@if ( HasBar( hot ) )
-							{
-								<div style="width: 100%; height: 5px; margin-top: 5px; border-radius: 3px; background-color: rgba(255,255,255,0.18); pointer-events: none;">
-									<div style="width: @((int)(hot.Amount * 100f))%; height: 5px; border-radius: 3px; background-color: rgba(120,200,255,0.95);"></div>
-								</div>
-							}
+							<Image Texture=@pic style="width: 60px; height: 60px; pointer-events: none;" />
 						}
-						else if ( slot == HeldSlot )
+						else if ( hot is null && slot == HeldSlot )
 						{
-							<div style="font-size: 12px; opacity: 0.55; pointer-events: none;">in hand</div>
+							<div style="font-size: 12px; opacity: 0.5; pointer-events: none;">in hand</div>
 						}
 					</div>
 				}
@@ -165,17 +154,32 @@
 					<div style="margin-top: 4px; font-weight: 500;">@line</div>
 				}
 			}
-			<div style="margin-top: 14px; font-size: 13px; opacity: 0.5; line-height: 17px; font-weight: 400;">Click an item to pick it up, click a slot to put it down. Right click sends it to the other bar or puts armor on. Tab closes.</div>
+			<div style="margin-top: 14px; font-size: 13px; opacity: 0.5; line-height: 17px; font-weight: 400;">Drag items between slots. Hover for details. Right click sends an item to the other bar or puts armor on. Tab closes.</div>
 		</div>
 
-		@if ( _cursor is not null )
-		{
-			<div style="position: absolute; left: @((int)_mouse.x - 30)px; top: @((int)_mouse.y - 30)px; display: flex; flex-direction: column; align-items: center; pointer-events: none;">
-				@{ var dragPic = IconOf( _cursor ); }
-				@if ( dragPic is not null ) { <Image Texture=@dragPic style="width: 64px; height: 64px;" /> }
-				<div style="padding: 3px 10px; border-radius: 8px; background-color: rgba(255,255,255,0.92); color: black; font-size: 14px; line-height: 16px; font-weight: 700;">@NameOf( _cursor )</div>
-			</div>
-		}
+		@* ---- the item on the cursor (moved every frame by code) ---- *@
+		<div @ref="_dragPanel" style="position: absolute; left: 0; top: 0; display: @(_cursor is not null ? "flex" : "none"); align-items: center; justify-content: center; width: 64px; height: 64px; pointer-events: none;">
+			@{ var dragPic = IconOf( _cursor ); }
+			@if ( dragPic is not null ) { <Image Texture=@dragPic style="width: 64px; height: 64px;" /> }
+		</div>
+
+		@* ---- the hover menu ---- *@
+		<div @ref="_tipPanel" style="position: absolute; left: 0; top: 0; display: @(TipVisible ? "flex" : "none"); flex-direction: column; width: 270px; padding: 12px 14px; border-radius: 10px; background-color: rgba(10,13,19,0.97); border: 2px solid @Rarity.Css( TipRarity, 0.8f ); box-shadow: 0 0 18px @Rarity.Css( TipRarity, 0.35f ); color: white; pointer-events: none;">
+			<div style="font-size: 18px; line-height: 22px; font-weight: 700; color: @Rarity.Css( TipRarity, 1f );">@TipName</div>
+			<div style="font-size: 12px; line-height: 15px; opacity: 0.6; margin-bottom: 6px;">@TipSubtitle</div>
+			@if ( !string.IsNullOrEmpty( TipDescription ) )
+			{
+				<div style="font-size: 14px; line-height: 18px; opacity: 0.85; margin-bottom: 6px;">@TipDescription</div>
+			}
+			@foreach ( var line in TipLines )
+			{
+				<div style="font-size: 13px; line-height: 17px; opacity: 0.9;">@line</div>
+			}
+			@if ( !string.IsNullOrEmpty( TipHint ) )
+			{
+				<div style="margin-top: 8px; font-size: 12px; line-height: 15px; opacity: 0.5;">@TipHint</div>
+			}
+		</div>
 	</div>
 </root>
 
@@ -194,7 +198,11 @@
 	private PlayerStats Stats => Scene.GetAllComponents<PlayerStats>().FirstOrDefault();
 
 	private ItemContainer.Stored _cursor;
-	private Vector2 _mouse;
+	private Panel _dragPanel, _tipPanel;
+	private ItemContainer.Stored _hovered;
+	private string _tipName, _tipSubtitle, _tipDescription, _tipHint;
+	private int _tipRarity;
+	private List<string> _tipLines = new();
 	private int _recipe;
 	private int _version;
 
@@ -236,8 +244,8 @@
 
 		if ( !Open ) return;
 
-		_mouse = Panel.MousePosition;
 		Mouse.Visibility = MouseVisibility.Visible;
+		PlaceFloatingPanels();
 
 		// drag on the character to turn it
 		if ( _spinning )
@@ -318,6 +326,79 @@
 			"bag" => Unlocked( i ) && def.Stowable,
 			_ => def.Stowable,
 		};
+	}
+
+	private bool TipVisible => Open && _hovered is not null && _cursor is null;
+	private string TipName => _tipName;
+	private string TipSubtitle => _tipSubtitle;
+	private string TipDescription => _tipDescription;
+	private string TipHint => _tipHint;
+	private int TipRarity => _tipRarity;
+	private List<string> TipLines => _tipLines;
+
+	/// <summary>The dragged item and the hover menu follow the mouse. Moved directly every frame (not through a rebuild) so they never lag, and in the panel's own units so they sit exactly under the pointer at any resolution.</summary>
+	private void PlaceFloatingPanels()
+	{
+		float scale = MathF.Max( 0.01f, Panel.ScaleToScreen );
+		var m = Panel.MousePosition / scale;
+
+		if ( _dragPanel is not null )
+		{
+			_dragPanel.Style.Left = Length.Pixels( m.x - 32f );
+			_dragPanel.Style.Top = Length.Pixels( m.y - 32f );
+		}
+
+		if ( _tipPanel is not null && TipVisible )
+		{
+			float width = Panel.Box.Rect.Width / scale;
+			float height = Panel.Box.Rect.Height / scale;
+			float x = m.x + 24f;
+			float y = m.y + 20f;
+			if ( x + 280f > width ) x = m.x - 294f;
+			if ( y + 230f > height ) y = MathF.Max( 8f, height - 240f );
+			_tipPanel.Style.Left = Length.Pixels( x );
+			_tipPanel.Style.Top = Length.Pixels( y );
+		}
+	}
+
+	private void Hover( string kind, int i )
+	{
+		var s = kind == "bag" && !Unlocked( i ) ? null : GetSlot( kind, i );
+		if ( ReferenceEquals( s, _hovered ) ) return;
+		_hovered = s;
+		if ( s is not null ) BuildTip( s, kind );
+		_version++;
+	}
+
+	private void Unhover()
+	{
+		if ( _hovered is null ) return;
+		_hovered = null;
+		_version++;
+	}
+
+	private void BuildTip( ItemContainer.Stored s, string kind )
+	{
+		var def = ItemLibrary.Get( s.ItemId );
+		_tipLines = new List<string>();
+		if ( def is null ) { _tipName = s.ItemId; _tipSubtitle = ""; _tipDescription = null; _tipHint = null; _tipRarity = 0; return; }
+
+		_tipName = def.Name;
+		_tipRarity = def.Rarity;
+		_tipSubtitle = $"{Rarity.NameOf( def.Rarity )} - {def.Category}";
+		_tipDescription = def.Description;
+
+		_tipLines.Add( $"{(def.Hands == 1 ? "One-handed" : "Two-handed")}, {def.Mass:0.#} kg" );
+		if ( def.Use == UseKind.Melee ) _tipLines.Add( $"Hits for up to {def.Damage.Cap:0} damage (faster swings hit harder)" );
+		if ( def.ArmorSlot is not null ) _tipLines.Add( $"Armor: {def.Defense * 100f:0}% less damage ({def.ArmorSlot})" );
+		if ( def.BackpackTier > 0 ) _tipLines.Add( $"Backpack: adds {PlayerInventory.SlotsPerTier} slots" );
+		if ( def.Use == UseKind.Eat ) _tipLines.Add( $"Restores {def.Restore * s.Amount:0} food" );
+		if ( def.Use == UseKind.Drink ) _tipLines.Add( $"Restores up to {def.Restore * s.Amount:0} water ({s.Amount * 100f:0}% left)" );
+		if ( def.Use == UseKind.Refuel ) _tipLines.Add( $"Fuel: {s.Amount * def.Capacity:0} / {def.Capacity:0} L" );
+		if ( def.Container is { } c ) _tipLines.Add( s.Amount > 0.01f ? $"Holds {s.Amount * c.Capacity:0} / {c.Capacity:0} L of {s.Liquid}" : $"Empty ({c.Capacity:0} L)" );
+		if ( def.Explosion is not null ) _tipLines.Add( "Explodes when hit hard enough" );
+
+		_tipHint = def.ArmorSlot is not null || def.BackpackTier > 0 ? "Drag to move. Right click to wear." : kind == "hot" ? "Drag to move. Right click: to pockets." : "Drag to move. Right click: to hotbar.";
 	}
 
 	private string _dragKind;
@@ -565,7 +646,8 @@
 			hash.Add( Info is null ? "" : string.Join( '|', Info ) );
 			var s = Stats;
 			if ( s is not null ) { hash.Add( (int)s.Health ); hash.Add( (int)s.Food ); hash.Add( (int)s.Water ); }
-			if ( _cursor is not null ) { hash.Add( (int)_mouse.x ); hash.Add( (int)_mouse.y ); }
+			hash.Add( _cursor is not null );
+			hash.Add( _hovered );
 			var inv = Inv;
 			if ( inv is not null )
 			{

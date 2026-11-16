@@ -573,7 +573,7 @@ public sealed class PlayerGrabber : Component
 		item.Body.AngularVelocity = Vector3.Zero;
 
 		_relative = camera.WorldRotation.Inverse * item.WorldRotation;
-		_holdDistance = Math.Clamp( (item.WorldPosition - camera.WorldPosition).Length, MinHoldDistance, MaxHoldDistance );
+		_holdDistance = Math.Clamp( (item.WorldPosition - camera.WorldPosition).Length, MinHoldDistance, 150f );   // brought in close, like holding it out in front of you
 
 		// items that are held a certain way (a weapon, tip forward) are turned into that pose and held at their own distance
 		var def = item.Definition;
@@ -636,7 +636,20 @@ public sealed class PlayerGrabber : Component
 		// carried a little way in front of you, where you left it; the item is pulled there by its velocity, so walls still stop it
 		var forward = camera.WorldRotation.Forward;
 		var want = camera.WorldRotation * _relative;
-		float gain = 14f, maxSpeed = 2600f, turn = 18f;
+
+		// weight: heavy things are slow to follow your hand (they lag, and swing when you turn), light things stay right in front
+		float mass = body.MassOverride > 0f ? body.MassOverride : 1f;
+		float heft = 1f / (1f + mass / 30f);
+		float gain = MathX.Lerp( 5f, 14f, heft ), maxSpeed = 2600f * MathX.Lerp( 0.3f, 1f, heft ), turn = MathX.Lerp( 8f, 18f, heft );
+
+		// standing on what you are holding would lift you into the air: let go instead
+		var below = Scene.Trace.Ray( GameObject.WorldPosition + Vector3.Up * 12f, GameObject.WorldPosition + Vector3.Down * 26f ).IgnoreGameObjectHierarchy( GameObject ).Run();
+		if ( below.Hit && below.GameObject.IsValid() && below.GameObject.Components.Get<Item>( FindMode.EverythingInSelfAndParent ) == _held )
+		{
+			Notify( "You can't stand on what you are holding" );
+			Release( false );
+			return;
+		}
 
 		// a swing sweeps the item through an arc about your left axis; it is the speed of that sweep that hurts
 		if ( _swinging && _swing is not null )
@@ -657,7 +670,14 @@ public sealed class PlayerGrabber : Component
 			}
 		}
 
-		var target = camera.WorldPosition + forward * _holdDistance;
+		// it never goes through a wall or the car: the hold distance shortens to whatever is in the way (with the item's own size to spare)
+		float distance = _holdDistance;
+		float reach = MathF.Max( _held.HalfExtents.x, MathF.Max( _held.HalfExtents.y, _held.HalfExtents.z ) );
+		var blocked = Scene.Trace.Ray( camera.WorldPosition, camera.WorldPosition + forward * (distance + reach) )
+			.IgnoreGameObjectHierarchy( GameObject ).WithoutTags( "held" ).Run();
+		if ( blocked.Hit ) distance = MathF.Max( MinHoldDistance * 0.5f, MathF.Min( distance, blocked.Distance - reach ) );
+
+		var target = camera.WorldPosition + forward * distance;
 		var toTarget = target - body.WorldPosition;
 
 		if ( toTarget.Length > 450f )

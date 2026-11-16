@@ -127,6 +127,9 @@ public sealed class ItemDefinition
 	/// <summary>Armor: the native s&box clothing resource that is put on the character when this is worn.</summary>
 	public string Clothing;
 
+	/// <summary>0 common, 1 uncommon, 2 rare, 3 epic, 4 legendary (see <see cref="Rarity"/>).</summary>
+	public int Rarity;
+
 	/// <summary>The orientation it is held in, in degrees (pitch, yaw, roll) in your view. Null: however it was lying.</summary>
 	public Angles? HoldAngles;
 
@@ -223,6 +226,7 @@ public static class ItemLibrary
 		public float defense { get; set; }
 		public int backpack { get; set; }
 		public string clothing { get; set; }
+		public string rarity { get; set; }
 		public float[] hold { get; set; }
 		public float holdDistance { get; set; }
 		public int hands { get; set; } = 2;
@@ -280,7 +284,7 @@ public static class ItemLibrary
 				PortionPerUse = r.portionPerUse <= 0f ? 1f : r.portionPerUse,
 				ConsumedWhenEmpty = r.consumedWhenEmpty,
 				Stowable = r.stowable,
-				ArmorSlot = r.armorSlot, Defense = r.defense, BackpackTier = r.backpack, Clothing = r.clothing,
+				ArmorSlot = r.armorSlot, Defense = r.defense, BackpackTier = r.backpack, Clothing = r.clothing, Rarity = LongTrip.Gameplay.Rarity.Parse( r.rarity ),
 				HoldAngles = r.hold is { Length: 3 } ? new Angles( r.hold[0], r.hold[1], r.hold[2] ) : null,
 				HoldDistance = r.holdDistance,
 				Hands = r.hands == 1 ? 1 : 2,

@@ -16,6 +16,7 @@ public sealed class ItemIcons : Component
 	private readonly Queue<string> _queue = new();
 	private readonly HashSet<string> _queued = new();
 
+	private const string StudioTag = "icon_studio";
 	private GameObject _stage;
 	private GameObject _cameraObject;
 	private CameraComponent _camera;
@@ -68,6 +69,7 @@ public sealed class ItemIcons : Component
 			_camera.ZFar = 4000f;
 			_camera.BackgroundColor = new Color( 0f, 0f, 0f, 0f );
 			_camera.Enabled = false;   // only draws when asked to
+			_camera.RenderTags.Add( StudioTag );   // draws only what is tagged for the studio: no sky, ground or fog behind the item
 		}
 
 		if ( _stage.IsValid() ) _stage.Destroy();
@@ -75,11 +77,13 @@ public sealed class ItemIcons : Component
 		_stage.Name = "Icon stage";
 		_stage.Flags |= GameObjectFlags.NotSaved;
 		_stage.WorldPosition = Studio;
+		_stage.Tags.Add( StudioTag );
 
 		var bounds = model.Bounds;
 		float scale = def.ModelScale;
 		var holder = Scene.CreateObject();
 		holder.SetParent( _stage, false );
+		holder.Tags.Add( StudioTag );
 		holder.LocalScale = scale;
 		holder.LocalPosition = -bounds.Center * scale;
 		// a three-quarter view, tipped a little so long things (tools) read well
@@ -94,14 +98,15 @@ public sealed class ItemIcons : Component
 		_cameraObject.WorldPosition = Studio + direction * distance;
 		_cameraObject.WorldRotation = Rotation.LookAt( -direction );
 
-		// a light of its own, so an icon looks the same in any weather or time of day
+		// lit by lights of its own, tagged for the studio, so an icon looks the same in any weather
 		var lightObject = Scene.CreateObject();
 		lightObject.SetParent( _stage, false );
+		lightObject.Tags.Add( StudioTag );
 		lightObject.WorldPosition = _cameraObject.WorldPosition + Vector3.Up * distance * 0.4f + new Vector3( 0f, -distance * 0.3f, 0f );
 		var light = lightObject.Components.Create<PointLight>();
 		light.LightColor = new Color( 1f, 0.97f, 0.92f );
 		light.Radius = distance * 4f;
-		light.Intensity = 9f;
+		light.Intensity = 3f;
 		light.Shadows = false;
 
 		var texture = Texture.CreateRenderTarget( "icon_" + itemId, ImageFormat.RGBA8888, new Vector2( Size, Size ) );

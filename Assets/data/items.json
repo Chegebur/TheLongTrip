@@ -15,7 +15,8 @@
         "scale": 0.08,
         "minSpeed": 3,
         "cap": 6
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "canned_food",
@@ -33,7 +34,8 @@
         "scale": 0.1,
         "minSpeed": 3,
         "cap": 8
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "apple",
@@ -51,7 +53,8 @@
         "scale": 0.05,
         "minSpeed": 4,
         "cap": 2
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "banana",
@@ -69,7 +72,8 @@
         "scale": 0.05,
         "minSpeed": 4,
         "cap": 2
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "banana_bunch",
@@ -87,7 +91,8 @@
         "scale": 0.05,
         "minSpeed": 4,
         "cap": 3
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "fuel_can",
@@ -106,7 +111,8 @@
         "scale": 0.05,
         "minSpeed": 3,
         "cap": 10
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "baseball_bat",
@@ -134,7 +140,8 @@
         "minSpeed": 4,
         "cap": 45,
         "cooldown": 0.25
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "crowbar",
@@ -162,7 +169,8 @@
         "minSpeed": 4,
         "cap": 40,
         "cooldown": 0.25
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "pipe_wrench",
@@ -190,7 +198,8 @@
         "minSpeed": 4,
         "cap": 30,
         "cooldown": 0.22
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "hacksaw",
@@ -218,7 +227,8 @@
         "minSpeed": 4,
         "cap": 18,
         "cooldown": 0.2
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "rusted_spade",
@@ -247,7 +257,8 @@
         "minSpeed": 4,
         "cap": 60,
         "cooldown": 0.3
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "pickaxe",
@@ -276,7 +287,8 @@
         "minSpeed": 4,
         "cap": 65,
         "cooldown": 0.3
-      }
+      },
+      "rarity": "rare"
     },
     {
       "id": "sledgehammer",
@@ -305,7 +317,8 @@
         "minSpeed": 4,
         "cap": 80,
         "cooldown": 0.4
-      }
+      },
+      "rarity": "rare"
     },
     {
       "id": "explosive_barrel",
@@ -327,7 +340,8 @@
         "scale": 0.02,
         "minSpeed": 4,
         "cap": 20
-      }
+      },
+      "rarity": "epic"
     },
     {
       "id": "propane_tank",
@@ -349,7 +363,8 @@
         "scale": 0.03,
         "minSpeed": 4,
         "cap": 15
-      }
+      },
+      "rarity": "rare"
     },
     {
       "id": "plastic_crate",
@@ -364,7 +379,8 @@
         "scale": 0.03,
         "minSpeed": 4,
         "cap": 8
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "military_crate",
@@ -381,7 +397,8 @@
         "minSpeed": 4,
         "cap": 25
       },
-      "modelScale": 1.3
+      "modelScale": 1.3,
+      "rarity": "rare"
     },
     {
       "id": "barrel",
@@ -403,7 +420,8 @@
         "scale": 0.02,
         "minSpeed": 4,
         "cap": 20
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "barrel_blue",
@@ -425,7 +443,8 @@
         "scale": 0.02,
         "minSpeed": 4,
         "cap": 20
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "tyre",
@@ -442,7 +461,8 @@
         "scale": 0.03,
         "minSpeed": 4,
         "cap": 8
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "wheel_rim",
@@ -458,7 +478,8 @@
         "scale": 0.04,
         "minSpeed": 4,
         "cap": 14
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "cardboard_box",
@@ -474,7 +495,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "trash_can",
@@ -491,7 +513,8 @@
         "scale": 0.03,
         "minSpeed": 4,
         "cap": 10
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "sack_pack",
@@ -508,7 +531,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "suitcase_pack",
@@ -525,7 +549,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "rare"
     },
     {
       "id": "footlocker_pack",
@@ -542,7 +567,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "epic"
     },
     {
       "id": "canned_tomatoes",
@@ -560,7 +586,8 @@
       "hands": 1,
       "use": "eat",
       "portionPerUse": 1,
-      "consumedWhenEmpty": true
+      "consumedWhenEmpty": true,
+      "rarity": "common"
     },
     {
       "id": "sardines",
@@ -578,7 +605,8 @@
       "hands": 1,
       "use": "eat",
       "portionPerUse": 1,
-      "consumedWhenEmpty": true
+      "consumedWhenEmpty": true,
+      "rarity": "uncommon"
     },
     {
       "id": "milk_carton",
@@ -595,7 +623,8 @@
         "scale": 0.05,
         "minSpeed": 4,
         "cap": 3
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "suitcase_pack_2",
@@ -611,7 +640,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "rare"
     },
     {
       "id": "crate_lid",
@@ -627,7 +657,8 @@
         "scale": 0.03,
         "minSpeed": 4,
         "cap": 6
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "trash_can_rust",
@@ -644,7 +675,8 @@
         "scale": 0.03,
         "minSpeed": 4,
         "cap": 10
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "bin_lid",
@@ -660,7 +692,8 @@
         "scale": 0.06,
         "minSpeed": 4,
         "cap": 12
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "bin_lid_rust",
@@ -676,7 +709,8 @@
         "scale": 0.06,
         "minSpeed": 4,
         "cap": 14
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "hard_hat",
@@ -695,7 +729,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "rare"
     },
     {
       "id": "army_helmet",
@@ -714,7 +749,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "legendary"
     },
     {
       "id": "gasmask",
@@ -733,7 +769,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "rare"
     },
     {
       "id": "cowboy_hat",
@@ -752,7 +789,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "baseball_cap",
@@ -771,7 +809,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "beanie",
@@ -790,7 +829,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "biker_jacket",
@@ -809,7 +849,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "epic"
     },
     {
       "id": "puffer_jacket",
@@ -828,7 +869,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "rare"
     },
     {
       "id": "army_shirt",
@@ -847,7 +889,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "wind_breaker",
@@ -866,7 +909,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "hoodie",
@@ -885,7 +929,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "winter_coat",
@@ -904,7 +949,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "legendary"
     },
     {
       "id": "army_pants",
@@ -923,7 +969,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "cargo_pants",
@@ -942,7 +989,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "jeans",
@@ -961,7 +1009,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "binman_trousers",
@@ -980,7 +1029,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "army_boots",
@@ -999,7 +1049,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "rare"
     },
     {
       "id": "black_boots",
@@ -1018,7 +1069,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "uncommon"
     },
     {
       "id": "sneakers",
@@ -1037,7 +1089,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "common"
     },
     {
       "id": "trainers",
@@ -1056,7 +1109,8 @@
         "scale": 0.02,
         "minSpeed": 5,
         "cap": 3
-      }
+      },
+      "rarity": "common"
     }
   ],
   "loot": [

@@ -1,9 +1,9 @@
 namespace LongTrip.Gameplay;
 
 /// <summary>
-/// Makes the car a moving base. Anything standing on it (you, loose items, things you carry in) is carried along with the car's own
+/// Makes the car a moving base. You, when walking on it, are carried along (the physics engine already carries loose items by friction) with the car's own
 /// movement: each physics step the car's change of position and turn is applied to whatever is resting on it, so you can walk about on a
-/// moving car and nothing slides off the back when it pulls away. Goes on the car root.
+/// moving car. Goes on the car root.
 /// </summary>
 public sealed class MovingBase : Component
 {
@@ -35,19 +35,7 @@ public sealed class MovingBase : Component
 			_player.WorldPosition = carried;
 			_player.EyeAngles = _player.EyeAngles + new Angles( 0f, yaw, 0f );
 		}
-
-		// ---- loose items resting on it
-		foreach ( var item in Scene.GetAllComponents<Item>() )
-		{
-			if ( !item.IsValid() || item.IsHeld || item.Body is null || !item.Body.MotionEnabled ) continue;
-			if ( (item.WorldPosition - now.Position).LengthSquared > Range * Range ) continue;
-			if ( item.GameObject.IsDescendant( GameObject ) ) continue;
-			if ( !IsStandingOnCar( item.GameObject, item.WorldPosition ) ) continue;
-
-			var carried = Carry( item.WorldPosition, delta, now );
-			item.WorldPosition = carried;
-			item.WorldRotation = (now.Rotation * delta.Rotation.Inverse) * item.WorldRotation;
-		}
+		// (loose items on the car are carried by the physics engine's friction, so they are not moved by hand: that would move them twice)
 	}
 
 	/// <summary>Where a point that was fixed to the car's previous pose is now.</summary>
