@@ -161,8 +161,11 @@ public sealed class BuildSystem : Component
 		var cam = Scene.Camera;
 		if ( !cam.IsValid() ) return;
 
-		Aim( cam, def, out var min, out var size, out var looking );
-		var (verdict, why) = Evaluate( def, min, size );
+		Aim( cam, def, out var snap, out var looking );
+		var min = snap.Min;
+		var size = snap.Size;
+		_turn = snap.Turn;   // walls turn themselves to lie along the edge they snap to
+		var (verdict, why) = (snap.Verdict, snap.Why);
 
 		ShowGhost( def, min, size, verdict );
 
@@ -211,13 +214,17 @@ public sealed class BuildSystem : Component
 
 	// ---- aiming ---------------------------------------------------------------------------------------------------------------
 
-	private Vector3Int FootprintSize( BuildPieceDef def ) => _turn % 2 == 1 ? new Vector3Int( def.Cells.y, def.Cells.x, def.Cells.z ) : def.Cells;
+	private Vector3Int FootprintSize( BuildPieceDef def, int turn ) => turn % 2 == 1 ? new Vector3Int( def.Cells.y, def.Cells.x, def.Cells.z ) : def.Cells;
+
+	private readonly record struct Snap( Vector3Int Min, Vector3Int Size, int Turn, Verdict Verdict, string Why );
+	private readonly record struct Candidate( Vector3Int Min, int Turn );
 
 	/// <summary>
-	/// Where the piece would go. The pointer is where its footprint is centred; when you look at the side of something built, the piece is put against that
-	/// face (touching, not overlapping); looking at the top of something puts it on top.
+	/// Where the piece goes: it snaps to what is already built, the way building works in Fortnite. A floor goes edge to edge next to a floor, on the same
+	/// tile lattice; a wall stands on the edge of a floor (and turns itself to lie along that edge), continues a wall, or stacks on one; a floor goes on top
+	/// of a wall. With nothing built yet it snaps to the roof's own tile lattice. Of everything that fits, the placement nearest to where you look wins.
 	/// </summary>
-	private void Aim( CameraComponent cam, BuildPieceDef def, out Vector3Int min, out Vector3Int size, out BuiltPiece looking )
+	private void Aim( CameraComponent cam, BuildPieceDef def, out Snap snap, out BuiltPiece looking )
 	{
 		looking = null;
 		var player = Scene.GetAllObjects( true ).FirstOrDefault( g => g.Components.Get<PlayerController>( true ) is not null );
@@ -226,40 +233,123 @@ public sealed class BuildSystem : Component
 
 		if ( tr.Hit && tr.GameObject.IsValid() ) looking = tr.GameObject.Components.Get<BuiltPiece>( FindMode.EverythingInSelfAndParent );
 
-		size = FootprintSize( def );
 		var frame = _grid.Frame;
 		float cell = _grid.CellSize;
-
 		var point = tr.Hit ? tr.HitPosition : cam.WorldPosition + cam.WorldRotation.Forward * 300f;
-		var lp = (frame.PointToLocal( point ) - _grid.Origin) / cell;                 // in cells, fractional
-		var normal = tr.Hit ? frame.NormalToLocal( tr.Normal ) : Vector3.Up;
+		var lp = (frame.PointToLocal( point ) - _grid.Origin) / cell;   // in cells, fractional
 
-		float roofZ = BuildLibrary.RoofLevel;
-		float zf = MathF.Floor( lp.z + 0.02f );
+		Snap? bestOk = null, bestAny = null;
+		float okDistance = float.MaxValue, anyDistance = float.MaxValue;
 
-		// centred on the pointer
-		int mx = (int)MathF.Round( lp.x - size.x * 0.5f );
-		int my = (int)MathF.Round( lp.y - size.y * 0.5f );
-		int mz = (int)zf;
-
-		if ( tr.Hit )
+		foreach ( var c in Candidates( def ) )
 		{
-			bool top = normal.z > 0.6f;
-			if ( !top )
+			var size = FootprintSize( def, c.Turn );
+			var (verdict, why) = Evaluate( def, c.Min, size );
+
+			var centre = new Vector3( c.Min.x + size.x * 0.5f, c.Min.y + size.y * 0.5f, c.Min.z + size.z * 0.5f );
+			// how far the pointer is above or below the piece's own height range (so looking at the top of a wall picks the piece stacked on it)
+			float lz = lp.z + 0.05f;
+			float dz = lz < c.Min.z ? c.Min.z - lz : lz > c.Min.z + size.z ? lz - (c.Min.z + size.z) : 0f;
+			float d = MathF.Sqrt( (centre.x - lp.x) * (centre.x - lp.x) + (centre.y - lp.y) * (centre.y - lp.y) + dz * dz );
+			if ( verdict == Verdict.NeedsNail ) d += 0.35f;   // a spot that needs no nail is preferred when two are equally near
+
+			var candidate = new Snap( c.Min, size, c.Turn, verdict, why );
+			if ( d < anyDistance ) { anyDistance = d; bestAny = candidate; }
+			if ( verdict != Verdict.Blocked && d < okDistance ) { okDistance = d; bestOk = candidate; }
+		}
+
+		// a placement that works and is near enough wins; otherwise show the nearest spot (red) with the reason
+		snap = bestOk is { } ok && okDistance < 3.2f ? ok : bestAny ?? new Snap( new Vector3Int( BuildLibrary.RoofX.Min, BuildLibrary.RoofY.Min, BuildLibrary.RoofLevel ), FootprintSize( def, _turn ), _turn, Verdict.Blocked, "Nowhere to put it" );
+	}
+
+	private int TurnFor( BuildPieceDef def, int parity )
+	{
+		// floors are square: they keep the turn you gave them; a wall lies one way or the other
+		if ( def.Cells.x == def.Cells.y ) return _turn;
+		return parity == _turn % 2 ? _turn : (_turn + 1) % 4;
+	}
+
+	private IEnumerable<Candidate> Candidates( BuildPieceDef def )
+	{
+		int roof = BuildLibrary.RoofLevel;
+		var rx = BuildLibrary.RoofX;
+		var ry = BuildLibrary.RoofY;
+		var seen = new HashSet<(int, int, int, int)>();
+		var found = new List<Candidate>();
+
+		void Add( int x, int y, int z, int turn )
+		{
+			if ( !seen.Add( (x, y, z, turn % 2) ) ) return;
+			found.Add( new Candidate( new Vector3Int( x, y, z ), turn ) );
+		}
+
+		int parities = def.Cells.x == def.Cells.y ? 1 : 2;
+
+		// 1. the roof's own tile lattice (so the first pieces already line up with each other), reaching a tile past the roof for nails
+		for ( int p = 0; p < parities; p++ )
+		{
+			int turn = TurnFor( def, p );
+			var size = FootprintSize( def, turn );
+			for ( int x = rx.Min - size.x; x < rx.Max + size.x; x += size.x )
+			for ( int y = ry.Min - size.y; y < ry.Max + size.y; y += size.y )
+				Add( x, y, roof, turn );
+		}
+
+		// 2. against what is already built
+		foreach ( var b in _built )
+		{
+			if ( !b.IsValid() ) continue;
+
+			for ( int p = 0; p < parities; p++ )
 			{
-				// the side of something: the piece goes against that face
-				if ( MathF.Abs( normal.x ) >= MathF.Abs( normal.y ) ) mx = normal.x > 0f ? (int)MathF.Round( lp.x ) : (int)MathF.Round( lp.x ) - size.x;
-				else my = normal.y > 0f ? (int)MathF.Round( lp.y ) : (int)MathF.Round( lp.y ) - size.y;
-				mz = (int)MathF.Floor( lp.z + 0.02f );
-			}
-			else
-			{
-				// the top of something: on it (the point is on the surface, so the layer is the one above it)
-				mz = (int)MathF.Round( lp.z );
+				int turn = TurnFor( def, p );
+				var size = FootprintSize( def, turn );
+
+				if ( b.Def.Layer == def.Layer )
+				{
+					// next to it on the same lattice (a piece's width along the edge, so tiles stay in step) ...
+					for ( int k = -1; k <= 1; k++ )
+					{
+						Add( b.Max.x, b.Min.y + k * size.y, b.Min.z, turn );
+						Add( b.Min.x - size.x, b.Min.y + k * size.y, b.Min.z, turn );
+						Add( b.Min.x + k * size.x, b.Max.y, b.Min.z, turn );
+						Add( b.Min.x + k * size.x, b.Min.y - size.y, b.Min.z, turn );
+					}
+
+					// ... or stacked on it, for walls
+					if ( def.Layer == "wall" ) Add( b.Min.x, b.Min.y, b.Max.z, turn );
+				}
+				else if ( def.Layer == "wall" && b.Def.Layer == "floor" )
+				{
+					// a wall stands on the edge of a floor, along that edge
+					if ( size.x == 1 )
+					{
+						for ( int k = 0; k * size.y < b.Size.y; k++ )
+						{
+							Add( b.Min.x, b.Min.y + k * size.y, b.Min.z, turn );
+							Add( b.Max.x - 1, b.Min.y + k * size.y, b.Min.z, turn );
+						}
+					}
+					if ( size.y == 1 )
+					{
+						for ( int k = 0; k * size.x < b.Size.x; k++ )
+						{
+							Add( b.Min.x + k * size.x, b.Min.y, b.Min.z, turn );
+							Add( b.Min.x + k * size.x, b.Max.y - 1, b.Min.z, turn );
+						}
+					}
+				}
+				else if ( def.Layer == "floor" && b.Def.Layer == "wall" )
+				{
+					// a floor goes on the top of a wall, its edge on the wall
+					foreach ( int x in new[] { b.Min.x, b.Max.x - size.x } )
+					foreach ( int y in new[] { b.Min.y, b.Max.y - size.y } )
+						Add( x, y, b.Max.z, turn );
+				}
 			}
 		}
 
-		min = new Vector3Int( mx, my, Math.Max( mz, (int)roofZ ) );
+		return found;
 	}
 
 	// ---- the rules -----------------------------------------------------------------------------------------------------------------
