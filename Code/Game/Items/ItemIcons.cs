@@ -106,7 +106,7 @@ public sealed class ItemIcons : Component
 		var light = lightObject.Components.Create<PointLight>();
 		light.LightColor = new Color( 1f, 0.97f, 0.92f );
 		light.Radius = distance * 4f;
-		light.Intensity = 3f;
+		light.Intensity = 1.2f;
 		light.Shadows = false;
 
 		var texture = Texture.CreateRenderTarget( "icon_" + itemId, ImageFormat.RGBA8888, new Vector2( Size, Size ) );

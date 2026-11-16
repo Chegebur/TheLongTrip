@@ -36,13 +36,16 @@ public static class Rarity
 		return $"rgba({c[0]},{c[1]},{c[2]},{alpha.ToString( System.Globalization.CultureInfo.InvariantCulture )})";
 	}
 
-	/// <summary>The look of a slot: nothing but a faint outline when empty; with an item, a soft glow of its rarity instead of a background.</summary>
+	/// <summary>
+	/// The look of a slot: nothing but a faint outline when empty; with an item, a soft glow of its rarity instead of a background. Every property is
+	/// always written (the style system only changes what it is given, so an old glow would otherwise stay on a slot after its item has gone).
+	/// </summary>
 	public static string SlotLook( string itemId, bool open = true )
 	{
-		if ( !open ) return "background-color: rgba(255,255,255,0.012); border: 2px solid rgba(255,255,255,0.06);";
-		if ( itemId is null ) return "background-color: rgba(255,255,255,0.025); border: 2px solid rgba(255,255,255,0.16);";
+		if ( !open ) return "background-image: none; box-shadow: none; border-color: rgba(255,255,255,0.05);";
+		if ( itemId is null ) return "background-image: none; box-shadow: none; border-color: rgba(255,255,255,0.10);";
 
 		int r = Of( itemId );
-		return $"background-image: radial-gradient(circle, {Css( r, 0.42f )} 0%, {Css( r, 0.10f )} 78%); border: 2px solid {Css( r, 0.65f )}; box-shadow: 0 0 16px {Css( r, 0.42f )};";
+		return $"background-image: radial-gradient(circle, {Css( r, 0.42f )} 0%, {Css( r, 0.08f )} 80%); border-color: {Css( r, 0.65f )}; box-shadow: 0 0 18px {Css( r, 0.40f )};";
 	}
 }

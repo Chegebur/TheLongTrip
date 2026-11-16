@@ -25,7 +25,7 @@
 		@for ( int i = 0; i < SlotNames.Length; i++ )
 		{
 			int slot = i;
-			<div style="position: relative; display: flex; align-items: center; justify-content: center; width: 84px; height: 84px; margin: 0 5px; border-radius: 10px; @Rarity.SlotLook( string.IsNullOrEmpty( SlotNames[slot] ) ? null : SlotIds[slot] ) @(slot == Selected ? "border: 3px solid rgba(255,255,255,0.95);" : (slot == Equipped ? "border: 3px solid rgba(120,200,255,0.9);" : "")) color: white;">
+			<div style="position: relative; display: flex; align-items: center; justify-content: center; width: 84px; height: 84px; margin: 0 5px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.12); @Rarity.SlotLook( string.IsNullOrEmpty( SlotNames[slot] ) ? null : SlotIds[slot] ) @(slot == Selected ? "border: 3px solid rgba(255,255,255,0.95);" : (slot == Equipped ? "border: 3px solid rgba(120,200,255,0.9);" : "")) color: white;">
 				<div style="position: absolute; left: 7px; top: 3px; font-size: 15px; opacity: 0.75;">@(slot + 1)</div>
 				@{ var pic = ItemIcons.Icon( SlotIds[slot] ); }
 				@if ( pic is not null && !string.IsNullOrEmpty( SlotNames[slot] ) ) { <Image Texture=@pic style="width: 62px; height: 62px;" /> }

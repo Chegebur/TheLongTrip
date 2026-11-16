@@ -1,0 +1,602 @@
+InventoryHud
+{
+	.overlay
+	{
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		background-color: rgba(3, 5, 9, 0.68);
+		pointer-events: all;
+		color: white;
+		font-size: 14px;
+
+		&.hidden
+		{
+			display: none;
+		}
+	}
+
+	.window
+	{
+		display: flex;
+		flex-direction: column;
+		width: 960px;
+		border-radius: 18px;
+		background-image: linear-gradient(180deg, rgba(27, 32, 44, 0.98), rgba(13, 16, 23, 0.98));
+		border: 1px solid rgba(255, 255, 255, 0.10);
+		box-shadow: 0 28px 90px rgba(0, 0, 0, 0.7);
+		pointer-events: all;
+	}
+
+	.titlebar
+	{
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		padding: 14px 22px;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+
+		.title
+		{
+			font-size: 15px;
+			font-weight: 700;
+			letter-spacing: 4px;
+			color: rgba(255, 255, 255, 0.92);
+		}
+
+		.hint
+		{
+			font-size: 12px;
+			color: rgba(255, 255, 255, 0.4);
+			margin-right: 12px;
+		}
+
+		.close
+		{
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 28px;
+			height: 28px;
+			border-radius: 8px;
+			font-size: 15px;
+			color: rgba(255, 255, 255, 0.55);
+			background-color: rgba(255, 255, 255, 0.05);
+			pointer-events: all;
+
+			&:hover
+			{
+				background-color: rgba(255, 110, 100, 0.28);
+				color: white;
+			}
+		}
+	}
+
+	.body
+	{
+		display: flex;
+		flex-direction: column;
+		padding: 18px 22px 22px 22px;
+	}
+
+	.caption
+	{
+		font-size: 11px;
+		line-height: 14px;
+		font-weight: 700;
+		letter-spacing: 3px;
+		color: rgba(255, 255, 255, 0.38);
+		margin-bottom: 8px;
+	}
+
+	.top
+	{
+		display: flex;
+		flex-direction: row;
+		height: 408px;
+	}
+
+	.col
+	{
+		display: flex;
+		flex-direction: column;
+	}
+
+	.slots
+	{
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		flex-grow: 1;
+	}
+
+	// ---- slots ----
+	.slot
+	{
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 84px;
+		height: 84px;
+		flex-shrink: 0;
+		border-radius: 14px;
+		border: 2px solid rgba(255, 255, 255, 0.10);
+		background-color: rgba(255, 255, 255, 0.025);
+		pointer-events: all;
+
+		.hl
+		{
+			position: absolute;
+			left: -2px;
+			top: -2px;
+			right: -2px;
+			bottom: -2px;
+			border-radius: 14px;
+			border: 2px solid rgba(255, 255, 255, 0.85);
+			opacity: 0;
+			pointer-events: none;
+		}
+
+		&:hover .hl
+		{
+			opacity: 0.55;
+		}
+
+		&.selected .hl
+		{
+			opacity: 1;
+		}
+
+		&.locked
+		{
+			background-color: rgba(255, 255, 255, 0.01);
+			border-color: rgba(255, 255, 255, 0.05);
+
+			&:hover .hl
+			{
+				opacity: 0;
+			}
+		}
+
+		.icon
+		{
+			width: 62px;
+			height: 62px;
+			pointer-events: none;
+		}
+
+		.tag
+		{
+			font-size: 11px;
+			letter-spacing: 2px;
+			font-weight: 600;
+			color: rgba(255, 255, 255, 0.28);
+			pointer-events: none;
+		}
+
+		.num
+		{
+			position: absolute;
+			left: 8px;
+			top: 4px;
+			font-size: 12px;
+			font-weight: 700;
+			color: rgba(255, 255, 255, 0.5);
+			pointer-events: none;
+		}
+	}
+
+	.rowlabel
+	{
+		width: 84px;
+		flex-shrink: 0;
+		font-size: 12px;
+		line-height: 15px;
+		font-weight: 600;
+		color: rgba(255, 255, 255, 0.55);
+
+		&.off
+		{
+			color: rgba(255, 255, 255, 0.22);
+		}
+	}
+
+	.packrow
+	{
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+
+		.slot
+		{
+			margin-right: 10px;
+		}
+	}
+
+	// ---- the character ----
+	.character
+	{
+		position: relative;
+		width: 296px;
+		flex-shrink: 0;
+		margin: 0 18px;
+		border-radius: 16px;
+		border: 1px solid rgba(255, 255, 255, 0.10);
+		background-image: radial-gradient(circle, rgba(70, 82, 110, 0.35), rgba(0, 0, 0, 0.45));
+		overflow: hidden;
+		pointer-events: all;
+
+		.scene
+		{
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+		}
+
+		.note
+		{
+			position: absolute;
+			left: 0;
+			right: 0;
+			bottom: 8px;
+			text-align: center;
+			font-size: 11px;
+			letter-spacing: 2px;
+			color: rgba(255, 255, 255, 0.35);
+			pointer-events: none;
+		}
+	}
+
+	// ---- crafting ----
+	.crafting
+	{
+		display: flex;
+		flex-direction: row;
+		height: 300px;
+		margin-top: 18px;
+		padding: 14px;
+		border-radius: 16px;
+		background-color: rgba(255, 255, 255, 0.03);
+		border: 1px solid rgba(255, 255, 255, 0.09);
+	}
+
+	.recipes
+	{
+		display: flex;
+		flex-direction: column;
+		width: 452px;
+		flex-shrink: 0;
+		overflow: hidden;
+
+		.grid
+		{
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			align-content: flex-start;
+		}
+	}
+
+	.recipe
+	{
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		width: 136px;
+		height: 62px;
+		flex-shrink: 0;
+		margin: 0 8px 8px 0;
+		padding: 5px 9px;
+		overflow: hidden;
+		border-radius: 12px;
+		font-size: 13px;
+		font-weight: 600;
+		line-height: 15px;
+		pointer-events: all;
+
+		&:hover
+		{
+			background-color: rgba(255, 255, 255, 0.07);
+		}
+
+		.pic
+		{
+			width: 42px;
+			height: 42px;
+			flex-shrink: 0;
+			margin-right: 8px;
+			pointer-events: none;
+		}
+
+		.name
+		{
+			min-width: 0;
+			overflow: hidden;
+			pointer-events: none;
+		}
+	}
+
+	.detail
+	{
+		display: flex;
+		flex-direction: row;
+		flex-grow: 1;
+		min-width: 0;
+		margin-left: 14px;
+		padding: 12px;
+		overflow: hidden;
+		border-radius: 14px;
+		background-color: rgba(0, 0, 0, 0.25);
+		border: 1px solid rgba(255, 255, 255, 0.07);
+
+		.preview
+		{
+			position: relative;
+			width: 168px;
+			height: 168px;
+			border-radius: 12px;
+			background-image: radial-gradient(circle, rgba(70, 82, 110, 0.30), rgba(0, 0, 0, 0.5));
+			overflow: hidden;
+		}
+
+		.info
+		{
+			display: flex;
+			flex-direction: column;
+			flex-grow: 1;
+			min-width: 0;
+			margin-left: 16px;
+			overflow: hidden;
+			font-size: 14px;
+			line-height: 19px;
+
+			.name
+			{
+				font-size: 20px;
+				line-height: 24px;
+				font-weight: 700;
+			}
+
+			.desc
+			{
+				margin-top: 4px;
+				color: rgba(255, 255, 255, 0.72);
+			}
+
+			.needs
+			{
+				margin-top: 12px;
+				font-size: 11px;
+				letter-spacing: 3px;
+				font-weight: 700;
+				color: rgba(255, 255, 255, 0.38);
+			}
+
+			.need
+			{
+				margin-top: 3px;
+				color: rgba(225, 232, 242, 0.95);
+
+				&.missing
+				{
+					color: rgb(238, 128, 118);
+				}
+			}
+		}
+	}
+
+	.craftbtn
+	{
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 168px;
+		height: 42px;
+		margin-top: 12px;
+		border-radius: 12px;
+		font-size: 15px;
+		font-weight: 700;
+		letter-spacing: 3px;
+		background-color: rgba(255, 255, 255, 0.06);
+		color: rgba(255, 255, 255, 0.35);
+		pointer-events: all;
+
+		&.ready
+		{
+			background-image: linear-gradient(180deg, rgba(88, 200, 150, 0.95), rgba(44, 150, 108, 0.95));
+			color: white;
+			box-shadow: 0 0 18px rgba(70, 200, 140, 0.35);
+
+			&:hover
+			{
+				background-image: linear-gradient(180deg, rgba(110, 222, 172, 1), rgba(58, 170, 124, 1));
+			}
+		}
+	}
+
+	// ---- the hotbar ----
+	.hotbar
+	{
+		display: flex;
+		flex-direction: column;
+		margin-top: 18px;
+
+		.row
+		{
+			display: flex;
+			flex-direction: row;
+			justify-content: center;
+
+			.slot
+			{
+				margin: 0 6px;
+			}
+		}
+	}
+
+	// ---- status ----
+	.status
+	{
+		display: flex;
+		flex-direction: column;
+		width: 276px;
+		flex-shrink: 0;
+		margin-left: 20px;
+		margin-top: 96px;
+		align-self: flex-start;
+		padding: 18px 20px;
+		border-radius: 18px;
+		background-image: linear-gradient(180deg, rgba(27, 32, 44, 0.98), rgba(13, 16, 23, 0.98));
+		border: 1px solid rgba(255, 255, 255, 0.10);
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+		font-size: 15px;
+		font-weight: 600;
+		pointer-events: all;
+
+		.bar
+		{
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			margin-bottom: 12px;
+
+			.label
+			{
+				width: 62px;
+				flex-shrink: 0;
+				font-size: 13px;
+				color: rgba(255, 255, 255, 0.7);
+			}
+
+			.track
+			{
+				flex-grow: 1;
+				min-width: 0;
+				height: 12px;
+				border-radius: 6px;
+				background-color: rgba(255, 255, 255, 0.09);
+				overflow: hidden;
+
+				.fill
+				{
+					height: 12px;
+					border-radius: 6px;
+				}
+			}
+
+			.value
+			{
+				width: 34px;
+				margin-left: 8px;
+				flex-shrink: 0;
+				text-align: right;
+				font-size: 13px;
+				color: rgba(255, 255, 255, 0.55);
+			}
+		}
+
+		.row
+		{
+			margin-top: 5px;
+			font-weight: 500;
+			font-size: 14px;
+			color: rgba(255, 255, 255, 0.85);
+		}
+
+		.sep
+		{
+			height: 1px;
+			margin: 12px 0;
+			background-color: rgba(255, 255, 255, 0.08);
+		}
+
+		.help
+		{
+			margin-top: 14px;
+			font-size: 12px;
+			line-height: 17px;
+			font-weight: 400;
+			color: rgba(255, 255, 255, 0.38);
+		}
+	}
+
+	// ---- the item on the cursor and the hover menu ----
+	.dragging
+	{
+		position: absolute;
+		left: 0;
+		top: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 68px;
+		height: 68px;
+		pointer-events: none;
+	}
+
+	.tip
+	{
+		position: absolute;
+		left: 0;
+		top: 0;
+		display: flex;
+		flex-direction: column;
+		width: 272px;
+		padding: 14px 16px;
+		border-radius: 12px;
+		background-color: rgba(9, 12, 18, 0.98);
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		pointer-events: none;
+
+		.t-name
+		{
+			font-size: 18px;
+			line-height: 22px;
+			font-weight: 700;
+		}
+
+		.t-sub
+		{
+			font-size: 11px;
+			line-height: 15px;
+			letter-spacing: 2px;
+			color: rgba(255, 255, 255, 0.5);
+			margin-bottom: 8px;
+		}
+
+		.t-desc
+		{
+			font-size: 14px;
+			line-height: 18px;
+			color: rgba(255, 255, 255, 0.82);
+			margin-bottom: 8px;
+		}
+
+		.t-line
+		{
+			font-size: 13px;
+			line-height: 18px;
+			color: rgba(255, 255, 255, 0.88);
+		}
+
+		.t-hint
+		{
+			margin-top: 10px;
+			padding-top: 8px;
+			border-top: 1px solid rgba(255, 255, 255, 0.08);
+			font-size: 12px;
+			line-height: 15px;
+			color: rgba(255, 255, 255, 0.4);
+		}
+	}
+}

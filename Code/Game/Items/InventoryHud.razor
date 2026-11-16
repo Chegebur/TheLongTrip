@@ -4,180 +4,203 @@
 @namespace LongTrip.Gameplay
 
 <root>
-	<div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: @(Open ? "flex" : "none"); flex-direction: row; align-items: center; justify-content: center; background-color: rgba(4,6,10,0.62); pointer-events: all;">
+	<div class="overlay @(Open ? "" : "hidden")">
 
-		<div @ref="_dialog" style="display: flex; flex-direction: column; align-items: stretch; width: 940px; padding: 22px; border-radius: 16px; background-color: rgba(18,22,30,0.96); border: 2px solid rgba(255,255,255,0.12); color: white; pointer-events: all;">
+		<div @ref="_dialog" class="window">
 
-			@* ---- top: armor, the character, pockets and backpack ---- *@
-			<div style="display: flex; flex-direction: row; height: 400px;">
-
-				<div style="display: flex; flex-direction: column; justify-content: space-between; width: 92px; flex-shrink: 0;">
-					@for ( int a = 0; a < 4; a++ )
-					{
-						int armor = a;
-						var worn = Inv?.Armor[armor];
-						var pic = IconOf( worn );
-						<div onmousedown=@(() => BeginDrag( "arm", armor )) onmouseup=@FinishDrag slotid="arm:@armor" onmouseover=@(() => Hover( "arm", armor )) onmouseout=@Unhover onrightclick=@(() => RightClick( "arm", armor )) style="position: relative; display: flex; align-items: center; justify-content: center; width: 92px; height: 92px; overflow: hidden; border-radius: 10px; @Rarity.SlotLook( worn?.ItemId ) pointer-events: all;">
-							@if ( worn is null )
-							{
-								<div style="font-size: 13px; line-height: 15px; letter-spacing: 1px; opacity: 0.35; pointer-events: none;">@(new[] { "HEAD", "CHEST", "LEGS", "FEET" }[armor])</div>
-							}
-							else if ( pic is not null )
-							{
-								<Image Texture=@pic style="width: 68px; height: 68px; pointer-events: none;" />
-							}
-						</div>
-					}
+			<div class="titlebar">
+				<div class="title">INVENTORY</div>
+				<div style="display: flex; flex-direction: row; align-items: center;">
+					<div class="hint">Tab to close</div>
+					<div class="close" onclick=@Close>X</div>
 				</div>
+			</div>
 
-				<div style="position: relative; width: 300px; flex-shrink: 0; margin: 0 16px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.22); background-color: rgba(0,0,0,0.35); overflow: hidden; pointer-events: all;" onmousedown=@StartSpin>
-					<ScenePanel @ref="_charPanel" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%;" />
-					<div style="position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font-size: 13px; opacity: 0.5; pointer-events: none;">Drag to turn</div>
-				</div>
+			<div class="body">
 
-				<div style="display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1;">
-					@for ( int row = 0; row < 4; row++ )
-					{
-						int r = row;
-						<div style="display: flex; flex-direction: row; align-items: center; height: 92px;">
-							<div style="width: 70px; flex-shrink: 0; font-size: 13px; opacity: @(Unlocked( r * 4 ) ? "0.7" : "0.3"); line-height: 15px;">@(new[] { "Pockets", "Small pack", "Medium pack", "Large pack" }[r])</div>
-							@for ( int col = 0; col < 4; col++ )
+				@* ---- equipment, the character, pockets and packs ---- *@
+				<div class="top">
+
+					<div class="col" style="width: 84px; flex-shrink: 0;">
+						<div class="caption">WORN</div>
+						<div class="slots">
+							@for ( int a = 0; a < 4; a++ )
 							{
-								int idx = r * 4 + col;
-								bool open = Unlocked( idx );
-								var stored = Inv?.Storage[idx];
-								var pic = IconOf( stored );
-								<div onmousedown=@(() => BeginDrag( "bag", idx )) onmouseup=@FinishDrag slotid="bag:@idx" onmouseover=@(() => Hover( "bag", idx )) onmouseout=@Unhover onrightclick=@(() => RightClick( "bag", idx )) style="display: flex; align-items: center; justify-content: center; width: 82px; height: 82px; flex-shrink: 0; margin-right: 8px; overflow: hidden; border-radius: 10px; @Rarity.SlotLook( open ? stored?.ItemId : null, open ) pointer-events: all;">
-									@if ( !open )
+								int armor = a;
+								var worn = Inv?.Armor[armor];
+								var pic = IconOf( worn );
+								<div class="slot" slotid="arm:@armor" onmousedown=@(() => BeginDrag( "arm", armor )) onmouseup=@FinishDrag onmouseover=@(() => Hover( "arm", armor )) onmouseout=@Unhover onrightclick=@(() => RightClick( "arm", armor )) style="@Rarity.SlotLook( worn?.ItemId )">
+									<div class="hl"></div>
+									@if ( worn is null )
 									{
-										<div style="font-size: 12px; opacity: 0.22; pointer-events: none;">locked</div>
+										<div class="tag">@(new[] { "HEAD", "BODY", "LEGS", "FEET" }[armor])</div>
 									}
-									else if ( stored is not null && pic is not null )
+									else if ( pic is not null )
 									{
-										<Image Texture=@pic style="width: 60px; height: 60px; pointer-events: none;" />
+										<Image class="icon" Texture=@pic />
 									}
 								</div>
 							}
 						</div>
-					}
+					</div>
+
+					<div class="character" onmousedown=@StartSpin>
+						<ScenePanel @ref="_charPanel" class="scene" />
+						<div class="note">DRAG TO TURN</div>
+					</div>
+
+					<div class="col" style="flex-grow: 1;">
+						<div class="caption">CARRIED</div>
+						<div class="slots">
+							@for ( int row = 0; row < 4; row++ )
+							{
+								int r = row;
+								<div class="packrow">
+									<div class="rowlabel @(Unlocked( r * 4 ) ? "" : "off")">@(new[] { "Pockets", "Small pack", "Medium pack", "Large pack" }[r])</div>
+									@for ( int col = 0; col < 4; col++ )
+									{
+										int idx = r * 4 + col;
+										bool open = Unlocked( idx );
+										var stored = Inv?.Storage[idx];
+										var pic = IconOf( stored );
+										<div class="slot @(open ? "" : "locked")" slotid="bag:@idx" onmousedown=@(() => BeginDrag( "bag", idx )) onmouseup=@FinishDrag onmouseover=@(() => Hover( "bag", idx )) onmouseout=@Unhover onrightclick=@(() => RightClick( "bag", idx )) style="@Rarity.SlotLook( open ? stored?.ItemId : null, open )">
+											<div class="hl"></div>
+											@if ( !open )
+											{
+												<div class="tag">LOCKED</div>
+											}
+											else if ( stored is not null && pic is not null )
+											{
+												<Image class="icon" Texture=@pic />
+											}
+										</div>
+									}
+								</div>
+							}
+						</div>
+					</div>
 				</div>
-			</div>
 
-			@* ---- pocket crafting ---- *@
-			<div style="display: flex; flex-direction: row; height: 300px; margin-top: 16px; padding: 12px; border-radius: 12px; background-color: rgba(255,255,255,0.04); border: 2px solid rgba(255,255,255,0.18);">
+				@* ---- pocket crafting ---- *@
+				<div class="crafting">
+					<div class="recipes">
+						<div class="caption">POCKET CRAFTING</div>
+						<div class="grid">
+							@for ( int i = 0; i < Recipes.Count; i++ )
+							{
+								int recipe = i;
+								bool can = CanCraft( Recipes[recipe] );
+								int rarity = Rarity.Of( Recipes[recipe].Output );
+								var pic = ItemIcons.Icon( Recipes[recipe].Output );
+								<div class="recipe" onclick=@(() => SelectRecipe( recipe )) style="background-image: radial-gradient(circle, @Rarity.Css( rarity, recipe == _recipe ? 0.34f : 0.14f ) 0%, @Rarity.Css( rarity, 0.03f ) 85%); border: 2px solid @Rarity.Css( rarity, recipe == _recipe ? 0.95f : 0.25f ); opacity: @(can ? "1" : "0.55");">
+									@if ( pic is not null ) { <Image class="pic" Texture=@pic /> }
+									<div class="name">@Recipes[recipe].Name</div>
+								</div>
+							}
+						</div>
+					</div>
 
-				<div style="display: flex; flex-direction: column; width: 440px; flex-shrink: 0; padding: 8px; overflow: hidden; border-radius: 10px; border: 2px solid rgba(255,255,255,0.2); background-color: rgba(0,0,0,0.22);">
-					<div style="font-size: 14px; line-height: 16px; opacity: 0.6; margin-bottom: 8px;">Pocket crafting</div>
-					<div style="display: flex; flex-direction: row; flex-wrap: wrap; align-content: flex-start;">
-						@for ( int i = 0; i < Recipes.Count; i++ )
+					<div class="detail">
+						<div style="display: flex; flex-direction: column; flex-shrink: 0;">
+							<div class="preview">
+								<ScenePanel @ref="_recipePanel" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%;" />
+							</div>
+							<div class="craftbtn @(SelectedCanCraft ? "ready" : "")" onclick=@Craft>CRAFT</div>
+						</div>
+						<div class="info">
+							@if ( Selected is not null )
+							{
+								<div class="name" style="color: @Rarity.Css( Rarity.Of( Selected.Output ), 1f );">@Selected.Name@(Selected.OutputCount > 1 ? $" x{Selected.OutputCount}" : "")</div>
+								<div class="desc">@Selected.Description</div>
+								<div class="needs">NEEDS</div>
+								@foreach ( var (item, count) in Selected.Inputs )
+								{
+									int have = Inv?.Count( item ) ?? 0;
+									<div class="need @(have >= count ? "" : "missing")">@count x @(ItemLibrary.Get( item )?.Name ?? item)  (@have)</div>
+								}
+							}
+							else
+							{
+								<div class="desc">No recipes</div>
+							}
+						</div>
+					</div>
+				</div>
+
+				@* ---- the hotbar ---- *@
+				<div class="hotbar">
+					<div class="caption" style="margin-left: 6px;">HOTBAR</div>
+					<div class="row">
+						@for ( int h = 0; h < 6; h++ )
 						{
-							int recipe = i;
-							bool can = CanCraft( Recipes[recipe] );
-							int rarity = Rarity.Of( Recipes[recipe].Output );
-							var pic = ItemIcons.Icon( Recipes[recipe].Output );
-							<div onclick=@(() => SelectRecipe( recipe )) style="display: flex; flex-direction: row; align-items: center; width: 132px; height: 60px; flex-shrink: 0; margin: 0 6px 6px 0; padding: 4px 8px; overflow: hidden; border-radius: 8px; background-image: radial-gradient(circle, @Rarity.Css( rarity, recipe == _recipe ? 0.35f : 0.16f ) 0%, @Rarity.Css( rarity, 0.04f ) 80%); border: 2px solid @Rarity.Css( rarity, recipe == _recipe ? 0.9f : 0.35f ); font-size: 13px; font-weight: 600; line-height: 15px; opacity: @(can ? "1" : "0.5"); pointer-events: all;">
-								@if ( pic is not null ) { <Image Texture=@pic style="width: 40px; height: 40px; flex-shrink: 0; margin-right: 6px; pointer-events: none;" /> }
-								<div style="min-width: 0; overflow: hidden; pointer-events: none;">@Recipes[recipe].Name</div>
+							int slot = h;
+							var hot = Inv?.Hotbar?.Get( slot );
+							var pic = IconOf( hot );
+							<div class="slot @(slot == HotSelected ? "selected" : "")" slotid="hot:@slot" onmousedown=@(() => BeginDrag( "hot", slot )) onmouseup=@FinishDrag onmouseover=@(() => Hover( "hot", slot )) onmouseout=@Unhover onrightclick=@(() => RightClick( "hot", slot )) style="@Rarity.SlotLook( hot?.ItemId )">
+								<div class="hl"></div>
+								<div class="num">@(slot + 1)</div>
+								@if ( hot is not null && pic is not null )
+								{
+									<Image class="icon" Texture=@pic />
+								}
+								else if ( hot is null && slot == HeldSlot )
+								{
+									<div class="tag">IN HAND</div>
+								}
 							</div>
 						}
 					</div>
 				</div>
-
-				<div style="display: flex; flex-direction: row; flex-grow: 1; min-width: 0; margin-left: 12px; padding: 8px; overflow: hidden; border-radius: 10px; border: 2px solid rgba(255,255,255,0.2); background-color: rgba(0,0,0,0.22);">
-					<div style="display: flex; flex-direction: column; width: 170px; flex-shrink: 0;">
-						<div style="position: relative; width: 170px; height: 170px; border-radius: 8px; background-color: rgba(0,0,0,0.35); overflow: hidden;">
-							<ScenePanel @ref="_recipePanel" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%;" />
-						</div>
-						<div onclick=@Craft style="margin-top: 10px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 18px; font-weight: 700; background-color: rgba(255,255,255,@(SelectedCanCraft ? "0.22" : "0.06")); opacity: @(SelectedCanCraft ? "1" : "0.5"); pointer-events: all;">Craft</div>
-					</div>
-					<div style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0; margin-left: 14px; overflow: hidden; font-size: 14px; line-height: 18px;">
-						@if ( Selected is not null )
-						{
-							<div style="font-size: 19px; line-height: 22px; font-weight: 700; color: @Rarity.Css( Rarity.Of( Selected.Output ), 1f );">@Selected.Name@(Selected.OutputCount > 1 ? $" x{Selected.OutputCount}" : "")</div>
-							<div style="margin-top: 4px; opacity: 0.8;">@Selected.Description</div>
-							<div style="margin-top: 10px; font-size: 12px; line-height: 14px; opacity: 0.55;">NEEDS</div>
-							@foreach ( var (item, count) in Selected.Inputs )
-							{
-								int have = Inv?.Count( item ) ?? 0;
-								<div style="margin-top: 2px; color: @(have >= count ? "rgb(220,230,240)" : "rgb(230,120,110)");">@count x @(ItemLibrary.Get( item )?.Name ?? item) (@have)</div>
-							}
-						}
-						else
-						{
-							<div style="opacity: 0.5;">No recipes</div>
-						}
-					</div>
-				</div>
-			</div>
-
-			@* ---- the hotbar ---- *@
-			<div style="display: flex; flex-direction: row; justify-content: center; margin-top: 16px;">
-				@for ( int h = 0; h < 6; h++ )
-				{
-					int slot = h;
-					var hot = Inv?.Hotbar?.Get( slot );
-					var pic = IconOf( hot );
-					<div onmousedown=@(() => BeginDrag( "hot", slot )) onmouseup=@FinishDrag slotid="hot:@slot" onmouseover=@(() => Hover( "hot", slot )) onmouseout=@Unhover onrightclick=@(() => RightClick( "hot", slot )) style="position: relative; display: flex; align-items: center; justify-content: center; width: 82px; height: 82px; flex-shrink: 0; margin: 0 5px; overflow: hidden; border-radius: 10px; @Rarity.SlotLook( hot?.ItemId ) @(slot == HotSelected ? "border: 2px solid rgba(255,255,255,0.9);" : "") pointer-events: all;">
-						<div style="position: absolute; left: 7px; top: 3px; font-size: 12px; line-height: 14px; opacity: 0.6; pointer-events: none;">@(slot + 1)</div>
-						@if ( hot is not null && pic is not null )
-						{
-							<Image Texture=@pic style="width: 60px; height: 60px; pointer-events: none;" />
-						}
-						else if ( hot is null && slot == HeldSlot )
-						{
-							<div style="font-size: 12px; opacity: 0.5; pointer-events: none;">in hand</div>
-						}
-					</div>
-				}
 			</div>
 		</div>
 
 		@* ---- status ---- *@
-		<div style="display: flex; flex-direction: column; width: 270px; flex-shrink: 0; margin-left: 18px; padding: 18px; align-self: flex-start; margin-top: 90px; border-radius: 16px; background-color: rgba(18,22,30,0.96); border: 2px solid rgba(255,255,255,0.12); color: white; font-size: 16px; line-height: 20px; font-weight: 600;">
-			<div style="font-size: 12px; line-height: 14px; opacity: 0.5; margin-bottom: 10px;">STATUS</div>
+		<div class="status">
+			<div class="caption">STATUS</div>
 			@foreach ( var (label, value, color) in Bars() )
 			{
-				<div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 10px;">
-					<div style="width: 70px; flex-shrink: 0;">@label</div>
-					<div style="flex-grow: 1; height: 16px; border-radius: 8px; background-color: rgba(255,255,255,0.15);">
-						<div style="width: @((int)Math.Clamp( value, 0f, 100f ))%; height: 16px; border-radius: 8px; background-color: @color;"></div>
-					</div>
+				<div class="bar">
+					<div class="label">@label</div>
+					<div class="track"><div class="fill" style="width: @((int)Math.Clamp( value, 0f, 100f ))%; background-color: @color;"></div></div>
+					<div class="value">@((int)value)</div>
 				</div>
 			}
-			<div style="margin-top: 6px; font-size: 12px; line-height: 14px; opacity: 0.5;">ARMOR</div>
-			<div style="margin-top: 2px; margin-bottom: 12px;">@((int)((1f - (Inv?.DamageFactor ?? 1f)) * 100f))% less damage</div>
-			<div style="font-size: 12px; line-height: 14px; opacity: 0.5;">WORLD</div>
+			<div class="sep"></div>
+			<div class="caption">ARMOR</div>
+			<div class="row">@((int)((1f - (Inv?.DamageFactor ?? 1f)) * 100f))% less damage taken</div>
+			<div class="sep"></div>
+			<div class="caption">WORLD</div>
 			@if ( Info is not null )
 			{
 				@foreach ( var line in Info )
 				{
-					<div style="margin-top: 4px; font-weight: 500;">@line</div>
+					<div class="row">@line</div>
 				}
 			}
-			<div style="margin-top: 14px; font-size: 13px; opacity: 0.5; line-height: 17px; font-weight: 400;">Drag items between slots. Hover for details. Right click sends an item to the other bar or puts armor on. Tab closes.</div>
+			<div class="help">Drag items between slots. Hover for details. Right click sends an item to the other bar or puts armor on.</div>
 		</div>
 
 		@* ---- the item on the cursor (moved every frame by code) ---- *@
-		<div @ref="_dragPanel" style="position: absolute; left: 0; top: 0; display: @(_cursor is not null ? "flex" : "none"); align-items: center; justify-content: center; width: 64px; height: 64px; pointer-events: none;">
+		<div @ref="_dragPanel" class="dragging" style="display: @(_cursor is not null ? "flex" : "none");">
 			@{ var dragPic = IconOf( _cursor ); }
-			@if ( dragPic is not null ) { <Image Texture=@dragPic style="width: 64px; height: 64px;" /> }
+			@if ( dragPic is not null ) { <Image Texture=@dragPic style="width: 68px; height: 68px;" /> }
 		</div>
 
 		@* ---- the hover menu ---- *@
-		<div @ref="_tipPanel" style="position: absolute; left: 0; top: 0; display: @(TipVisible ? "flex" : "none"); flex-direction: column; width: 270px; padding: 12px 14px; border-radius: 10px; background-color: rgba(10,13,19,0.97); border: 2px solid @Rarity.Css( TipRarity, 0.8f ); box-shadow: 0 0 18px @Rarity.Css( TipRarity, 0.35f ); color: white; pointer-events: none;">
-			<div style="font-size: 18px; line-height: 22px; font-weight: 700; color: @Rarity.Css( TipRarity, 1f );">@TipName</div>
-			<div style="font-size: 12px; line-height: 15px; opacity: 0.6; margin-bottom: 6px;">@TipSubtitle</div>
+		<div @ref="_tipPanel" class="tip" style="display: @(TipVisible ? "flex" : "none"); border-color: @Rarity.Css( TipRarity, 0.75f ); box-shadow: 0 0 22px @Rarity.Css( TipRarity, 0.30f );">
+			<div class="t-name" style="color: @Rarity.Css( TipRarity, 1f );">@TipName</div>
+			<div class="t-sub">@TipSubtitle</div>
 			@if ( !string.IsNullOrEmpty( TipDescription ) )
 			{
-				<div style="font-size: 14px; line-height: 18px; opacity: 0.85; margin-bottom: 6px;">@TipDescription</div>
+				<div class="t-desc">@TipDescription</div>
 			}
 			@foreach ( var line in TipLines )
 			{
-				<div style="font-size: 13px; line-height: 17px; opacity: 0.9;">@line</div>
+				<div class="t-line">@line</div>
 			}
 			@if ( !string.IsNullOrEmpty( TipHint ) )
 			{
-				<div style="margin-top: 8px; font-size: 12px; line-height: 15px; opacity: 0.5;">@TipHint</div>
+				<div class="t-hint">@TipHint</div>
 			}
 		</div>
 	</div>
@@ -256,6 +279,9 @@
 
 		UpdateScenes();
 	}
+
+	/// <summary>The close button.</summary>
+	private void Close() { if ( Open ) Toggle(); }
 
 	private void Toggle()
 	{
