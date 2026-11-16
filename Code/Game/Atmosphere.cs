@@ -57,6 +57,8 @@ public sealed class Atmosphere : Component
 	private SkyBox2D _sky;
 
 	private Look _current;
+	private Rotation _sunHome;
+	private float _night;
 	private bool _first = true;
 
 	protected override void OnStart()
@@ -64,6 +66,7 @@ public sealed class Atmosphere : Component
 		_world = Components.Get<WorldStreamer>() ?? Scene.GetAllComponents<WorldStreamer>().FirstOrDefault();
 		_car = Components.Get<CarSession>() ?? Scene.GetAllComponents<CarSession>().FirstOrDefault();
 		_sun = Scene.GetAllComponents<DirectionalLight>().FirstOrDefault();
+		if ( _sun.IsValid() ) _sunHome = _sun.WorldRotation;
 		_ambient = Scene.GetAllComponents<AmbientLight>().FirstOrDefault();
 		_sky = Scene.GetAllComponents<SkyBox2D>().FirstOrDefault();
 		Components.GetOrCreate<Weather>();
@@ -101,14 +104,14 @@ public sealed class Atmosphere : Component
 		float k = _first ? 1f : 1f - MathF.Exp( -Follow * Time.Delta );
 		_first = false;
 		_current = _current.FogEnd == 0 ? target : Mix( _current, target, k );
-		Apply( Tweak( WithWeather( _current ) ) );
+		Apply( Tweak( TimeOfDay( WithWeather( _current ) ) ) );
 
 		// ---- camera: speed-sensitive FOV and vignette
 		float speed = _car.IsValid() && _car.Controller.IsValid() ? _car.Controller.SpeedMs : 0f;
 		float s = Math.Clamp( speed / 40f, 0f, 1f );
 
 		if ( _vignette.IsValid() )
-			_vignette.Intensity = MathX.Lerp( G.VignetteStanding, G.VignetteSpeed, s );
+			_vignette.Intensity = MathX.Lerp( G.VignetteStanding, G.VignetteSpeed, s ) + _night * 0.22f;
 
 		// The chase camera owns the FOV while driving; on foot we ease back to the base value.
 		if ( !(_car.IsValid() && _car.IsDriving) )
@@ -137,6 +140,56 @@ public sealed class Atmosphere : Component
 		l.Ambient = l.Ambient * w.Dim + Color.White * (w.Flash * 0.35f);
 		l.Saturation *= 1f - w.Desaturate;
 		l.SkyTint = Color.Lerp( l.SkyTint, l.SkyTint * w.Tint, 0.8f ) * MathX.Lerp( 1f, 0.28f, 1f - w.Light );
+		return l;
+	}
+
+	private static float Smooth( float a, float b, float x ) { float t = Math.Clamp( (x - a) / (b - a), 0f, 1f ); return t * t * (3f - 2f * t); }
+
+	/// <summary>
+	/// Day and night on top of the biome and weather look. Day: stronger, warmer sun and richer colour. Sunset: an orange glow low in the sky.
+	/// Night: the sun becomes a faint blue moon, ambient light almost goes out, the fog is dark and closes in, and the colour drains: a dark, quiet,
+	/// slightly wrong world where the headlights and flashlight are what you see by.
+	/// </summary>
+	private Look TimeOfDay( Look l )
+	{
+		var g = G;
+		float e = g.SunElevation;
+		float night = 1f - Smooth( -9f, 5f, e);
+		float day = Smooth( 8f, 35f, e );
+		float glow = MathF.Exp( -MathF.Pow( (e - 4f) / 9f, 2f ) ) * (1f - night * 0.6f) * g.SunsetGlow;
+		_night = night;
+
+		// the sun goes round: east to west across the sky, and the moon takes its place at night
+		if ( _sun.IsValid() )
+		{
+			float pitch = Math.Clamp( MathF.Abs( e ), 6f, 72f );
+			float yaw = _sunHome.Angles().yaw + (g.Hour - 12f) * 15f + (night > 0.5f ? 180f : 0f);
+			_sun.WorldRotation = Rotation.From( pitch, yaw, 0f );
+		}
+
+		// daylight: sunnier and more vibrant
+		l.SunIntensity *= MathX.Lerp( 1f, g.DaySun, day );
+		l.Saturation *= MathX.Lerp( 1f, g.DayVibrance, day );
+		l.Contrast *= MathX.Lerp( 1f, 1.05f, day );
+		l.Ambient = l.Ambient * MathX.Lerp( 1f, 1.15f, day );
+
+		// sunset and sunrise
+		l.Sun = Color.Lerp( l.Sun, new Color( 1f, 0.52f, 0.25f ), glow );
+		l.SunIntensity *= MathX.Lerp( 1f, 0.85f, glow );
+		l.FogColor = Color.Lerp( l.FogColor, new Color( 0.95f, 0.55f, 0.35f ), glow * 0.55f );
+		l.SkyTint = Color.Lerp( l.SkyTint, new Color( 1f, 0.62f, 0.45f ), glow * 0.6f );
+
+		// night
+		float nb = g.NightBrightness;
+		l.Sun = Color.Lerp( l.Sun, new Color( 0.42f, 0.58f, 1f ), night );
+		l.SunIntensity = MathX.Lerp( l.SunIntensity, 0.11f * nb, night );
+		l.Ambient = Color.Lerp( l.Ambient, new Color( 0.014f, 0.024f, 0.05f ) * nb, night );
+		l.FogColor = Color.Lerp( l.FogColor, new Color( 0.012f, 0.022f, 0.04f ) * MathF.Min( 1f, nb ), night );
+		l.FogStart *= MathX.Lerp( 1f, 1f - g.NightFog * 0.8f, night );
+		l.FogEnd *= MathX.Lerp( 1f, 1f - g.NightFog * 0.7f, night );
+		l.SkyTint = Color.Lerp( l.SkyTint, new Color( 0.012f, 0.02f, 0.05f ) * MathF.Min( 1.5f, nb ), night );
+		l.Saturation *= MathX.Lerp( 1f, 1f - g.NightDrain, night );
+		l.Contrast *= MathX.Lerp( 1f, 1.12f, night );
 		return l;
 	}
 

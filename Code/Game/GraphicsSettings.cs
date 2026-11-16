@@ -15,6 +15,21 @@ public sealed class GraphicsSettings : Component
 {
 	public static GraphicsSettings Instance { get; private set; }
 
+	// ---- time of day ---------------------------------------------------------------------------------------------------------------
+
+	[Property, Group( "Time of day" ), Range( 0f, 24f ), Title( "Hour (0-24, 12 = noon)" )] public float Hour { get; set; } = 9f;
+	[Property, Group( "Time of day" ), Range( 0.5f, 120f ), Title( "Minutes for a whole day" )] public float DayLengthMinutes { get; set; } = 24f;
+	[Property, Group( "Time of day" ), Title( "Freeze time" )] public bool FreezeTime { get; set; }
+	[Property, Group( "Time of day" ), Range( 0f, 3f ), Title( "Daylight: sunshine" )] public float DaySun { get; set; } = 1.3f;
+	[Property, Group( "Time of day" ), Range( 0.5f, 2f ), Title( "Daylight: vibrance" )] public float DayVibrance { get; set; } = 1.2f;
+	[Property, Group( "Time of day" ), Range( 0f, 1f ), Title( "Sunset: orange glow" )] public float SunsetGlow { get; set; } = 0.8f;
+	[Property, Group( "Time of day" ), Range( 0f, 4f ), Title( "Night: moonlight and ambient (0 = pitch dark)" )] public float NightBrightness { get; set; } = 1f;
+	[Property, Group( "Time of day" ), Range( 0f, 1f ), Title( "Night: fog closing in" )] public float NightFog { get; set; } = 0.65f;
+	[Property, Group( "Time of day" ), Range( 0f, 1f ), Title( "Night: drained colour" )] public float NightDrain { get; set; } = 0.45f;
+
+	/// <summary>Sun height above the horizon in degrees (negative: night).</summary>
+	public float SunElevation => MathF.Sin( (Hour - 6f) / 24f * MathF.PI * 2f ) * 68f;
+
 	// ---- light -------------------------------------------------------------------------------------------------------------------
 
 	[Property, Group( "Light" ), Range( 0f, 4f ), Title( "Sun brightness" )] public float SunBrightness { get; set; } = 1f;
@@ -60,6 +75,7 @@ public sealed class GraphicsSettings : Component
 	[Button( "Reset to defaults" )]
 	public void ResetToDefaults()
 	{
+		Hour = 9f; DayLengthMinutes = 24f; FreezeTime = false; DaySun = 1.3f; DayVibrance = 1.2f; SunsetGlow = 0.8f; NightBrightness = 1f; NightFog = 0.65f; NightDrain = 0.45f;
 		SunBrightness = AmbientBrightness = SkyBrightness = OtherLights = 1f;
 		SunTint = AmbientTint = SkyTint = FogTint = Color.White;
 		FogEnabled = true; FogDistance = FogStart = FogFalloff = 1f;
@@ -78,6 +94,7 @@ public sealed class GraphicsSettings : Component
 	protected override void OnUpdate()
 	{
 		Instance = this;
+		if ( !FreezeTime ) Hour = (Hour + Time.Delta / (DayLengthMinutes * 60f) * 24f) % 24f;
 
 		var cam = Scene.Camera;
 		if ( cam.IsValid() )
