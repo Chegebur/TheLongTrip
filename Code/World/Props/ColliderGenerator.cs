@@ -8,16 +8,17 @@ namespace LongTrip.World.Props;
 /// <list type="number">
 /// <item>If the model came with its own collision (authored physics), that is used as it is.</item>
 /// <item>Otherwise the triangles are rasterised into a voxel grid, the air outside is flood-filled away (so a sealed hollow is solid but a door or
-/// an arch stays open), and the solid voxels are merged into as few boxes as possible. The boxes become a collision-only model for a
-/// <see cref="ModelCollider"/>. It works for static things (rocks, fences, walls) and for loose items on a rigid body alike.</item>
+/// an arch stays open), and the solid voxels are merged into a few regions. Each region becomes one <b>convex hull</b> fitted to the model's own
+/// vertices inside it (so a rock is round, not boxy), reduced to a few dozen points, and the hulls become a collision-only model for a
+/// <see cref="ModelCollider"/>. A handful of tight convex pieces is far cheaper for the physics engine than a triangle mesh or dozens of boxes. It works for static things (rocks, fences, walls) and for loose items on a rigid body alike.</item>
 /// <item>If a single box would fit the shape about as well (a crate, a floor tile), nothing is generated and the caller keeps its box.</item>
 /// </list>
 /// Results are cached per model, so a thousand rocks share one generated collision.
 /// </summary>
 public static class ColliderGenerator
 {
-	/// <summary>The most boxes one model may get; the voxels are coarsened until it fits.</summary>
-	public const int MaxBoxes = 24;
+	/// <summary>The most convex pieces one model may get; the voxels are coarsened until it fits.</summary>
+	public const int MaxBoxes = 10;
 
 	/// <summary>How full its bounding box must be before one box is considered good enough.</summary>
 	public const float SingleBoxFill = 0.74f;
@@ -85,28 +86,85 @@ public static class ColliderGenerator
 		float longest = MathF.Max( size.x, MathF.Max( size.y, size.z ) );
 		if ( longest < 0.01f ) return null;
 
-		// start fine (about 28 cells along the longest side) and coarsen until the box count is acceptable
-		for ( float cells = 28f; cells >= 6f; cells *= 0.75f )
-		{
-			var boxes = Voxelise( verts, indices, bounds, longest / cells, out float fill );
-			if ( boxes.Count == 0 ) return null;
-			if ( boxes.Count > MaxBoxes && cells > 6.5f ) continue;
+		// does one box fit well enough? Judged on a fine grid, so the answer does not depend on how coarsely the pieces are cut below
+		Voxelise( verts, indices, bounds, longest / 28f, out float fineFill, out _ );
+		if ( fineFill >= SingleBoxFill ) { _boxes[model] = 0; return null; }
 
-			// a plain box fits well enough: nothing to generate
-			if ( fill >= SingleBoxFill ) { _boxes[model] = 0; return null; }
+		// start at about 8 cells along the longest side and refine while the piece count stays small: fewer, bigger pieces are cheaper
+		for ( float cells = 14f; cells >= 3f; cells *= 0.75f )
+		{
+			var boxes = Voxelise( verts, indices, bounds, longest / cells, out float fill, out var ownerOf );
+			if ( boxes.Count == 0 ) return null;
+			if ( boxes.Count > MaxBoxes && cells > 3.5f ) continue;
+
+			// the model's own vertices, grouped by the region they fall in
+			var groups = new List<Vector3>[boxes.Count];
+			for ( int i = 0; i < groups.Length; i++ ) groups[i] = new List<Vector3>();
+			foreach ( var v in verts )
+			{
+				int g = ownerOf( v.Position );
+				if ( g >= 0 ) groups[g].Add( v.Position );
+			}
 
 			var builder = Model.Builder;
-			foreach ( var (centre, half) in boxes )
-				builder = builder.AddCollisionBox( half, centre, Rotation.Identity );
+			int pieces = 0;
+			for ( int i = 0; i < boxes.Count; i++ )
+			{
+				var points = Reduce( groups[i] );
+				if ( points.Count >= 5 && !Flat( points ) ) builder = builder.AddCollisionHull( points );
+				else builder = builder.AddCollisionBox( boxes[i].Half, boxes[i].Centre, Rotation.Identity );
+				pieces++;
+			}
 			var made = builder.Create();
-			if ( made is not null ) _boxes[model] = boxes.Count;
+			if ( made is not null ) _boxes[model] = pieces;
 			return made;
 		}
 		return null;
 	}
 
+	/// <summary>True when all the points lie (nearly) in a plane or a line: no volume for a hull to have.</summary>
+	private static bool Flat( List<Vector3> points )
+	{
+		var lo = points[0]; var hi = points[0];
+		foreach ( var p in points ) { lo = Vector3.Min( lo, p ); hi = Vector3.Max( hi, p ); }
+		var d = hi - lo;
+		float biggest = MathF.Max( d.x, MathF.Max( d.y, d.z ) );
+		return d.x < biggest * 0.02f || d.y < biggest * 0.02f || d.z < biggest * 0.02f;
+	}
+
+	private static readonly Vector3[] Directions = BuildDirections();
+
+	private static Vector3[] BuildDirections()
+	{
+		var list = new List<Vector3>();
+		for ( int x = -1; x <= 1; x++ )
+		for ( int y = -1; y <= 1; y++ )
+		for ( int z = -1; z <= 1; z++ )
+			if ( x != 0 || y != 0 || z != 0 ) list.Add( new Vector3( x, y, z ).Normal );
+		return list.ToArray();
+	}
+
+	/// <summary>The points that matter for a convex hull: the extreme ones in each of 26 directions (at most 26, no duplicates).</summary>
+	private static List<Vector3> Reduce( List<Vector3> points )
+	{
+		var kept = new List<Vector3>();
+		if ( points.Count == 0 ) return kept;
+		foreach ( var dir in Directions )
+		{
+			var best = points[0];
+			float bestDot = float.MinValue;
+			foreach ( var p in points )
+			{
+				float d = Vector3.Dot( p, dir );
+				if ( d > bestDot ) { bestDot = d; best = p; }
+			}
+			if ( !kept.Contains( best ) ) kept.Add( best );
+		}
+		return kept;
+	}
+
 	/// <summary>Rasterise, fill, merge. Returns box centres and half sizes (model space), and how much of the bounds is solid.</summary>
-	private static List<(Vector3 Centre, Vector3 Half)> Voxelise( Vertex[] verts, uint[] indices, BBox bounds, float cell, out float fill )
+	private static List<(Vector3 Centre, Vector3 Half)> Voxelise( Vertex[] verts, uint[] indices, BBox bounds, float cell, out float fill, out Func<Vector3, int> ownerOf )
 	{
 		var min = bounds.Mins;
 		int nx = Math.Max( 1, (int)MathF.Ceiling( bounds.Size.x / cell ) );
@@ -181,6 +239,8 @@ public static class ColliderGenerator
 
 		// merge into boxes: a run along x, widened along y, then thickened along z
 		var used = new bool[solid.Length];
+		var owner = new int[solid.Length];
+		Array.Fill( owner, -1 );
 		var boxes = new List<(Vector3, Vector3)>();
 		for ( int z = 1; z <= nz; z++ )
 		for ( int y = 1; y <= ny; y++ )
@@ -212,12 +272,23 @@ public static class ColliderGenerator
 			for ( int zi = z; zi <= z1; zi++ )
 			for ( int yi = y; yi <= y1; yi++ )
 			for ( int xi = x; xi <= x1; xi++ )
+			{
 				used[I( xi, yi, zi )] = true;
+				owner[I( xi, yi, zi )] = boxes.Count;
+			}
 
 			var lo = min + new Vector3( (x - 1) * step.x, (y - 1) * step.y, (z - 1) * step.z );
 			var hi = min + new Vector3( x1 * step.x, y1 * step.y, z1 * step.z );
 			boxes.Add( ((lo + hi) * 0.5f, (hi - lo) * 0.5f) );
 		}
+		// which region a point of the model falls in (-1: none)
+		ownerOf = p =>
+		{
+			int x = Math.Clamp( (int)MathF.Floor( (p.x - min.x) / step.x ), 0, nx - 1 );
+			int y = Math.Clamp( (int)MathF.Floor( (p.y - min.y) / step.y ), 0, ny - 1 );
+			int z = Math.Clamp( (int)MathF.Floor( (p.z - min.z) / step.z ), 0, nz - 1 );
+			return owner[I( x + 1, y + 1, z + 1 )];
+		};
 		return boxes;
 	}
 }
