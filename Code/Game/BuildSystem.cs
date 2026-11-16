@@ -235,31 +235,71 @@ public sealed class BuildSystem : Component
 
 		var frame = _grid.Frame;
 		float cell = _grid.CellSize;
-		var point = tr.Hit ? tr.HitPosition : cam.WorldPosition + cam.WorldRotation.Forward * 300f;
-		var lp = (frame.PointToLocal( point ) - _grid.Origin) / cell;   // in cells, fractional
 
-		Snap? bestOk = null, bestAny = null;
-		float okDistance = float.MaxValue, anyDistance = float.MaxValue;
+		// the crosshair ray in cell units, in the grid's own frame
+		var o = (frame.PointToLocal( cam.WorldPosition ) - _grid.Origin) / cell;
+		var dir = frame.Rotation.Inverse * cam.WorldRotation.Forward;
+		float reach = 800f / cell;
+		float wall = tr.Hit ? tr.Distance / cell : reach;   // something solid (the car, a built piece) stops the ray here
+
+		Snap? bestHit = null, bestNear = null, bestAny = null;
+		float hitT = float.MaxValue, nearD = float.MaxValue, anyD = float.MaxValue;
 
 		foreach ( var c in Candidates( def ) )
 		{
 			var size = FootprintSize( def, c.Turn );
 			var (verdict, why) = Evaluate( def, c.Min, size );
-
-			var centre = new Vector3( c.Min.x + size.x * 0.5f, c.Min.y + size.y * 0.5f, c.Min.z + size.z * 0.5f );
-			// how far the pointer is above or below the piece's own height range (so looking at the top of a wall picks the piece stacked on it)
-			float lz = lp.z + 0.05f;
-			float dz = lz < c.Min.z ? c.Min.z - lz : lz > c.Min.z + size.z ? lz - (c.Min.z + size.z) : 0f;
-			float d = MathF.Sqrt( (centre.x - lp.x) * (centre.x - lp.x) + (centre.y - lp.y) * (centre.y - lp.y) + dz * dz );
-			if ( verdict == Verdict.NeedsNail ) d += 0.35f;   // a spot that needs no nail is preferred when two are equally near
-
 			var candidate = new Snap( c.Min, size, c.Turn, verdict, why );
-			if ( d < anyDistance ) { anyDistance = d; bestAny = candidate; }
-			if ( verdict != Verdict.Blocked && d < okDistance ) { okDistance = d; bestOk = candidate; }
+
+			var lo = new Vector3( c.Min.x, c.Min.y, c.Min.z );
+			var hi = new Vector3( c.Min.x + size.x, c.Min.y + size.y, c.Min.z + size.z );
+			bool hits = RayBox( o, dir, lo, hi, out float t ) && t <= reach;
+
+			// closest the ray comes to the middle of the piece (in cells)
+			var centre = (lo + hi) * 0.5f;
+			float along = MathF.Max( 0f, Vector3.Dot( centre - o, dir ) );
+			float miss = (centre - (o + dir * along)).Length;
+
+			float penalty = verdict == Verdict.NeedsNail ? 0.15f : 0f;   // equally good: prefer the spot that needs no nail
+
+			if ( miss + penalty < anyD ) { anyD = miss + penalty; bestAny = candidate; }
+			if ( verdict == Verdict.Blocked ) continue;
+
+			// a piece the ray passes through, not hidden behind something solid (a little slack so pieces can be placed against a surface)
+			if ( hits && t <= wall + 0.6f && t + penalty < hitT ) { hitT = t + penalty; bestHit = candidate; }
+			else if ( miss + penalty < nearD ) { nearD = miss + penalty; bestNear = candidate; }
 		}
 
-		// a placement that works and is near enough wins; otherwise show the nearest spot (red) with the reason
-		snap = bestOk is { } ok && okDistance < 3.2f ? ok : bestAny ?? new Snap( new Vector3Int( BuildLibrary.RoofX.Min, BuildLibrary.RoofY.Min, BuildLibrary.RoofLevel ), FootprintSize( def, _turn ), _turn, Verdict.Blocked, "Nowhere to put it" );
+		// 1. the piece you are looking through, 2. the nearest one to the crosshair (only if close), 3. show the nearest spot in red with the reason
+		if ( bestHit is { } h ) snap = h;
+		else if ( bestNear is { } n && nearD < 1.2f ) snap = n;
+		else snap = bestAny ?? new Snap( new Vector3Int( BuildLibrary.RoofX.Min, BuildLibrary.RoofY.Min, BuildLibrary.RoofLevel ), FootprintSize( def, _turn ), _turn, Verdict.Blocked, "Nowhere to put it" );
+	}
+
+	/// <summary>Slab test: does the ray cross the box, and at what distance along it?</summary>
+	private static bool RayBox( Vector3 o, Vector3 d, Vector3 lo, Vector3 hi, out float tNear )
+	{
+		float t0 = 0f, t1 = float.MaxValue;
+		tNear = 0f;
+		for ( int i = 0; i < 3; i++ )
+		{
+			float oi = i == 0 ? o.x : i == 1 ? o.y : o.z;
+			float di = i == 0 ? d.x : i == 1 ? d.y : d.z;
+			float l = i == 0 ? lo.x : i == 1 ? lo.y : lo.z;
+			float h = i == 0 ? hi.x : i == 1 ? hi.y : hi.z;
+			if ( MathF.Abs( di ) < 1e-6f )
+			{
+				if ( oi < l || oi > h ) return false;
+				continue;
+			}
+			float a = (l - oi) / di, b = (h - oi) / di;
+			if ( a > b ) (a, b) = (b, a);
+			t0 = MathF.Max( t0, a );
+			t1 = MathF.Min( t1, b );
+			if ( t0 > t1 ) return false;
+		}
+		tNear = t0;
+		return true;
 	}
 
 	private int TurnFor( BuildPieceDef def, int parity )
@@ -488,12 +528,18 @@ public sealed class BuildSystem : Component
 		}
 	}
 
-	/// <summary>Where a piece sits (in the grid's frame): centred over its cells, standing on the bottom of them.</summary>
-	private Vector3 PieceLocalPosition( BuildPieceDef def, Vector3Int min, Vector3Int size, Model model )
+	/// <summary>
+	/// Where a piece's pivot goes (in the grid's frame). The models' pivots are not at their middles (some are metres away), so the middle of the
+	/// scaled model is what is centred over the piece's cells, standing on the bottom of them, and the pivot goes wherever that puts it.
+	/// </summary>
+	private Vector3 PieceLocalPosition( BuildPieceDef def, Vector3Int min, Vector3Int size, Model model, int turn )
 	{
 		float cell = _grid.CellSize;
-		float height = model is null ? 0f : model.Bounds.Size.z * ScaleOf( def, model ).z;
-		return _grid.Origin + new Vector3( (min.x + size.x * 0.5f) * cell, (min.y + size.y * 0.5f) * cell, min.z * cell + height * 0.5f + def.Rest );
+		var scale = model is null ? Vector3.One : ScaleOf( def, model );
+		var centre = model is null ? Vector3.Zero : model.Bounds.Center * scale;
+		float height = model is null ? 0f : model.Bounds.Size.z * scale.z;
+		var middle = _grid.Origin + new Vector3( (min.x + size.x * 0.5f) * cell, (min.y + size.y * 0.5f) * cell, min.z * cell + height * 0.5f + def.Rest );
+		return middle - Rotation.FromYaw( turn * 90f ) * centre;
 	}
 
 	private void ShowGhost( BuildPieceDef def, Vector3Int min, Vector3Int size, Verdict verdict )
@@ -516,7 +562,7 @@ public sealed class BuildSystem : Component
 
 		var frame = _grid.Frame;
 		_ghost.WorldScale = ScaleOf( def, model );
-		_ghost.WorldPosition = frame.PointToWorld( PieceLocalPosition( def, min, size, model ) );
+		_ghost.WorldPosition = frame.PointToWorld( PieceLocalPosition( def, min, size, model, _turn ) );
 		_ghost.WorldRotation = frame.Rotation * Rotation.FromYaw( _turn * 90f );
 		_ghostRenderer.Tint = verdict switch
 		{
@@ -537,7 +583,7 @@ public sealed class BuildSystem : Component
 		go.Name = "Built " + def.Name;
 		go.Flags |= GameObjectFlags.NotSaved;
 		go.SetParent( anchor, false );
-		go.LocalPosition = PieceLocalPosition( def, min, size, model );
+		go.LocalPosition = PieceLocalPosition( def, min, size, model, _turn );
 		go.LocalRotation = Rotation.FromYaw( _turn * 90f );
 		go.LocalScale = ScaleOf( def, model );
 
