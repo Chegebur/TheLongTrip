@@ -145,6 +145,8 @@ public sealed class Weather : Component
 		(WeatherKind, float)[] options;
 		if ( biome == BiomeLibrary.Desert )
 			options = new[] { (WeatherKind.Clear, 6f), (WeatherKind.Dust, 2.5f), (WeatherKind.Overcast, 1.5f), (WeatherKind.Fog, 0.4f), (WeatherKind.Storm, 0.4f), (WeatherKind.Sandstorm, 1.2f), (WeatherKind.HeavyOvercast, 0.5f) };
+		else if ( biome == BiomeLibrary.Forest )
+			options = new[] { (WeatherKind.Clear, 3.5f), (WeatherKind.Overcast, 2.5f), (WeatherKind.Rain, 3.5f), (WeatherKind.Storm, 1f), (WeatherKind.Fog, 2.2f), (WeatherKind.HeavyRain, 1.8f), (WeatherKind.HeavyOvercast, 1f), (WeatherKind.DenseFog, 1f) };
 		else if ( biome == BiomeLibrary.IcePlains )
 			options = new[] { (WeatherKind.Clear, 3f), (WeatherKind.Snow, 4f), (WeatherKind.Blizzard, 1.5f), (WeatherKind.Overcast, 2f), (WeatherKind.Fog, 1f), (WeatherKind.HeavySnow, 1.5f), (WeatherKind.DenseFog, 0.5f) };
 		else

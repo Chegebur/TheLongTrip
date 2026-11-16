@@ -165,11 +165,17 @@ public sealed class WorldGenerator
 
 	private int[] _regionBiomes;
 
+	/// <summary>The biome the road starts in (the forest, if this world has one).</summary>
+	public int StartBiome
+	{
+		get { int i = Array.IndexOf( Biomes, BiomeLibrary.Forest ); return i >= 0 ? i : 0; }
+	}
+
 	private void BuildRegionTable()
 	{
 		int n = Biomes.Length;
 		var table = new int[PrecomputedRegions];
-		table[0] = 0; // the road always starts in the first biome (Desert)
+		table[0] = StartBiome; // the road always starts in the forest
 		for ( int r = 1; r < table.Length; r++ )
 		{
 			// Always move to a *different* biome than the previous stretch.
@@ -183,7 +189,7 @@ public sealed class WorldGenerator
 	public int BiomeOfRegion( long region )
 	{
 		// The start of the road (and anything behind it) is the first biome, so the spawn is never mid-blend.
-		if ( region <= 0 ) return 0;
+		if ( region <= 0 ) return StartBiome;
 		if ( region < PrecomputedRegions ) return _regionBiomes[region];
 
 		// Beyond the table: still deterministic, just no longer guaranteed to differ from the previous stretch.

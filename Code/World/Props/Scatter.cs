@@ -12,7 +12,7 @@ public sealed class ScatterDefinition
 	/// <summary>"wild" (anywhere off the road), "roadside" (on the verge next to the road) or "civ" (near houses).</summary>
 	public string Zone = "wild";
 
-	/// <summary>Biomes it appears in: "desert", "grasslands", "ice". Empty: all.</summary>
+	/// <summary>Biomes it appears in: "desert", "grasslands", "ice", "forest". Empty: all.</summary>
 	public string[] Biomes = Array.Empty<string>();
 
 	public float Weight = 1f;
@@ -124,6 +124,7 @@ public static class ScatterLibrary
 		var b = gen.Biomes[gen.DominantBiome( x, y )];
 		if ( b == BiomeLibrary.Desert ) return "desert";
 		if ( b == BiomeLibrary.IcePlains ) return "ice";
+		if ( b == BiomeLibrary.Forest ) return "forest";
 		return "grasslands";
 	}
 
@@ -159,14 +160,16 @@ public static class ScatterLibrary
 		// ---- wild: anywhere away from the road, thicker where vegetation would be
 		// Things in nature come in groups: a few cluster centres per chunk, everything gathers round them (a boulder with smaller rocks
 		// at its feet, a patch of shrubs) and the gaps between stay empty.
-		int wild = (int)(WildPerChunk * density);
-		int clusters = 3 + (int)(R( 7000 ) * 4f);
+		// a forest is thick all over: more props, in many wide clusters that run together
+		bool forest = BiomeName( gen, x0 + size * 0.5f, y0 + size * 0.5f ) == "forest";
+		int wild = (int)(WildPerChunk * density * (forest ? 3.4f : 1f));
+		int clusters = forest ? 14 + (int)(R( 7000 ) * 6f) : 3 + (int)(R( 7000 ) * 4f);
 		for ( int a = 0; a < wild; a++ )
 		{
 			int c = a % clusters;
 			float cx = x0 + R( 7100 + c * 2 ) * size, cy = y0 + R( 7101 + c * 2 ) * size;
 			float ang = R( a * 11 + 0 ) * MathF.PI * 2f;
-			float rad = MathF.Pow( R( a * 11 + 1 ), 1.6f ) * (500f + R( 7200 + c ) * 900f);
+			float rad = MathF.Pow( R( a * 11 + 1 ), forest ? 1.1f : 1.6f ) * ((forest ? 1300f : 500f) + R( 7200 + c ) * (forest ? 1500f : 900f));
 			float px = cx + MathF.Cos( ang ) * rad, py = cy + MathF.Sin( ang ) * rad;
 			if ( px < x0 || px >= x0 + size || py < y0 || py >= y0 + size ) continue;
 			float dist = MathF.Abs( py - gen.RoadCenterY( px ) );

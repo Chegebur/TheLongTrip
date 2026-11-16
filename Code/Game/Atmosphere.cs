@@ -21,7 +21,7 @@ public sealed class Atmosphere : Component
 		public Color SkyTint;
 	}
 
-	// Index = BiomeLibrary.All index: Desert, Grasslands, Ice Plains, spare.
+	// Index = BiomeLibrary.All index: Desert, Grasslands, Ice Plains, Forest.
 	private static readonly Look[] Looks =
 	{
 		// Desert: warm, dusty haze
@@ -36,6 +36,10 @@ public sealed class Atmosphere : Component
 		new Look { FogColor = new Color( 0.78f, 0.86f, 0.97f ), FogStart = 2500, FogEnd = 42000, FogExponent = 1.1f,
 			Sun = new Color( 0.96f, 0.98f, 1.00f ), SunIntensity = 1.55f, Ambient = new Color( 0.42f, 0.50f, 0.62f ),
 			Saturation = 1.00f, Contrast = 1.04f, SkyTint = new Color( 0.95f, 0.98f, 1.05f ) },
+		// Forest: green-grey air, shorter sight lines, softer light under the canopy
+		new Look { FogColor = new Color( 0.62f, 0.72f, 0.66f ), FogStart = 1800, FogEnd = 30000, FogExponent = 1.2f,
+			Sun = new Color( 1.00f, 0.95f, 0.80f ), SunIntensity = 1.5f, Ambient = new Color( 0.34f, 0.44f, 0.40f ),
+			Saturation = 1.12f, Contrast = 1.06f, SkyTint = new Color( 0.96f, 1.00f, 0.96f ) },
 	};
 
 	/// <summary>How quickly the look follows the biome (per second). Biome blends are long, so this is gentle.</summary>

@@ -89,11 +89,25 @@ public static class BiomeLibrary
 		MountainHeight = 3200f,
 	};
 
+	/// <summary>Dense woodland: gently rolling, soft forest floor, trees everywhere (see scatter.json). The biome the road starts in.</summary>
+	public static readonly Biome Forest = new()
+	{
+		Name = "Forest",
+		AltAmount = 0.55f,   // bare dirt between the trees
+		ExtraAmount = 0.45f, // leafy grass
+		HillHeight = 520f,
+		HillScale = 6000f,
+		RidgeHeight = 40f,
+		RidgeScale = 1800f,
+		DetailHeight = 10f,
+		MountainHeight = 1500f,
+	};
+
 	/// <summary>
-	/// All biomes the generator can pick from. Index 0 is the starting biome. The index is also the
+	/// All biomes the generator can pick from. The starting biome is <see cref="Forest"/> (see <c>WorldGenerator.StartBiome</c>). The index is also the
 	/// biome's slot in the terrain shader (<c>BIOME_TABLE</c>), which currently has room for 4.
 	/// </summary>
-	public static readonly Biome[] All = { Desert, Grasslands, IcePlains };
+	public static readonly Biome[] All = { Desert, Grasslands, IcePlains, Forest };
 
 	public const int MaxBiomes = 4;
 }

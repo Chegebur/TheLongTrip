@@ -184,6 +184,94 @@
         1.5
       ],
       "collide": "upright"
+    },
+    {
+      "id": "forest_oak",
+      "model": "models/sbox_props/trees/oak/tree_oak_big_a.vmdl",
+      "zone": "wild",
+      "biomes": [
+        "forest"
+      ],
+      "weight": 44,
+      "scale": [
+        0.5,
+        0.9
+      ],
+      "collide": "upright",
+      "lean": 2
+    },
+    {
+      "id": "forest_pine_bush_a",
+      "model": "models/sbox_props/shrubs/pine/pine_bush_regular_a.vmdl",
+      "zone": "wild",
+      "biomes": [
+        "forest"
+      ],
+      "weight": 7,
+      "scale": [
+        1.0,
+        1.8
+      ],
+      "collide": "none",
+      "vegetation": true
+    },
+    {
+      "id": "forest_pine_bush_c",
+      "model": "models/sbox_props/shrubs/pine/pine_bush_regular_c.vmdl",
+      "zone": "wild",
+      "biomes": [
+        "forest"
+      ],
+      "weight": 7,
+      "scale": [
+        1.0,
+        1.8
+      ],
+      "collide": "none",
+      "vegetation": true
+    },
+    {
+      "id": "forest_beech_bush",
+      "model": "models/sbox_props/shrubs/beech/beech_bush_large.vmdl",
+      "zone": "wild",
+      "biomes": [
+        "forest"
+      ],
+      "weight": 6,
+      "scale": [
+        1.0,
+        1.8
+      ],
+      "collide": "none",
+      "vegetation": true
+    },
+    {
+      "id": "forest_grass_a",
+      "model": "models/sbox_props/nature/grass_clumps/grass_clump_a.vmdl",
+      "zone": "wild",
+      "biomes": [
+        "forest"
+      ],
+      "weight": 8,
+      "scale": [
+        1.5,
+        2.8
+      ],
+      "collide": "none"
+    },
+    {
+      "id": "forest_grass_b",
+      "model": "models/sbox_props/nature/grass_clumps/grass_clump_b.vmdl",
+      "zone": "wild",
+      "biomes": [
+        "forest"
+      ],
+      "weight": 8,
+      "scale": [
+        1.5,
+        2.8
+      ],
+      "collide": "none"
     }
   ]
 }
