@@ -4,9 +4,9 @@
 @namespace LongTrip.Gameplay
 
 <root>
-	<div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: @(Open ? "flex" : "none"); flex-direction: row; align-items: center; justify-content: center; background-color: rgba(4,6,10,0.62); pointer-events: all;" onmouseup=@DropOutside>
+	<div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: @(Open ? "flex" : "none"); flex-direction: row; align-items: center; justify-content: center; background-color: rgba(4,6,10,0.62); pointer-events: all;">
 
-		<div style="display: flex; flex-direction: column; align-items: stretch; width: 940px; padding: 22px; border-radius: 16px; background-color: rgba(18,22,30,0.96); border: 2px solid rgba(255,255,255,0.12); color: white; pointer-events: all;" onmouseup=@DropInside>
+		<div @ref="_dialog" style="display: flex; flex-direction: column; align-items: stretch; width: 940px; padding: 22px; border-radius: 16px; background-color: rgba(18,22,30,0.96); border: 2px solid rgba(255,255,255,0.12); color: white; pointer-events: all;">
 
 			@* ---- top: armor, the character, pockets and backpack ---- *@
 			<div style="display: flex; flex-direction: row; height: 400px;">
@@ -17,7 +17,7 @@
 						int armor = a;
 						var worn = Inv?.Armor[armor];
 						var pic = IconOf( worn );
-						<div onmousedown=@(() => BeginDrag( "arm", armor )) onmouseup=@(() => EndDrag( "arm", armor )) onmouseover=@(() => Hover( "arm", armor )) onmouseout=@Unhover onrightclick=@(() => RightClick( "arm", armor )) style="position: relative; display: flex; align-items: center; justify-content: center; width: 92px; height: 92px; overflow: hidden; border-radius: 10px; @Rarity.SlotLook( worn?.ItemId ) pointer-events: all;">
+						<div onmousedown=@(() => BeginDrag( "arm", armor )) onmouseup=@FinishDrag slotid="arm:@armor" onmouseover=@(() => Hover( "arm", armor )) onmouseout=@Unhover onrightclick=@(() => RightClick( "arm", armor )) style="position: relative; display: flex; align-items: center; justify-content: center; width: 92px; height: 92px; overflow: hidden; border-radius: 10px; @Rarity.SlotLook( worn?.ItemId ) pointer-events: all;">
 							@if ( worn is null )
 							{
 								<div style="font-size: 13px; line-height: 15px; letter-spacing: 1px; opacity: 0.35; pointer-events: none;">@(new[] { "HEAD", "CHEST", "LEGS", "FEET" }[armor])</div>
@@ -47,7 +47,7 @@
 								bool open = Unlocked( idx );
 								var stored = Inv?.Storage[idx];
 								var pic = IconOf( stored );
-								<div onmousedown=@(() => BeginDrag( "bag", idx )) onmouseup=@(() => EndDrag( "bag", idx )) onmouseover=@(() => Hover( "bag", idx )) onmouseout=@Unhover onrightclick=@(() => RightClick( "bag", idx )) style="display: flex; align-items: center; justify-content: center; width: 82px; height: 82px; flex-shrink: 0; margin-right: 8px; overflow: hidden; border-radius: 10px; @Rarity.SlotLook( open ? stored?.ItemId : null, open ) pointer-events: all;">
+								<div onmousedown=@(() => BeginDrag( "bag", idx )) onmouseup=@FinishDrag slotid="bag:@idx" onmouseover=@(() => Hover( "bag", idx )) onmouseout=@Unhover onrightclick=@(() => RightClick( "bag", idx )) style="display: flex; align-items: center; justify-content: center; width: 82px; height: 82px; flex-shrink: 0; margin-right: 8px; overflow: hidden; border-radius: 10px; @Rarity.SlotLook( open ? stored?.ItemId : null, open ) pointer-events: all;">
 									@if ( !open )
 									{
 										<div style="font-size: 12px; opacity: 0.22; pointer-events: none;">locked</div>
@@ -117,7 +117,7 @@
 					int slot = h;
 					var hot = Inv?.Hotbar?.Get( slot );
 					var pic = IconOf( hot );
-					<div onmousedown=@(() => BeginDrag( "hot", slot )) onmouseup=@(() => EndDrag( "hot", slot )) onmouseover=@(() => Hover( "hot", slot )) onmouseout=@Unhover onrightclick=@(() => RightClick( "hot", slot )) style="position: relative; display: flex; align-items: center; justify-content: center; width: 82px; height: 82px; flex-shrink: 0; margin: 0 5px; overflow: hidden; border-radius: 10px; @Rarity.SlotLook( hot?.ItemId ) @(slot == HotSelected ? "border: 2px solid rgba(255,255,255,0.9);" : "") pointer-events: all;">
+					<div onmousedown=@(() => BeginDrag( "hot", slot )) onmouseup=@FinishDrag slotid="hot:@slot" onmouseover=@(() => Hover( "hot", slot )) onmouseout=@Unhover onrightclick=@(() => RightClick( "hot", slot )) style="position: relative; display: flex; align-items: center; justify-content: center; width: 82px; height: 82px; flex-shrink: 0; margin: 0 5px; overflow: hidden; border-radius: 10px; @Rarity.SlotLook( hot?.ItemId ) @(slot == HotSelected ? "border: 2px solid rgba(255,255,255,0.9);" : "") pointer-events: all;">
 						<div style="position: absolute; left: 7px; top: 3px; font-size: 12px; line-height: 14px; opacity: 0.6; pointer-events: none;">@(slot + 1)</div>
 						@if ( hot is not null && pic is not null )
 						{
@@ -399,6 +399,43 @@
 		if ( def.Explosion is not null ) _tipLines.Add( "Explodes when hit hard enough" );
 
 		_tipHint = def.ArmorSlot is not null || def.BackpackTier > 0 ? "Drag to move. Right click to wear." : kind == "hot" ? "Drag to move. Right click: to pockets." : "Drag to move. Right click: to hotbar.";
+	}
+
+	private Panel _dialog;
+
+	/// <summary>
+	/// The mouse was let go. The button goes up on the slot it was pressed on (the panel keeps the mouse), so the slot under the pointer is found
+	/// by position: every slot has a slotid ("kind:index"). Over a slot: drop there. Over the window: back where it came from. Outside: into the world.
+	/// </summary>
+	private void FinishDrag()
+	{
+		if ( _cursor is null ) return;
+
+		var mouse = Panel.MousePosition + Panel.Box.Rect.Position;   // screen pixels, like every Box.Rect
+		foreach ( var slot in AllPanels( Panel ) )
+		{
+			string id = slot.GetAttribute( "slotid", null );
+			if ( id is null || !slot.Box.Rect.IsInside( mouse ) ) continue;
+
+			int colon = id.IndexOf( ':' );
+			if ( colon > 0 && int.TryParse( id.Substring( colon + 1 ), out int index ) )
+			{
+				EndDrag( id.Substring( 0, colon ), index );
+				return;
+			}
+		}
+
+		if ( _dialog is not null && _dialog.Box.Rect.IsInside( mouse ) ) DropInside();
+		else DropOutside();
+	}
+
+	private static IEnumerable<Panel> AllPanels( Panel root )
+	{
+		foreach ( var child in root.Children )
+		{
+			yield return child;
+			foreach ( var deeper in AllPanels( child ) ) yield return deeper;
+		}
 	}
 
 	private string _dragKind;

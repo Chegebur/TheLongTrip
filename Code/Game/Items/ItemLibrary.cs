@@ -347,11 +347,20 @@ public static class ItemLibrary
 		go.Flags |= GameObjectFlags.NotSaved;
 
 		var model = ModelFor( def );
-		if ( model.IsValid() ) go.Components.Create<ModelRenderer>().Model = model;
+		// Many models (clothes, tools) have their origin far from their middle. The visible model hangs off a child so that the item's own origin
+		// is the middle of the model: the collider, the centre of mass and the ground check all then agree (an off-centre origin made items sink and jitter).
+		if ( model.IsValid() )
+		{
+			var visual = scene.CreateObject();
+			visual.Name = "Visual";
+			visual.SetParent( go, false );
+			visual.LocalPosition = def.Size.HasValue ? Vector3.Zero : -model.Bounds.Center;
+			visual.Components.Create<ModelRenderer>().Model = model;
+		}
 
 		// the collision box: given in the data, or the model's own bounds (models are centred on their origin)
 		var size = def.Size ?? (model.IsValid() ? model.Bounds.Size : new Vector3( 6f, 6f, 6f ));
-		var centre = def.Size.HasValue || !model.IsValid() ? Vector3.Zero : model.Bounds.Center;
+		var centre = Vector3.Zero;
 
 		var body = go.Components.Create<Rigidbody>();
 		body.MassOverride = def.Mass;
