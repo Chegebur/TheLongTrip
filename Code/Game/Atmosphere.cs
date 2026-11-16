@@ -45,15 +45,6 @@ public sealed class Atmosphere : Component
 	/// <summary>How quickly the look follows the biome (per second). Biome blends are long, so this is gentle.</summary>
 	[Property, Group( "Atmosphere" )] public float Follow { get; set; } = 1.5f;
 
-	/// <summary>Base field of view on foot. (When driving, the chase camera widens it with speed.)</summary>
-	[Property, Group( "Camera" )] public float FootFov { get; set; } = 78f;
-
-	/// <summary>Vignette strength at a standstill and at full speed.</summary>
-	[Property, Group( "Camera" )] public Vector2 VignetteRange { get; set; } = new Vector2( 0.16f, 0.34f );
-
-	/// <summary>Sharpening scale (a touch of crispness against the soft look of anti-aliasing).</summary>
-	[Property, Group( "Camera" )] public float SharpenScale { get; set; } = 0.25f;
-
 	private WorldStreamer _world;
 	private CarSession _car;
 	private CameraComponent _camera;
@@ -92,7 +83,6 @@ public sealed class Atmosphere : Component
 		_vignette.Color = new Color( 0.02f, 0.03f, 0.05f );
 		_vignette.Smoothness = 0.85f;
 		_vignette.Roundness = 0.9f;
-		_sharpen.Scale = SharpenScale;
 	}
 
 	protected override void OnUpdate()
@@ -111,18 +101,18 @@ public sealed class Atmosphere : Component
 		float k = _first ? 1f : 1f - MathF.Exp( -Follow * Time.Delta );
 		_first = false;
 		_current = _current.FogEnd == 0 ? target : Mix( _current, target, k );
-		Apply( WithWeather( _current ) );
+		Apply( Tweak( WithWeather( _current ) ) );
 
 		// ---- camera: speed-sensitive FOV and vignette
 		float speed = _car.IsValid() && _car.Controller.IsValid() ? _car.Controller.SpeedMs : 0f;
 		float s = Math.Clamp( speed / 40f, 0f, 1f );
 
 		if ( _vignette.IsValid() )
-			_vignette.Intensity = MathX.Lerp( VignetteRange.x, VignetteRange.y, s );
+			_vignette.Intensity = MathX.Lerp( G.VignetteStanding, G.VignetteSpeed, s );
 
 		// The chase camera owns the FOV while driving; on foot we ease back to the base value.
 		if ( !(_car.IsValid() && _car.IsDriving) )
-			_camera.FieldOfView = MathX.Lerp( _camera.FieldOfView, FootFov, 1f - MathF.Exp( -4f * Time.Delta ) );
+			_camera.FieldOfView = MathX.Lerp( _camera.FieldOfView, G.FootFov, 1f - MathF.Exp( -4f * Time.Delta ) );
 	}
 
 	private Vector3 FocusPosition()
@@ -147,6 +137,26 @@ public sealed class Atmosphere : Component
 		l.Ambient = l.Ambient * w.Dim + Color.White * (w.Flash * 0.35f);
 		l.Saturation *= 1f - w.Desaturate;
 		l.SkyTint = Color.Lerp( l.SkyTint, l.SkyTint * w.Tint, 0.8f ) * MathX.Lerp( 1f, 0.28f, 1f - w.Light );
+		return l;
+	}
+
+	private GraphicsSettings G => _graphics.IsValid() ? _graphics : _graphics = Components.GetOrCreate<GraphicsSettings>();
+	private GraphicsSettings _graphics;
+
+	/// <summary>The user's graphics tuning (GraphicsSettings) applied on top of the biome and weather look.</summary>
+	private Look Tweak( Look l )
+	{
+		var g = G;
+		l.Sun = l.Sun * g.SunTint;
+		l.SunIntensity *= g.SunBrightness;
+		l.Ambient = l.Ambient * g.AmbientTint * g.AmbientBrightness;
+		l.SkyTint = l.SkyTint * g.SkyTint * g.SkyBrightness;
+		l.FogColor = l.FogColor * g.FogTint;
+		l.FogEnd *= g.FogDistance;
+		l.FogStart *= g.FogStart;
+		l.FogExponent *= g.FogFalloff;
+		l.Saturation *= g.Saturation;
+		l.Contrast *= g.Contrast;
 		return l;
 	}
 
