@@ -77,6 +77,8 @@ public sealed class PlayerGrabber : Component
 		_pack = Components.GetOrCreate<ItemContainer>();
 		_pack.Capacity = 6;
 		_inventory = Components.GetOrCreate<PlayerInventory>();
+		Components.GetOrCreate<PlayerOutfit>();
+		Components.GetOrCreate<ItemIcons>();
 		RecipeLibrary.Reset();
 
 		var hudObject = Scene.CreateObject();
@@ -125,6 +127,16 @@ public sealed class PlayerGrabber : Component
 	{
 		var camera = Scene.Camera;
 		if ( !camera.IsValid() ) return;
+
+		if ( BuildSystem.Active )
+		{
+			LookSuppressed = false;
+			if ( _player.IsValid() ) _player.UseLookControls = true;
+			_hud.Hint = BuildSystem.Hint; _hud.Controls = null;
+			UpdateHud( FindAssembly( Scene ) );
+			_arms.Tick( camera, _held, Time.Delta, _held.IsValid() ? (_held.Definition?.Hands ?? 2) : 2 );
+			return;
+		}
 
 		// with the inventory open the mouse belongs to the menu: no grabbing, swinging or looking about
 		if ( InventoryHud.IsOpen )
@@ -256,9 +268,11 @@ public sealed class PlayerGrabber : Component
 		var slots = _pack.Slots;
 		var names = new string[slots.Count];
 		var amounts = new float[slots.Count];
+		var ids = new string[slots.Count];
 		for ( int i = 0; i < slots.Count; i++ )
 		{
 			var stored = slots[i];
+			ids[i] = stored?.ItemId;
 			names[i] = stored is null ? "" : (ItemLibrary.Get( stored.ItemId )?.Name ?? stored.ItemId);
 			amounts[i] = stored is null ? -1f : stored.Amount;
 		}
@@ -267,9 +281,11 @@ public sealed class PlayerGrabber : Component
 		if ( _equipped >= 0 && _equipped < names.Length && _held.IsValid() )
 		{
 			names[_equipped] = _held.Display;
+			ids[_equipped] = _held.ItemId;
 			amounts[_equipped] = _held.Amount;
 		}
 
+		_hud.SlotIds = ids;
 		_hud.SlotNames = names;
 		_hud.SlotAmounts = amounts;
 		_hud.Selected = _selected;
@@ -329,6 +345,7 @@ public sealed class PlayerGrabber : Component
 
 		Release( false );
 		_pack.TryStore( item, slot );
+		Sfx.Play( Sfx.Press );
 		Notify( $"{def.Name} put in slot {slot + 1}" );
 		return true;
 	}
@@ -482,6 +499,7 @@ public sealed class PlayerGrabber : Component
 			else ok = _inventory.Wear( new ItemContainer.Stored( worn.ItemId, worn.Amount, worn.Liquid ) );
 
 			if ( !ok ) { Notify( def.BackpackTier > 0 ? "You already have an equal or bigger pack" : "No room to swap that" ); return true; }
+			Sfx.Play( Sfx.Cloth );
 			Notify( def.BackpackTier > 0 ? $"You put on the {def.Name.ToLowerInvariant()}" : $"You wear the {def.Name.ToLowerInvariant()}" );
 			Release( false );
 			if ( worn.IsValid() ) worn.GameObject.Destroy();
@@ -499,11 +517,13 @@ public sealed class PlayerGrabber : Component
 		switch ( def.Use )
 		{
 			case UseKind.Eat:
+				Sfx.Play( Sfx.Cloth );
 				_stats?.Eat( def.Restore * take );
 				Notify( $"You ate the {_held.Display.ToLowerInvariant()}" );
 				break;
 
 			case UseKind.Drink:
+				Sfx.Play( Sfx.Press );
 				_stats?.Drink( def.Restore * take );
 				Notify( "You drink" );
 				break;
@@ -543,6 +563,7 @@ public sealed class PlayerGrabber : Component
 		// networked: the one who carries it simulates it (so it follows the hand with no lag), and it is theirs until somebody else grabs it
 		if ( item.GameObject.Network.Active && item.IsProxy ) item.GameObject.Network.TakeOwnership();
 
+		Sfx.Play( Sfx.DragStart, item.WorldPosition );
 		_held = item;
 		_equipped = -1;
 		_swinging = false;

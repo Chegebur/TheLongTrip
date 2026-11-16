@@ -494,76 +494,6 @@
       }
     },
     {
-      "id": "fisher_hat",
-      "name": "Fisherman's hat",
-      "category": "Armor",
-      "description": "Keeps the sun off. A little padding.",
-      "mass": 0.2,
-      "model": "models/items/hat/hat.vmdl",
-      "modelScale": 1.3,
-      "hands": 1,
-      "use": "wear",
-      "armorSlot": "head",
-      "defense": 0.06,
-      "damage": {
-        "scale": 0.02,
-        "minSpeed": 5,
-        "cap": 3
-      }
-    },
-    {
-      "id": "gas_mask",
-      "name": "Gas mask",
-      "category": "Armor",
-      "description": "Old but sturdy.",
-      "mass": 0.8,
-      "model": "models/items/gas_mask/gas_mask.vmdl",
-      "hands": 1,
-      "use": "wear",
-      "armorSlot": "head",
-      "defense": 0.12,
-      "damage": {
-        "scale": 0.02,
-        "minSpeed": 5,
-        "cap": 3
-      }
-    },
-    {
-      "id": "life_jacket",
-      "name": "Life jacket",
-      "category": "Armor",
-      "description": "Padded and bright.",
-      "mass": 1.2,
-      "model": "models/items/life_jacket/life_jacket.vmdl",
-      "hands": 2,
-      "use": "wear",
-      "armorSlot": "chest",
-      "defense": 0.15,
-      "damage": {
-        "scale": 0.02,
-        "minSpeed": 5,
-        "cap": 3
-      }
-    },
-    {
-      "id": "rubber_boots",
-      "name": "Rubber boots",
-      "category": "Armor",
-      "description": "Waterproof, thick soles.",
-      "mass": 1.5,
-      "model": "models/items/boots_clean/boots_clean.vmdl",
-      "hands": 2,
-      "use": "wear",
-      "armorSlot": "feet",
-      "defense": 0.08,
-      "damage": {
-        "scale": 0.02,
-        "minSpeed": 5,
-        "cap": 3
-      },
-      "modelScale": 1.0
-    },
-    {
       "id": "sack_pack",
       "name": "Sack",
       "category": "Backpack",
@@ -668,23 +598,6 @@
       }
     },
     {
-      "id": "rubber_boots_dirty",
-      "name": "Muddy rubber boots",
-      "category": "Armor",
-      "description": "Seen some mud, still solid.",
-      "mass": 1.5,
-      "model": "models/items/boots_dirty/boots_dirty.vmdl",
-      "hands": 2,
-      "use": "wear",
-      "armorSlot": "feet",
-      "defense": 0.06,
-      "damage": {
-        "scale": 0.02,
-        "minSpeed": 5,
-        "cap": 3
-      }
-    },
-    {
       "id": "suitcase_pack_2",
       "name": "Old suitcase",
       "category": "Backpack",
@@ -763,6 +676,386 @@
         "scale": 0.06,
         "minSpeed": 4,
         "cap": 14
+      }
+    },
+    {
+      "id": "hard_hat",
+      "name": "Hard hat",
+      "category": "Armor",
+      "description": "Plastic and scuffed.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/hat/hard_hat/models/hard_hat.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "head",
+      "defense": 0.08,
+      "clothing": "models/citizen_clothes/hat/hard_hat/hard_hat.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "army_helmet",
+      "name": "Army helmet",
+      "category": "Armor",
+      "description": "Heavy and hard.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/hat/tactical_helmet/models/tactical_helmet_army.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "head",
+      "defense": 0.14,
+      "clothing": "models/citizen_clothes/hat/tactical_helmet/tactical_helmet_army.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "gasmask",
+      "name": "Gas mask",
+      "category": "Armor",
+      "description": "Old but sturdy.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/hat/gasmask/models/gasmask.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "head",
+      "defense": 0.1,
+      "clothing": "models/citizen_clothes/hat/gasmask/gasmask.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "cowboy_hat",
+      "name": "Cowboy hat",
+      "category": "Armor",
+      "description": "Keeps the sun off.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/hat/cowboy_hat/models/cowboy_hat.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "head",
+      "defense": 0.03,
+      "clothing": "models/citizen_clothes/hat/cowboy_hat/cowboy_hat.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "baseball_cap",
+      "name": "Baseball cap",
+      "category": "Armor",
+      "description": "Faded.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/hat/baseball_cap/model/baseball_cap.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "head",
+      "defense": 0.02,
+      "clothing": "models/citizen_clothes/hat/baseball_cap/baseball_cap.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "beanie",
+      "name": "Beanie",
+      "category": "Armor",
+      "description": "Warm.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/hat/beanie/models/beanie.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "head",
+      "defense": 0.03,
+      "clothing": "models/citizen_clothes/hat/beanie/beanie.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "biker_jacket",
+      "name": "Biker jacket",
+      "category": "Armor",
+      "description": "Thick leather.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/jacket/biker_jacket/models/biker_jacket.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "chest",
+      "defense": 0.12,
+      "clothing": "models/citizen_clothes/jacket/biker_jacket/biker_jacket.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "puffer_jacket",
+      "name": "Puffer jacket",
+      "category": "Armor",
+      "description": "Padded.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/jacket/puffer_jacket/models/puffer_jacket.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "chest",
+      "defense": 0.1,
+      "clothing": "models/citizen_clothes/jacket/puffer_jacket/puffer_jacket.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "army_shirt",
+      "name": "Army shirt",
+      "category": "Armor",
+      "description": "Tough cotton.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/shirt/army_shirt/model/army_shirt.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "chest",
+      "defense": 0.06,
+      "clothing": "models/citizen_clothes/shirt/army_shirt/army_shirt.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "wind_breaker",
+      "name": "Wind breaker",
+      "category": "Armor",
+      "description": "Light and loud.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/jacket/wind_breaker/models/wind_breaker.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "chest",
+      "defense": 0.05,
+      "clothing": "models/citizen_clothes/jacket/wind_breaker/wind_breaker.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "hoodie",
+      "name": "Hoodie",
+      "category": "Armor",
+      "description": "Soft.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/jacket/hoodie/models/hoodie.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "chest",
+      "defense": 0.05,
+      "clothing": "models/citizen_clothes/jacket/hoodie/hoodie.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "winter_coat",
+      "name": "Winter coat",
+      "category": "Armor",
+      "description": "Thick against the cold.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/jacket/winter_coat/models/winter_coat.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "chest",
+      "defense": 0.14,
+      "clothing": "models/citizen_clothes/jacket/winter_coat/winter_coat.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "army_pants",
+      "name": "Army cargo pants",
+      "category": "Armor",
+      "description": "Lots of pockets.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/trousers/cargopants/models/cargo_pants.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "legs",
+      "defense": 0.07,
+      "clothing": "models/citizen_clothes/trousers/cargopants/cargo_pants_army.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "cargo_pants",
+      "name": "Brown cargo pants",
+      "category": "Armor",
+      "description": "Sturdy.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/trousers/cargopants/models/brown_cargo_pants.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "legs",
+      "defense": 0.06,
+      "clothing": "models/citizen_clothes/trousers/cargopants/brown_cargo_pants.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "jeans",
+      "name": "Jeans",
+      "category": "Armor",
+      "description": "Denim.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/trousers/jeans/models/jeans.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "legs",
+      "defense": 0.04,
+      "clothing": "models/citizen_clothes/trousers/jeans/jeans.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "binman_trousers",
+      "name": "Bin man trousers",
+      "category": "Armor",
+      "description": "High visibility.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/trousers/cargopants/models/binman_trousers.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "legs",
+      "defense": 0.05,
+      "clothing": "models/citizen_clothes/trousers/cargopants/binman_trousers.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "army_boots",
+      "name": "Army boots",
+      "category": "Armor",
+      "description": "Laced and heavy.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/shoes/boots/models/army_boots.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "feet",
+      "defense": 0.08,
+      "clothing": "models/citizen_clothes/shoes/boots/army_boots.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "black_boots",
+      "name": "Black boots",
+      "category": "Armor",
+      "description": "Good soles.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/shoes/boots/models/black_boots.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "feet",
+      "defense": 0.07,
+      "clothing": "models/citizen_clothes/shoes/boots/black_boots.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "sneakers",
+      "name": "Sneakers",
+      "category": "Armor",
+      "description": "Quiet.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/shoes/sneakers/models/sneakers.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "feet",
+      "defense": 0.03,
+      "clothing": "models/citizen_clothes/shoes/sneakers/sneakers.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
+    },
+    {
+      "id": "trainers",
+      "name": "Trainers",
+      "category": "Armor",
+      "description": "Worn out.",
+      "mass": 0.6,
+      "model": "models/citizen_clothes/shoes/trainers/models/trainers.vmdl",
+      "modelScale": 1.6,
+      "hands": 1,
+      "use": "wear",
+      "armorSlot": "feet",
+      "defense": 0.03,
+      "clothing": "models/citizen_clothes/shoes/trainers/trainers.clothing",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
       }
     }
   ],
@@ -860,22 +1153,6 @@
       "count": 1
     },
     {
-      "id": "fisher_hat",
-      "count": 1
-    },
-    {
-      "id": "gas_mask",
-      "count": 1
-    },
-    {
-      "id": "life_jacket",
-      "count": 1
-    },
-    {
-      "id": "rubber_boots",
-      "count": 1
-    },
-    {
       "id": "sack_pack",
       "count": 1
     },
@@ -900,10 +1177,6 @@
       "count": 2
     },
     {
-      "id": "rubber_boots_dirty",
-      "count": 1
-    },
-    {
       "id": "suitcase_pack_2",
       "count": 1
     },
@@ -921,6 +1194,86 @@
     },
     {
       "id": "bin_lid_rust",
+      "count": 1
+    },
+    {
+      "id": "hard_hat",
+      "count": 1
+    },
+    {
+      "id": "army_helmet",
+      "count": 1
+    },
+    {
+      "id": "gasmask",
+      "count": 1
+    },
+    {
+      "id": "cowboy_hat",
+      "count": 1
+    },
+    {
+      "id": "baseball_cap",
+      "count": 1
+    },
+    {
+      "id": "beanie",
+      "count": 1
+    },
+    {
+      "id": "biker_jacket",
+      "count": 1
+    },
+    {
+      "id": "puffer_jacket",
+      "count": 1
+    },
+    {
+      "id": "army_shirt",
+      "count": 1
+    },
+    {
+      "id": "wind_breaker",
+      "count": 1
+    },
+    {
+      "id": "hoodie",
+      "count": 1
+    },
+    {
+      "id": "winter_coat",
+      "count": 1
+    },
+    {
+      "id": "army_pants",
+      "count": 1
+    },
+    {
+      "id": "cargo_pants",
+      "count": 1
+    },
+    {
+      "id": "jeans",
+      "count": 1
+    },
+    {
+      "id": "binman_trousers",
+      "count": 1
+    },
+    {
+      "id": "army_boots",
+      "count": 1
+    },
+    {
+      "id": "black_boots",
+      "count": 1
+    },
+    {
+      "id": "sneakers",
+      "count": 1
+    },
+    {
+      "id": "trainers",
       "count": 1
     }
   ]

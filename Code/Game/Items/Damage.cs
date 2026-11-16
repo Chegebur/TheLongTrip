@@ -55,11 +55,20 @@ public sealed class ImpactDamage : Component, Component.ICollisionListener
 	public Item Item { get; set; }
 
 	private TimeSince _lastHit = 999f;
+	private TimeSince _lastSound = 999f;
 
 	public void OnCollisionStart( Collision collision )
 	{
 		// only the machine that simulates this object (its owner) judges its hits: a proxy would report the same hit again, late and doubled
 		if ( IsProxy ) return;
+
+		// a knock you can hear, by what it is made of
+		float knock = collision.Contact.Speed.Length * Units.UnitsToMeters;
+		if ( knock > 2.5f && _lastSound > 0.18f )
+		{
+			_lastSound = 0f;
+			Sfx.Play( Sfx.ImpactFor( Item?.Definition ), WorldPosition );
+		}
 		if ( Config is null || _lastHit < Config.Cooldown ) return;
 
 		// relative speed of the two bodies at the contact, in metres per second

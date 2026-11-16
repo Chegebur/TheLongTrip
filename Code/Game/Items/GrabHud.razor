@@ -27,7 +27,9 @@
 			int slot = i;
 			<div style="position: relative; width: 84px; height: 84px; margin: 0 5px; border-radius: 10px; background-color: rgba(0,0,0,@(slot == Equipped ? "0.65" : "0.45")); border: 3px solid @(slot == Selected ? "rgba(255,255,255,0.95)" : (slot == Equipped ? "rgba(120,200,255,0.9)" : "rgba(255,255,255,0.18)")); color: white;">
 				<div style="position: absolute; left: 7px; top: 3px; font-size: 15px; opacity: 0.75;">@(slot + 1)</div>
-				<div style="position: absolute; left: 4px; right: 4px; top: 26px; text-align: center; font-size: 15px; font-weight: 600; line-height: 17px;">@SlotNames[slot]</div>
+				@{ var pic = ItemIcons.Icon( SlotIds[slot] ); }
+					@if ( pic is not null ) { <Image Texture=@pic style="position: absolute; left: 21px; top: 8px; width: 42px; height: 42px;" /> }
+				<div style="position: absolute; left: 3px; right: 3px; top: 52px; max-height: 16px; overflow: hidden; text-align: center; font-size: 12px; font-weight: 600; line-height: 14px;">@SlotNames[slot]</div>
 				@if ( SlotAmounts[slot] >= 0f )
 				{
 					<div style="position: absolute; left: 8px; right: 8px; bottom: 7px; height: 6px; border-radius: 3px; background-color: rgba(255,255,255,0.18);">
@@ -88,6 +90,7 @@
 	public string[] Info { get; set; }
 
 	/// <summary>The hotbar: what is in each slot ("" when empty), how full it is (-1 when empty), which slot is selected and which one is in your hands.</summary>
+	public string[] SlotIds { get; set; } = new string[6];
 	public string[] SlotNames { get; set; } = new string[6] { "", "", "", "", "", "" };
 	public float[] SlotAmounts { get; set; } = new float[6] { -1f, -1f, -1f, -1f, -1f, -1f };
 	public int Selected { get; set; }

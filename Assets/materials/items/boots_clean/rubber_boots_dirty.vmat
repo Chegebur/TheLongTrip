@@ -1,7 +1,0 @@
-"Layer0"
-{
-	"shader"		"shaders/complex.shader"
-	"TextureColor"		"materials/items/boots_clean/rubber_boots_dirty_diff.png"
-	"TextureNormal"		"materials/items/boots_clean/rubber_boots_dirty_nor_gl.png"
-	"TextureRoughness"		"materials/items/boots_clean/rubber_boots_dirty_rough.png"
-}

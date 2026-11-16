@@ -151,6 +151,7 @@ public sealed class CarSession : Component
 		Car.AddComponent<CarNetwork>();
 		var grid = Car.AddComponent<BuildGrid>();
 		grid.Anchor = Car.Children.FirstOrDefault( c => c.Name == "Kit Body" );
+		Car.AddComponent<BuildSystem>();
 		Controller = Car.Components.Get<VehicleController>();
 		Controller.InputOverride = new DriveInputs { Handbrake = true };
 

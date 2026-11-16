@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/building/nordic/nordic_floor_color.png"
+	"TextureNormal"		"materials/building/nordic/nordic_floor_normal.png"
+	"TextureRoughness"		"materials/building/nordic/nordic_rough.png"
+}

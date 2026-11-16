@@ -124,6 +124,9 @@ public sealed class ItemDefinition
 	/// <summary>Backpack: the tier it unlocks (1 small, 2 medium, 3 large).</summary>
 	public int BackpackTier;
 
+	/// <summary>Armor: the native s&box clothing resource that is put on the character when this is worn.</summary>
+	public string Clothing;
+
 	/// <summary>The orientation it is held in, in degrees (pitch, yaw, roll) in your view. Null: however it was lying.</summary>
 	public Angles? HoldAngles;
 
@@ -219,6 +222,7 @@ public static class ItemLibrary
 		public string armorSlot { get; set; }
 		public float defense { get; set; }
 		public int backpack { get; set; }
+		public string clothing { get; set; }
 		public float[] hold { get; set; }
 		public float holdDistance { get; set; }
 		public int hands { get; set; } = 2;
@@ -276,7 +280,7 @@ public static class ItemLibrary
 				PortionPerUse = r.portionPerUse <= 0f ? 1f : r.portionPerUse,
 				ConsumedWhenEmpty = r.consumedWhenEmpty,
 				Stowable = r.stowable,
-				ArmorSlot = r.armorSlot, Defense = r.defense, BackpackTier = r.backpack,
+				ArmorSlot = r.armorSlot, Defense = r.defense, BackpackTier = r.backpack, Clothing = r.clothing,
 				HoldAngles = r.hold is { Length: 3 } ? new Angles( r.hold[0], r.hold[1], r.hold[2] ) : null,
 				HoldDistance = r.holdDistance,
 				Hands = r.hands == 1 ? 1 : 2,

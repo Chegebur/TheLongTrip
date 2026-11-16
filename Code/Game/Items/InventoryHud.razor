@@ -4,9 +4,9 @@
 @namespace LongTrip.Gameplay
 
 <root>
-	<div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: @(Open ? "flex" : "none"); flex-direction: row; align-items: center; justify-content: center; background-color: rgba(4,6,10,0.62); pointer-events: all;">
+	<div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: @(Open ? "flex" : "none"); flex-direction: row; align-items: center; justify-content: center; background-color: rgba(4,6,10,0.62); pointer-events: all;" onmouseup=@DropOutside>
 
-		<div style="display: flex; flex-direction: column; align-items: stretch; width: 940px; padding: 22px; border-radius: 16px; background-color: rgba(18,22,30,0.96); border: 2px solid rgba(255,255,255,0.12); color: white; pointer-events: all;">
+		<div style="display: flex; flex-direction: column; align-items: stretch; width: 940px; padding: 22px; border-radius: 16px; background-color: rgba(18,22,30,0.96); border: 2px solid rgba(255,255,255,0.12); color: white; pointer-events: all;" onmouseup=@DropInside>
 
 			@* ---- top: armor, the character, pockets and backpack ---- *@
 			<div style="display: flex; flex-direction: row; height: 400px;">
@@ -16,12 +16,13 @@
 					{
 						int armor = a;
 						var worn = Inv?.Armor[armor];
-						<div onclick=@(() => Click( "arm", armor )) onrightclick=@(() => RightClick( "arm", armor )) style="display: flex; flex-direction: column; align-items: center; justify-content: space-between; width: 92px; height: 92px; padding: 6px 4px; overflow: hidden; border-radius: 10px; background-color: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.22); pointer-events: all;">
+						<div onmousedown=@(() => BeginDrag( "arm", armor )) onmouseup=@(() => EndDrag( "arm", armor )) onrightclick=@(() => RightClick( "arm", armor )) style="display: flex; flex-direction: column; align-items: center; justify-content: space-between; width: 92px; height: 92px; padding: 6px 4px; overflow: hidden; border-radius: 10px; background-color: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.22); pointer-events: all;">
 							<div style="font-size: 12px; line-height: 14px; opacity: 0.5; pointer-events: none;">@(new[] { "HEAD", "CHEST", "LEGS", "FEET" }[armor])</div>
 							@if ( worn is not null )
 							{
-								<div style="width: 100%; max-height: 36px; overflow: hidden; text-align: center; font-size: 14px; font-weight: 700; line-height: 16px; pointer-events: none;">@NameOf( worn )</div>
-								<div style="font-size: 12px; line-height: 14px; opacity: 0.75; pointer-events: none;">-@((int)((ItemLibrary.Get( worn.ItemId )?.Defense ?? 0f) * 100f))% damage</div>
+								@{ var pic = IconOf( worn ); }
+								@if ( pic is not null ) { <Image Texture=@pic style="width: 40px; height: 40px; pointer-events: none;" /> }
+								<div style="width: 100%; max-height: 28px; overflow: hidden; text-align: center; font-size: 12px; font-weight: 600; line-height: 14px; pointer-events: none;">@NameOf( worn )</div>
 							}
 							else
 							{
@@ -47,14 +48,16 @@
 								int idx = r * 4 + col;
 								bool open = Unlocked( idx );
 								var stored = Inv?.Storage[idx];
-								<div onclick=@(() => Click( "bag", idx )) onrightclick=@(() => RightClick( "bag", idx )) style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 82px; height: 82px; flex-shrink: 0; margin-right: 8px; padding: 4px; overflow: hidden; border-radius: 10px; background-color: rgba(255,255,255,@(open ? "0.06" : "0.015")); border: 2px solid rgba(255,255,255,@(open ? "0.22" : "0.07")); pointer-events: all;">
+								<div onmousedown=@(() => BeginDrag( "bag", idx )) onmouseup=@(() => EndDrag( "bag", idx )) onrightclick=@(() => RightClick( "bag", idx )) style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 82px; height: 82px; flex-shrink: 0; margin-right: 8px; padding: 4px; overflow: hidden; border-radius: 10px; background-color: rgba(255,255,255,@(open ? "0.06" : "0.015")); border: 2px solid rgba(255,255,255,@(open ? "0.22" : "0.07")); pointer-events: all;">
 									@if ( !open )
 									{
 										<div style="font-size: 12px; opacity: 0.25; pointer-events: none;">locked</div>
 									}
 									else if ( stored is not null )
 									{
-										<div style="width: 100%; max-height: 36px; overflow: hidden; text-align: center; font-size: 14px; font-weight: 600; line-height: 16px; pointer-events: none;">@NameOf( stored )</div>
+										@{ var pic = IconOf( stored ); }
+								@if ( pic is not null ) { <Image Texture=@pic style="width: 46px; height: 46px; pointer-events: none;" /> }
+								<div style="width: 100%; max-height: 28px; overflow: hidden; text-align: center; font-size: 12px; font-weight: 600; line-height: 14px; pointer-events: none;">@NameOf( stored )</div>
 										@if ( HasBar( stored ) )
 										{
 											<div style="width: 100%; height: 5px; margin-top: 6px; border-radius: 3px; background-color: rgba(255,255,255,0.18); pointer-events: none;">
@@ -117,11 +120,13 @@
 				{
 					int slot = h;
 					var hot = Inv?.Hotbar?.Get( slot );
-					<div onclick=@(() => Click( "hot", slot )) onrightclick=@(() => RightClick( "hot", slot )) style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 82px; height: 82px; flex-shrink: 0; margin: 0 5px; padding: 14px 4px 4px 4px; overflow: hidden; border-radius: 10px; background-color: rgba(255,255,255,0.07); border: 2px solid rgba(255,255,255,@(slot == HotSelected ? "0.85" : "0.25")); pointer-events: all;">
+					<div onmousedown=@(() => BeginDrag( "hot", slot )) onmouseup=@(() => EndDrag( "hot", slot )) onrightclick=@(() => RightClick( "hot", slot )) style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 82px; height: 82px; flex-shrink: 0; margin: 0 5px; padding: 14px 4px 4px 4px; overflow: hidden; border-radius: 10px; background-color: rgba(255,255,255,0.07); border: 2px solid rgba(255,255,255,@(slot == HotSelected ? "0.85" : "0.25")); pointer-events: all;">
 						<div style="position: absolute; left: 7px; top: 2px; font-size: 12px; line-height: 14px; opacity: 0.6; pointer-events: none;">@(slot + 1)</div>
 						@if ( hot is not null )
 						{
-							<div style="width: 100%; max-height: 34px; overflow: hidden; text-align: center; font-size: 14px; font-weight: 600; line-height: 16px; pointer-events: none;">@NameOf( hot )</div>
+							@{ var pic = IconOf( hot ); }
+								@if ( pic is not null ) { <Image Texture=@pic style="width: 40px; height: 40px; pointer-events: none;" /> }
+								<div style="width: 100%; max-height: 28px; overflow: hidden; text-align: center; font-size: 12px; font-weight: 600; line-height: 14px; pointer-events: none;">@NameOf( hot )</div>
 							@if ( HasBar( hot ) )
 							{
 								<div style="width: 100%; height: 5px; margin-top: 5px; border-radius: 3px; background-color: rgba(255,255,255,0.18); pointer-events: none;">
@@ -165,7 +170,11 @@
 
 		@if ( _cursor is not null )
 		{
-			<div style="position: absolute; left: @((int)_mouse.x + 14)px; top: @((int)_mouse.y + 14)px; padding: 6px 12px; border-radius: 8px; background-color: rgba(255,255,255,0.92); color: black; font-size: 16px; line-height: 18px; font-weight: 700; pointer-events: none;">@NameOf( _cursor )</div>
+			<div style="position: absolute; left: @((int)_mouse.x - 30)px; top: @((int)_mouse.y - 30)px; display: flex; flex-direction: column; align-items: center; pointer-events: none;">
+				@{ var dragPic = IconOf( _cursor ); }
+				@if ( dragPic is not null ) { <Image Texture=@dragPic style="width: 64px; height: 64px;" /> }
+				<div style="padding: 3px 10px; border-radius: 8px; background-color: rgba(255,255,255,0.92); color: black; font-size: 14px; line-height: 16px; font-weight: 700;">@NameOf( _cursor )</div>
+			</div>
 		}
 	</div>
 </root>
@@ -198,6 +207,9 @@
 	private float _spinFrom;
 	private float _charYaw = 20f;
 	private bool _scenesReady;
+	private string _armorSig = "";
+	private float _rebuildAt;
+	private float _rebuildAgain;
 
 	private IReadOnlyList<Recipe> Recipes => RecipeLibrary.All;
 	private Recipe Selected => _recipe >= 0 && _recipe < Recipes.Count ? Recipes[_recipe] : null;
@@ -241,6 +253,7 @@
 	{
 		Open = !Open;
 		IsOpen = Open;
+		Sfx.Play( Open ? Sfx.Open : Sfx.Close );
 		Mouse.Visibility = Open ? MouseVisibility.Visible : MouseVisibility.Auto;
 
 		if ( Open )
@@ -307,24 +320,80 @@
 		};
 	}
 
-	private void Click( string kind, int i )
+	private string _dragKind;
+	private int _dragIndex;
+
+	private Texture IconOf( ItemContainer.Stored s ) => s is null ? null : ItemIcons.Icon( s.ItemId );
+
+	/// <summary>Mouse down on a slot with something in it: pick it up (it follows the mouse until you let go).</summary>
+	private void BeginDrag( string kind, int i )
 	{
-		if ( Inv is null ) return;
+		if ( Inv is null || _cursor is not null ) return;
 		if ( kind == "bag" && !Unlocked( i ) ) return;
 
 		var here = GetSlot( kind, i );
-		if ( _cursor is null )
+		if ( here is null ) return;
+
+		_cursor = here;
+		_dragKind = kind;
+		_dragIndex = i;
+		SetSlot( kind, i, null );
+		Sfx.Play( Sfx.DragStart );
+		_version++;
+	}
+
+	/// <summary>Mouse up on a slot: put what you are carrying there (swapping with what was there); if it does not fit it goes back.</summary>
+	private void EndDrag( string kind, int i )
+	{
+		if ( _cursor is null || Inv is null ) return;
+
+		if ( !Accepts( kind, i, _cursor ) || (kind == "bag" && !Unlocked( i )) )
 		{
-			if ( here is null ) return;
-			_cursor = here;
-			SetSlot( kind, i, null );
+			Sfx.Play( Sfx.Deny );
+			PlayerGrabber.Instance?.Notify( kind == "arm" ? "That does not go there" : "It does not fit" );
+			ReturnToOrigin();
+			return;
 		}
-		else
+
+		var old = GetSlot( kind, i );
+		SetSlot( kind, i, _cursor );
+		_cursor = null;
+
+		// what was there goes to the slot the dragged item came from, if it can; otherwise wherever there is room
+		if ( old is not null )
 		{
-			if ( !Accepts( kind, i, _cursor ) ) { PlayerGrabber.Instance?.Notify( kind == "arm" ? "That does not go there" : "It does not fit" ); return; }
-			SetSlot( kind, i, _cursor );
-			_cursor = here;
+			if ( Accepts( _dragKind, _dragIndex, old ) && GetSlot( _dragKind, _dragIndex ) is null ) SetSlot( _dragKind, _dragIndex, old );
+			else if ( !Inv.TryAdd( old ) ) DropInFront( old );
 		}
+		Sfx.Play( kind == "arm" ? Sfx.Cloth : Sfx.DragStop );
+		_version++;
+	}
+
+	/// <summary>Let go on the inventory's own background: back where it came from.</summary>
+	private void DropInside()
+	{
+		if ( _cursor is null ) return;
+		ReturnToOrigin();
+	}
+
+	/// <summary>Let go on the dark area around the inventory: it is thrown into the world in front of you.</summary>
+	private void DropOutside()
+	{
+		if ( _cursor is null ) return;
+		var stored = _cursor;
+		_cursor = null;
+		DropInFront( stored );
+		Sfx.Play( Sfx.DragStop );
+		_version++;
+	}
+
+	private void ReturnToOrigin()
+	{
+		var stored = _cursor;
+		_cursor = null;
+		if ( stored is null || Inv is null ) return;
+		if ( GetSlot( _dragKind, _dragIndex ) is null && Accepts( _dragKind, _dragIndex, stored ) ) SetSlot( _dragKind, _dragIndex, stored );
+		else if ( !Inv.TryAdd( stored ) ) DropInFront( stored );
 		_version++;
 	}
 
@@ -347,14 +416,15 @@
 
 	// ---- crafting ------------------------------------------------------------------------------------------------------------------
 
-	private void SelectRecipe( int i ) { _recipe = i; _version++; }
+	private void SelectRecipe( int i ) { _recipe = i; Sfx.Play( Sfx.Press ); _version++; }
 
 	private bool CanCraft( Recipe r ) => Inv is not null && r.Inputs.All( x => Inv.Count( x.Item ) >= x.Count );
 
 	private void Craft()
 	{
 		var r = Selected;
-		if ( r is null || Inv is null || !CanCraft( r ) ) return;
+		if ( r is null || Inv is null ) return;
+		if ( !CanCraft( r ) ) { Sfx.Play( Sfx.Deny ); return; }
 
 		foreach ( var (item, count) in r.Inputs ) Inv.Consume( item, count );
 
@@ -365,6 +435,7 @@
 			if ( def is not null && def.Stowable && Inv.TryAdd( made ) ) continue;
 			DropInFront( made );
 		}
+		Sfx.Play( Sfx.Craft );
 		PlayerGrabber.Instance?.Notify( $"Crafted {r.Name}" );
 		_version++;
 	}
@@ -400,8 +471,19 @@
 		Build( _charPanel, out _charRoot, out _charCamera, out _charCam );
 		Build( _recipePanel, out _recipeRoot, out _recipeCamera, out _recipeCam );
 
-		// the character: the player's own model and clothes, copied
-		var player = Scene.GetAllObjects( true ).FirstOrDefault( g => g.Components.Get<PlayerController>( true ) is not null );
+		BuildCharacter();
+
+		_charCamera.WorldPosition = new Vector3( 150f, 0f, 37f );
+		_charCamera.WorldRotation = Rotation.LookAt( new Vector3( -1f, 0f, 0f ) );
+	}
+
+	/// <summary>Copy the player's model and what it wears into the preview (again whenever the armor changes).</summary>
+	private void BuildCharacter()
+	{
+		if ( !_scenesReady ) return;
+		foreach ( var child in _charRoot.Children.ToList() ) child.Destroy();
+
+				var player = Scene.GetAllObjects( true ).FirstOrDefault( g => g.Components.Get<PlayerController>( true ) is not null );
 		var source = player?.Components.Get<PlayerController>( true )?.Renderer ?? player?.Components.Get<SkinnedModelRenderer>( FindMode.EverythingInSelfAndDescendants );
 		if ( source.IsValid() && source.Model is not null )
 		{
@@ -426,13 +508,16 @@
 			}
 		}
 
-		_charCamera.WorldPosition = new Vector3( 150f, 0f, 37f );
-		_charCamera.WorldRotation = Rotation.LookAt( new Vector3( -1f, 0f, 0f ) );
 	}
 
 	private void UpdateScenes()
 	{
 		if ( !_scenesReady ) return;
+
+		string armorSig = Inv is null ? "" : string.Join( ',', Inv.Armor.Select( a => a?.ItemId ?? "-" ) );
+		if ( armorSig != _armorSig ) { _armorSig = armorSig; _rebuildAt = RealTime.Now + 0.6f; _rebuildAgain = RealTime.Now + 2.5f; }
+		if ( _rebuildAgain > 0f && RealTime.Now >= _rebuildAgain ) { _rebuildAgain = 0f; BuildCharacter(); }
+		if ( _rebuildAt > 0f && RealTime.Now >= _rebuildAt ) { _rebuildAt = 0f; BuildCharacter(); }
 
 		_charRoot.WorldRotation = Rotation.FromYaw( _charYaw );
 		FitCamera( _charPanel, _charCam );
