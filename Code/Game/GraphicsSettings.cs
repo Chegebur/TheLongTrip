@@ -37,20 +37,20 @@ public sealed class GraphicsSettings : Component
 
 	[Property, Group( "Colour" ), Range( 0f, 2.5f )] public float Saturation { get; set; } = 1f;
 	[Property, Group( "Colour" ), Range( 0.3f, 2f )] public float Contrast { get; set; } = 1f;
-	[Property, Group( "Colour" ), Range( -0.5f, 0.5f )] public float Brightness { get; set; } = 0f;
+	[Property, Group( "Colour" ), Range( 0f, 2.5f )] public float Brightness { get; set; } = 1f;
 	[Property, Group( "Colour" ), Range( -180f, 180f ), Title( "Hue shift" )] public float HueShift { get; set; } = 0f;
 
 	// ---- post processing ---------------------------------------------------------------------------------------------------------
 
 	[Property, Group( "Bloom" ), Title( "Bloom on" )] public bool BloomEnabled { get; set; } = true;
-	[Property, Group( "Bloom" ), Range( 0f, 3f ), Title( "Strength" )] public float BloomStrength { get; set; } = 0.5f;
-	[Property, Group( "Bloom" ), Range( 0f, 2f ), Title( "Threshold" )] public float BloomThreshold { get; set; } = 0.5f;
+	[Property, Group( "Bloom" ), Range( 0f, 3f ), Title( "Strength" )] public float BloomStrength { get; set; } = 0.35f;
+	[Property, Group( "Bloom" ), Range( 0f, 4f ), Title( "Threshold" )] public float BloomThreshold { get; set; } = 1.4f;
 
 	[Property, Group( "Exposure" ), Range( -3f, 3f ), Title( "Exposure compensation" )] public float Exposure { get; set; } = 0f;
 
 	[Property, Group( "Ambient occlusion" ), Title( "AO on" )] public bool AoEnabled { get; set; } = true;
-	[Property, Group( "Ambient occlusion" ), Range( 0f, 4f ), Title( "Intensity" )] public float AoIntensity { get; set; } = 1f;
-	[Property, Group( "Ambient occlusion" ), Range( 0f, 256f ), Title( "Radius" )] public float AoRadius { get; set; } = 64f;
+	[Property, Group( "Ambient occlusion" ), Range( 0f, 4f ), Title( "Intensity" )] public float AoIntensity { get; set; } = 0.9f;
+	[Property, Group( "Ambient occlusion" ), Range( 0f, 256f ), Title( "Radius" )] public float AoRadius { get; set; } = 96f;
 
 	[Property, Group( "Camera" ), Range( 40f, 120f ), Title( "Field of view on foot" )] public float FootFov { get; set; } = 78f;
 	[Property, Group( "Camera" ), Range( 0f, 1f ), Title( "Vignette standing" )] public float VignetteStanding { get; set; } = 0.16f;
@@ -63,10 +63,10 @@ public sealed class GraphicsSettings : Component
 		SunBrightness = AmbientBrightness = SkyBrightness = OtherLights = 1f;
 		SunTint = AmbientTint = SkyTint = FogTint = Color.White;
 		FogEnabled = true; FogDistance = FogStart = FogFalloff = 1f;
-		Saturation = Contrast = 1f; Brightness = HueShift = 0f;
-		BloomEnabled = true; BloomStrength = 0.5f; BloomThreshold = 0.5f;
+		Saturation = Contrast = 1f; Brightness = 1f; HueShift = 0f;
+		BloomEnabled = true; BloomStrength = 0.35f; BloomThreshold = 1.4f;
 		Exposure = 0f;
-		AoEnabled = true; AoIntensity = 1f; AoRadius = 64f;
+		AoEnabled = true; AoIntensity = 0.9f; AoRadius = 96f;
 		FootFov = 78f; VignetteStanding = 0.16f; VignetteSpeed = 0.34f; Sharpening = 0.25f;
 	}
 
