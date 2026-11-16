@@ -199,14 +199,16 @@ public sealed class CarSession : Component
 		// and the loot from the item data file (food, drink, fuel, weapons, barrels...), in rows beside the parts
 		ItemLibrary.Reset();
 		int n = 0;
-		foreach ( var (id, count) in ItemLibrary.Loot )
+		foreach ( var entry in ItemLibrary.Loot )
 		{
-			for ( int c = 0; c < count; c++, n++ )
+			var id = entry.Id;
+			for ( int c = 0; c < entry.Count; c++, n++ )
 			{
 				float x = baseX + (n % 9) * 75f;
 				float y = gen.RoadCenterY( x ) - 330f + 190f + (n / 9) * 75f;
 				float ground = GroundGuard.SurfaceHeight( gen, x, y );
-				ItemLibrary.Spawn( Scene, id, new Vector3( x, y, ground + 40f ), Rotation.FromYaw( random.Next( 360 ) ) );
+				float fill = entry.Fill < 0f ? 1f : MathX.Lerp( entry.Fill, entry.FillMax < 0f ? entry.Fill : entry.FillMax, (float)random.NextDouble() );
+				ItemLibrary.Spawn( Scene, id, new Vector3( x, y, ground + 40f ), Rotation.FromYaw( random.Next( 360 ) ), fill, entry.Liquid );
 			}
 		}
 	}

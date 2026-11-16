@@ -63,8 +63,8 @@ public sealed class ItemContainer : Component
 
 		var stored = _slots[slot];
 		_slots[slot] = null;
-		var item = ItemLibrary.Spawn( Scene, stored.ItemId, position, rotation, stored.Amount );
-		if ( item.IsValid() && stored.Liquid is not null ) { item.Liquid = stored.Liquid; item.Amount = stored.Amount; }
+		var item = ItemLibrary.Spawn( Scene, stored.ItemId, position, rotation, stored.Amount, stored.Liquid );
+		if ( item.IsValid() && item.Definition?.Container is not null ) { item.Liquid = stored.Liquid; item.Amount = stored.Amount; item.RefreshMass(); }
 		return item;
 	}
 }

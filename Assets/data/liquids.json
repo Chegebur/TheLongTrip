@@ -1,0 +1,8 @@
+{
+  "liquids": [
+    { "id": "water", "name": "Water", "color": [90, 165, 240], "density": 1.0, "thirst": 30 },
+    { "id": "fuel", "name": "Fuel", "color": [235, 160, 45], "density": 0.75, "toxic": 22, "fuel": true },
+    { "id": "oil", "name": "Motor oil", "color": [45, 32, 22], "density": 0.9, "toxic": 14 },
+    { "id": "milk", "name": "Milk", "color": [245, 245, 238], "density": 1.03, "thirst": 12, "food": 14 }
+  ]
+}

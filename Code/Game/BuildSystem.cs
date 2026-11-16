@@ -67,7 +67,7 @@ public sealed class BuiltPiece : Component
 /// </summary>
 public sealed class BuildSystem : Component
 {
-	public static bool Active { get; private set; }
+	public static bool IsBuilding { get; private set; }
 	public static string Hint { get; private set; }
 
 	/// <summary>How close you must be to the car to start building (world units).</summary>
@@ -96,7 +96,7 @@ public sealed class BuildSystem : Component
 		_ghostMaterial = Material.Load( "materials/vehicles/ghost.vmat" );
 	}
 
-	protected override void OnDestroy() { if ( Active ) Stop(); }
+	protected override void OnDestroy() { if ( IsBuilding ) Stop(); }
 
 	protected override void OnUpdate()
 	{
@@ -104,11 +104,11 @@ public sealed class BuildSystem : Component
 
 		if ( Input.Keyboard.Pressed( "b" ) && !InventoryHud.IsOpen )
 		{
-			if ( Active ) Stop();
+			if ( IsBuilding ) Stop();
 			else if ( CanStart() ) Start();
 			else PlayerGrabber.Instance?.Notify( "Get closer to the car to build" );
 		}
-		if ( !Active ) return;
+		if ( !IsBuilding ) return;
 		if ( Input.Keyboard.Pressed( "escape" ) || InventoryHud.IsOpen ) { Stop(); return; }
 
 		var pieces = BuildLibrary.All;
@@ -148,14 +148,14 @@ public sealed class BuildSystem : Component
 
 	private void Start()
 	{
-		Active = true;
+		IsBuilding = true;
 		_grid.Visible = true;
 		Sfx.Play( Sfx.Open );
 	}
 
 	private void Stop()
 	{
-		Active = false;
+		IsBuilding = false;
 		Hint = null;
 		if ( _grid.IsValid() ) _grid.Visible = false;
 		if ( _ghost.IsValid() ) _ghost.Destroy();
@@ -186,10 +186,10 @@ public sealed class BuildSystem : Component
 		if ( !tr.Hit || Math.Abs( tr.Normal.z ) < 0.5f ) aimed.z = Math.Max( aimed.z, BuildLibrary.RoofLevel );   // a wall you look at: build beside it at roof level or above
 
 		(min, size) = Footprint( def, aimed );
-		valid = IsValid( def, min, size );
+		valid = CanPlace( def, min, size );
 	}
 
-	private bool IsValid( BuildPieceDef def, Vector3Int min, Vector3Int size )
+	private bool CanPlace( BuildPieceDef def, Vector3Int min, Vector3Int size )
 	{
 		int roof = BuildLibrary.RoofLevel;
 		if ( min.z < roof ) return false;
@@ -220,7 +220,7 @@ public sealed class BuildSystem : Component
 	// ---- placing and removing ----------------------------------------------------------------------------------------------
 
 	/// <summary>Where a piece sits (in the grid's frame): centred over its cells, resting on the bottom of them.</summary>
-	private Vector3 LocalPosition( BuildPieceDef def, Vector3Int min, Vector3Int size, Model model )
+	private Vector3 PieceLocalPosition( BuildPieceDef def, Vector3Int min, Vector3Int size, Model model )
 	{
 		float cell = _grid.CellSize;
 		float height = model is null ? 0f : model.Bounds.Size.z * def.Scale;
@@ -247,7 +247,7 @@ public sealed class BuildSystem : Component
 
 		var frame = _grid.Frame;
 		_ghost.WorldScale = def.Scale;
-		_ghost.WorldPosition = frame.PointToWorld( LocalPosition( def, min, size, model ) );
+		_ghost.WorldPosition = frame.PointToWorld( PieceLocalPosition( def, min, size, model ) );
 		_ghost.WorldRotation = frame.Rotation * Rotation.FromYaw( _turn * 90f );
 		_ghostRenderer.Tint = valid ? new Color( 0.4f, 1f, 0.5f, 0.7f ) : new Color( 1f, 0.35f, 0.3f, 0.7f );
 	}
@@ -264,7 +264,7 @@ public sealed class BuildSystem : Component
 		go.Name = "Built " + def.Name;
 		go.Flags |= GameObjectFlags.NotSaved;
 		go.SetParent( anchor, false );
-		go.LocalPosition = LocalPosition( def, min, size, model );
+		go.LocalPosition = PieceLocalPosition( def, min, size, model );
 		go.LocalRotation = Rotation.FromYaw( _turn * 90f );
 		go.LocalScale = def.Scale;
 

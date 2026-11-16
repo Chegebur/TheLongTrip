@@ -201,7 +201,8 @@ public sealed class VehicleController : Component, Component.ICollisionListener
 		if ( IsProxy )
 			return;
 
-		if ( Input.Pressed( "Reload" ) )
+		// (was the Reload key, R, which is the holster key now: pressing it would throw the car back to where it started)
+		if ( Input.Keyboard.Pressed( "backspace" ) )
 			Respawn();
 
 		// Drive-mode (assist level) cycle — Casual -> Sport -> Sim -> Casual. A plain property set,

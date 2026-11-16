@@ -4,19 +4,21 @@
       "id": "water_bottle",
       "name": "Water jug",
       "category": "Drink",
-      "description": "A few sips each.",
+      "description": "Three litres of water. Click to drink, hold to pour.",
       "mass": 0.9,
       "model": "models/items/water_jug/water_jug.vmdl",
       "hands": 1,
-      "use": "drink",
-      "restore": 40,
-      "portionPerUse": 0.25,
       "damage": {
         "scale": 0.08,
         "minSpeed": 3,
         "cap": 6
       },
-      "rarity": "common"
+      "rarity": "common",
+      "container": {
+        "capacity": 3,
+        "liquid": "water",
+        "fill": 1
+      }
     },
     {
       "id": "canned_food",
@@ -98,21 +100,24 @@
       "id": "fuel_can",
       "name": "Fuel can",
       "category": "Fuel",
-      "description": "Aim at the car and click to pour.",
+      "description": "Aim at the car and hold left mouse to pour. Breaks when hit hard: keep it away from sparks.",
       "mass": 3,
       "model": "models/items/jerrycan/jerrycan.vmdl",
       "hands": 2,
       "moveSpeed": 0.85,
-      "use": "refuel",
-      "capacity": 20,
-      "portionPerUse": 0.1,
       "stowable": false,
       "damage": {
         "scale": 0.05,
         "minSpeed": 3,
         "cap": 10
       },
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "container": {
+        "capacity": 20,
+        "liquid": "fuel",
+        "fill": 0.6
+      },
+      "health": 30
     },
     {
       "id": "baseball_bat",
@@ -404,7 +409,7 @@
       "id": "barrel",
       "name": "Barrel",
       "category": "Container",
-      "description": "Holds liquids (200 L). Empty for now.",
+      "description": "Holds up to 200 L. Pour into it from another container.",
       "mass": 18,
       "model": "models/world/props/barrel_rust/barrel_rust.vmdl",
       "modelScale": 1.4,
@@ -421,13 +426,14 @@
         "minSpeed": 4,
         "cap": 20
       },
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "health": 60
     },
     {
       "id": "barrel_blue",
       "name": "Blue barrel",
       "category": "Container",
-      "description": "Plastic drum, holds liquids (200 L).",
+      "description": "Plastic drum, up to 200 L.",
       "mass": 9,
       "model": "models/world/props/barrel_blue/barrel_blue.vmdl",
       "modelScale": 1.4,
@@ -444,7 +450,8 @@
         "minSpeed": 4,
         "cap": 20
       },
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "health": 50
     },
     {
       "id": "tyre",
@@ -616,15 +623,17 @@
       "model": "models/items/carton_milk/carton_milk.vmdl",
       "category": "Drink",
       "hands": 1,
-      "use": "drink",
-      "restore": 30,
-      "portionPerUse": 0.25,
       "damage": {
         "scale": 0.05,
         "minSpeed": 4,
         "cap": 3
       },
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "container": {
+        "capacity": 1,
+        "liquid": "milk",
+        "fill": 1
+      }
     },
     {
       "id": "suitcase_pack_2",
@@ -1098,7 +1107,7 @@
       "category": "Armor",
       "description": "Worn out.",
       "mass": 0.6,
-      "model": "models/citizen_clothes/shoes/trainers/models/trainers.vmdl",
+      "model": "models/citizen_clothes/shoes/trainers/trainers.vmdl",
       "modelScale": 1.6,
       "hands": 1,
       "use": "wear",
@@ -1114,14 +1123,6 @@
     }
   ],
   "loot": [
-    {
-      "id": "fuel_can",
-      "count": 3
-    },
-    {
-      "id": "water_bottle",
-      "count": 4
-    },
     {
       "id": "canned_food",
       "count": 4
@@ -1180,14 +1181,6 @@
     },
     {
       "id": "military_crate",
-      "count": 1
-    },
-    {
-      "id": "barrel",
-      "count": 2
-    },
-    {
-      "id": "barrel_blue",
       "count": 1
     },
     {
@@ -1328,6 +1321,49 @@
     },
     {
       "id": "trainers",
+      "count": 1
+    },
+    {
+      "id": "water_bottle",
+      "count": 4
+    },
+    {
+      "id": "fuel_can",
+      "count": 3,
+      "liquid": "fuel",
+      "fill": 0.3,
+      "fillMax": 1.0
+    },
+    {
+      "id": "fuel_can",
+      "count": 1,
+      "liquid": "oil",
+      "fill": 0.2,
+      "fillMax": 0.6
+    },
+    {
+      "id": "barrel",
+      "count": 1,
+      "liquid": "water",
+      "fill": 0.6,
+      "fillMax": 1.0
+    },
+    {
+      "id": "barrel",
+      "count": 1,
+      "liquid": "fuel",
+      "fill": 0.3,
+      "fillMax": 0.7
+    },
+    {
+      "id": "barrel_blue",
+      "count": 1,
+      "liquid": "water",
+      "fill": 0.3,
+      "fillMax": 0.9
+    },
+    {
+      "id": "barrel_blue",
       "count": 1
     }
   ]

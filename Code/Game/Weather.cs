@@ -44,19 +44,18 @@ public sealed class Weather : Component
 	private static Target TargetFor( WeatherKind k, float s ) => k switch
 	{
 		WeatherKind.Overcast => new Target { Fog = 0.8f, Light = 0.55f, Dim = 0.85f, Desat = 0.25f * s, Tint = new Color( 0.85f, 0.9f, 1f ) },
-		WeatherKind.Fog => new Target { Fog = MathX.Lerp( 0.5f, 0.12f, s ), Light = 0.7f, Dim = 0.95f, Desat = 0.35f * s, Tint = new Color( 0.9f, 0.93f, 0.98f ) },
-		WeatherKind.Rain => new Target { Fog = MathX.Lerp( 0.7f, 0.35f, s ), Light = 0.4f, Dim = 0.75f, Desat = 0.35f, Rain = s, Tint = new Color( 0.75f, 0.82f, 0.95f ) },
-		WeatherKind.Storm => new Target { Fog = 0.28f, Light = 0.18f, Dim = 0.55f, Desat = 0.5f, Rain = 1f, Tint = new Color( 0.62f, 0.7f, 0.85f ) },
-		WeatherKind.Dust => new Target { Fog = MathX.Lerp( 0.55f, 0.1f, s ), Light = 0.65f, Dim = 0.95f, Desat = 0.1f, Dust = s, Tint = new Color( 1f, 0.82f, 0.55f ) },
-		WeatherKind.Snow => new Target { Fog = MathX.Lerp( 0.7f, 0.4f, s ), Light = 0.6f, Dim = 0.95f, Desat = 0.15f, Snow = s, Tint = new Color( 0.92f, 0.96f, 1f ) },
-		WeatherKind.Blizzard => new Target { Fog = 0.12f, Light = 0.45f, Dim = 0.9f, Desat = 0.3f, Snow = 1f, Tint = new Color( 0.88f, 0.93f, 1f ) },
+		WeatherKind.Fog => new Target { Fog = MathX.Lerp( 0.4f, 0.05f, s ), Light = 0.7f, Dim = 0.95f, Desat = 0.35f * s, Tint = new Color( 0.9f, 0.93f, 0.98f ) },
+		WeatherKind.Rain => new Target { Fog = MathX.Lerp( 0.6f, 0.22f, s ), Light = 0.4f, Dim = 0.75f, Desat = 0.35f, Rain = s, Tint = new Color( 0.75f, 0.82f, 0.95f ) },
+		WeatherKind.Storm => new Target { Fog = 0.16f, Light = 0.18f, Dim = 0.55f, Desat = 0.5f, Rain = 1f, Tint = new Color( 0.62f, 0.7f, 0.85f ) },
+		WeatherKind.Dust => new Target { Fog = MathX.Lerp( 0.45f, 0.05f, s ), Light = 0.65f, Dim = 0.95f, Desat = 0.1f, Dust = s, Tint = new Color( 1f, 0.82f, 0.55f ) },
+		WeatherKind.Snow => new Target { Fog = MathX.Lerp( 0.6f, 0.25f, s ), Light = 0.6f, Dim = 0.95f, Desat = 0.15f, Snow = s, Tint = new Color( 0.92f, 0.96f, 1f ) },
+		WeatherKind.Blizzard => new Target { Fog = 0.045f, Light = 0.45f, Dim = 0.9f, Desat = 0.3f, Snow = 1f, Tint = new Color( 0.88f, 0.93f, 1f ) },
 		_ => new Target { Fog = 1f, Light = 1f, Dim = 1f, Tint = Color.White },
 	};
 
 	private float _rain, _snow, _dust;
 	private TimeUntil _next = 45f;   // the first minute is clear
 	private TimeUntil _nextFlash = 5f;
-	private float _flashDecay;
 	private readonly System.Random _random = new();
 
 	private WorldStreamer _world;
@@ -111,7 +110,6 @@ public sealed class Weather : Component
 		{
 			Flash = 1f;
 			_nextFlash = 4f + (float)_random.NextDouble() * 12f;
-			_flashDecay = 0f;
 		}
 		Flash = MathX.Approach( Flash, 0f, Time.Delta * (Flash > 0.5f ? 4f : 2.2f) );
 
@@ -148,10 +146,10 @@ public sealed class Weather : Component
 
 	// ---- rain, snow and dust drawn as thin streaks around the camera --------------------------------------------------------
 
-	private const int MaxStreaks = 420;
-	private const float Radius = 1500f, Height = 1100f;
+	private const int MaxStreaks = 800;
+	private const float Radius = 1100f, Height = 900f;
 
-	private sealed class Streak { public GameObject Go; public Vector3 Offset; public float Speed; public float Drift; }
+	private sealed class Streak { public GameObject Go; public ModelRenderer Renderer; public Vector3 Offset; public float Speed; public float Drift; }
 	private readonly List<Streak> _streaks = new();
 	private GameObject _streakRoot;
 	private Model _rainModel, _flakeModel, _dustModel;
@@ -161,13 +159,13 @@ public sealed class Weather : Component
 		if ( _rainModel.IsValid() ) return;
 		const string flat = "materials/world/interior/flat_lit.vmat";
 		var b = new PropMeshBuilder();
-		b.Box( flat, new Vector3( 0, 0, 0 ), new Vector3( 0.35f, 0.35f, 34f ), 0f, true, 1f, PropMeshBuilder.Flat( 190, 205, 225, 0.2f ) );
+		b.Box( flat, new Vector3( 0, 0, 0 ), new Vector3( 0.55f, 0.55f, 46f ), 0f, true, 1f, PropMeshBuilder.Flat( 190, 205, 225, 0.2f ) );
 		_rainModel = b.Build( "weather_rain" );
 		b = new PropMeshBuilder();
-		b.Box( flat, Vector3.Zero, new Vector3( 1.6f, 1.6f, 1.6f ), 0f, true, 1f, PropMeshBuilder.Flat( 245, 248, 255, 0.9f ) );
+		b.Box( flat, Vector3.Zero, new Vector3( 2.4f, 2.4f, 2.4f ), 0f, true, 1f, PropMeshBuilder.Flat( 245, 248, 255, 0.9f ) );
 		_flakeModel = b.Build( "weather_flake" );
 		b = new PropMeshBuilder();
-		b.Box( flat, Vector3.Zero, new Vector3( 3f, 3f, 1.6f ), 0f, true, 1f, PropMeshBuilder.Flat( 214, 176, 120, 0.9f ) );
+		b.Box( flat, Vector3.Zero, new Vector3( 4f, 4f, 2f ), 0f, true, 1f, PropMeshBuilder.Flat( 214, 176, 120, 0.9f ) );
 		_dustModel = b.Build( "weather_dust" );
 	}
 
@@ -199,7 +197,7 @@ public sealed class Weather : Component
 			go.Flags |= GameObjectFlags.NotSaved;
 			var r = go.AddComponent<ModelRenderer>();
 			r.RenderType = ModelRenderer.ShadowRenderType.Off;
-			_streaks.Add( new Streak { Go = go, Offset = RandomOffset(), Speed = 0.7f + (float)_random.NextDouble() * 0.6f, Drift = (float)_random.NextDouble() * 6.28f } );
+			_streaks.Add( new Streak { Go = go, Renderer = r, Offset = RandomOffset(), Speed = 0.7f + (float)_random.NextDouble() * 0.6f, Drift = (float)_random.NextDouble() * 6.28f } );
 		}
 		while ( _streaks.Count > wanted )
 		{
@@ -222,8 +220,7 @@ public sealed class Weather : Component
 			// wrapped around the camera so it is always raining where you look
 			if ( s.Offset.z < -Height * 0.35f || s.Offset.Length > Radius * 1.4f ) s.Offset = RandomOffset( true );
 
-			var renderer = s.Go.Components.Get<ModelRenderer>();
-			if ( renderer.Model != model ) renderer.Model = model;
+			if ( s.Renderer.Model != model ) s.Renderer.Model = model;
 			s.Go.WorldPosition = origin + s.Offset;
 			s.Go.WorldRotation = model == _rainModel ? rot : Rotation.Identity;
 		}

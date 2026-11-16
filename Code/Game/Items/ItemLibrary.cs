@@ -2,6 +2,9 @@ using LongTrip.World.Props;
 
 namespace LongTrip.Gameplay;
 
+/// <summary>One line of the loot list: what lies about at the start, and for containers what is in them (a fill range, 0 to 1).</summary>
+public sealed record LootEntry( string Id, int Count, string Liquid, float Fill, float FillMax );
+
 /// <summary>What using an item does (left mouse while holding it).</summary>
 public enum UseKind
 {
@@ -165,7 +168,7 @@ public static class ItemLibrary
 
 	// (rebuilt at the start of every play session, so edits to the data file are always picked up)
 	private static Dictionary<string, ItemDefinition> _definitions;
-	private static List<(string Id, int Count)> _loot;
+	private static List<LootEntry> _loot;
 	private static readonly Dictionary<string, Model> _models = new();
 
 	public static void Reset()
@@ -187,7 +190,7 @@ public static class ItemLibrary
 	public static IEnumerable<ItemDefinition> All => Definitions.Values;
 
 	/// <summary>The items lying about at the start (id and how many), from the data file.</summary>
-	public static IReadOnlyList<(string Id, int Count)> Loot
+	public static IReadOnlyList<LootEntry> Loot
 	{
 		get
 		{
@@ -204,7 +207,7 @@ public static class ItemLibrary
 	private sealed class ExplosionRecord { public float radius { get; set; } = 8f; public float force { get; set; } = 14f; public float damage { get; set; } = 45f; }
 	private sealed class MeleeRecord { public float swingSeconds { get; set; } = 0.3f; public float startAngle { get; set; } = -50f; public float endAngle { get; set; } = 55f; public float cooldown { get; set; } = 0.5f; }
 	private sealed class ContainerRecord { public float capacity { get; set; } = 50f; public string liquid { get; set; } public float fill { get; set; } }
-	private sealed class LootRecord { public string id { get; set; } public int count { get; set; } = 1; }
+	private sealed class LootRecord { public string id { get; set; } public int count { get; set; } = 1; public string liquid { get; set; } public float fill { get; set; } = -1f; public float fillMax { get; set; } = -1f; }
 
 	private sealed class ItemRecord
 	{
@@ -247,7 +250,7 @@ public static class ItemLibrary
 	private static void Load()
 	{
 		_definitions = new Dictionary<string, ItemDefinition>();
-		_loot = new List<(string, int)>();
+		_loot = new List<LootEntry>();
 
 		ItemFile file = null;
 		try
@@ -303,7 +306,7 @@ public static class ItemLibrary
 		}
 
 		foreach ( var l in file.loot ?? new List<LootRecord>() )
-			if ( !string.IsNullOrEmpty( l.id ) && l.count > 0 ) _loot.Add( (l.id, l.count) );
+			if ( !string.IsNullOrEmpty( l.id ) && l.count > 0 ) _loot.Add( new LootEntry( l.id, l.count, l.liquid, l.fill, l.fillMax ) );
 
 		Log.Info( $"[items] {_definitions.Count} item kinds loaded" );
 	}
@@ -333,7 +336,7 @@ public static class ItemLibrary
 	// ---- making one -----------------------------------------------------------------------------------
 
 	/// <summary>Create an item of a kind at a place. <paramref name="amount"/> is how full it is (0 to 1).</summary>
-	public static Item Spawn( Scene scene, string id, Vector3 position, Rotation rotation, float amount = 1f )
+	public static Item Spawn( Scene scene, string id, Vector3 position, Rotation rotation, float amount = 1f, string liquid = null )
 	{
 		var def = Get( id );
 		if ( def is null ) { Log.Warning( $"[items] unknown item '{id}'" ); return null; }
@@ -376,9 +379,15 @@ public static class ItemLibrary
 		item.ItemId = id;
 		item.Display = def.Name;
 		item.HalfExtents = size * def.ModelScale * 0.5f;
-		item.Amount = def.Container is { } box ? box.StartFill : Math.Clamp( amount, 0f, 1f );
-		if ( def.Container is { } held ) item.Liquid = held.StartFill > 0f ? held.Liquid : null;
 		item.Body = body;
+		if ( def.Container is { } box )
+		{
+			// a container is filled with what the data says, or with the liquid and amount it is asked for
+			item.Liquid = liquid ?? (box.StartFill > 0f ? box.Liquid : null);
+			item.Amount = item.Liquid is null ? 0f : (liquid is not null ? Math.Clamp( amount, 0f, 1f ) : box.StartFill);
+			item.RefreshMass();
+		}
+		else item.Amount = Math.Clamp( amount, 0f, 1f );
 
 		// everything hurts a little when it hits hard enough; weapons hurt a lot
 		var impact = go.Components.Create<ImpactDamage>();

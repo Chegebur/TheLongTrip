@@ -142,7 +142,7 @@ public sealed class Atmosphere : Component
 		l.SunIntensity = l.SunIntensity * w.Light + w.Flash * 6f;
 		l.Ambient = l.Ambient * w.Dim + Color.White * (w.Flash * 0.35f);
 		l.Saturation *= 1f - w.Desaturate;
-		l.SkyTint = Color.Lerp( l.SkyTint, l.SkyTint * w.Tint, 0.8f ) * MathX.Lerp( 1f, 0.55f, 1f - w.Light );
+		l.SkyTint = Color.Lerp( l.SkyTint, l.SkyTint * w.Tint, 0.8f ) * MathX.Lerp( 1f, 0.28f, 1f - w.Light );
 		return l;
 	}
 

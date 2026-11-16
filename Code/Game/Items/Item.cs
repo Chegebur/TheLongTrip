@@ -34,6 +34,17 @@ public class Item : Component
 
 	public bool IsWelded => Weld.IsValid();
 
+	/// <summary>Litres of liquid in a container item.</summary>
+	public float Litres => Definition?.Container is { } c ? Amount * c.Capacity : 0f;
+
+	/// <summary>A container weighs more with liquid in it: call after the contents change.</summary>
+	public void RefreshMass()
+	{
+		if ( Definition?.Container is not { } c || Body is null ) return;
+		float density = LiquidLibrary.Get( Liquid )?.Density ?? 1f;
+		Body.MassOverride = Definition.Mass + Amount * c.Capacity * density;
+	}
+
 	public ItemDefinition Definition => ItemId is null ? null : ItemLibrary.Get( ItemId );
 
 	/// <summary>Break the weld, if there is one. Returns true if there was.</summary>

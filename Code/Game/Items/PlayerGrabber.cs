@@ -60,6 +60,8 @@ public sealed class PlayerGrabber : Component
 	private PlayerController _player;
 	private PlayerStats _stats;
 	private ItemContainer _pack;
+	private readonly PourFx _pour = new();
+	private TimeSince _lastLiquidNotice = 999f;
 	private PlayerInventory _inventory;
 	private StretchyArms _arms;
 	private GrabHud _hud;
@@ -102,6 +104,7 @@ public sealed class PlayerGrabber : Component
 
 	protected override void OnDestroy()
 	{
+		_pour.Destroy();
 		if ( _hud.IsValid() ) _hud.GameObject.Destroy();
 		if ( Instance == this ) Instance = null;
 	}
@@ -128,7 +131,7 @@ public sealed class PlayerGrabber : Component
 		var camera = Scene.Camera;
 		if ( !camera.IsValid() ) return;
 
-		if ( BuildSystem.Active )
+		if ( BuildSystem.IsBuilding )
 		{
 			LookSuppressed = false;
 			if ( _player.IsValid() ) _player.UseLookControls = true;
@@ -149,6 +152,7 @@ public sealed class PlayerGrabber : Component
 			return;
 		}
 
+		_pour.Hide();
 		bool pressedF = Input.Keyboard.Pressed( "f" );
 		bool pressedR = Input.Keyboard.Pressed( "r" );
 		int slotKey = PressedSlot();
@@ -181,16 +185,21 @@ public sealed class PlayerGrabber : Component
 			FindWeldTarget( camera );
 
 			var def = _held.Definition;
-			bool usable = def is not null && def.Use != UseKind.None;
+			bool container = def?.Container is not null;
+			bool usable = def is not null && (def.Use != UseKind.None || container);
+
+			// a container pours while the left mouse is held (into what you aim at), or is sipped from with a click when nothing is aimed at
+			if ( container && !pressedF ) PourOrDrink( camera, def );
 
 			if ( pressedF ) Release( true );
-			else if ( Input.Pressed( "Attack1" ) ) { if ( !usable || !UseHeld( def ) ) Throw( camera ); }
+			else if ( Input.Pressed( "Attack1" ) ) { if ( !container && (!usable || !UseHeld( def )) ) Throw( camera ); }
 			else if ( Input.Keyboard.Pressed( "t" ) ) Throw( camera );
 			else if ( pressedR ) Holster();
 			else if ( Input.Keyboard.Pressed( "z" ) && _weldTarget.IsValid() ) WeldHeld();
 
 			_hud.Hint = _held.IsValid() && snap is not null ? $"F   Fit {snap.Display}"
-				: _held.IsValid() && _weldTarget.IsValid() ? $"Z   Weld to {_weldTargetName}" : null;
+				: _held.IsValid() && _weldTarget.IsValid() ? $"Z   Weld to {_weldTargetName}"
+				: _held.IsValid() && container ? ContainerHint() : null;
 			_hud.Controls = _held.IsValid()
 				? $"Right mouse (hold): turn     Wheel: distance     Left mouse: {(usable ? UsePrompt( def ) : "throw")}     T: throw     R: holster     Z: weld     F: drop / fit"
 				: null;
@@ -359,6 +368,94 @@ public sealed class PlayerGrabber : Component
 		if ( def.Use == UseKind.Refuel ) return $"  ({item.Amount * def.Capacity:F0} L)";
 		if ( def.Use == UseKind.Drink || def.Use == UseKind.Eat ) return $"  ({(int)(item.Amount * 100f)}%)";
 		return "";
+	}
+
+	/// <summary>What the held container holds, and what the mouse will do with it.</summary>
+	private string ContainerHint()
+	{
+		var c = _held.Definition?.Container;
+		if ( c is null ) return null;
+		if ( _held.Liquid is null || _held.Litres < 0.01f ) return $"{_held.Display}: empty ({c.Capacity:0} L)";
+		return $"{_held.Display}: {_held.Litres:0.0} / {c.Capacity:0} L of {LiquidLibrary.NameOf( _held.Liquid ).ToLowerInvariant()}     Hold left mouse: pour on what you aim at     Click: drink";
+	}
+
+	private const float PourRate = 7f;   // litres per second
+
+	/// <summary>
+	/// Left mouse with a container in your hands. Aim at a car and hold: fuel goes into its tank. Aim at another container and hold: the liquid pours
+	/// across (the target takes only the same liquid, or anything when empty). Aim at nothing and click: you drink a mouthful.
+	/// </summary>
+	private void PourOrDrink( CameraComponent camera, ItemDefinition def )
+	{
+		var cap = def.Container;
+		if ( !_held.IsValid() || cap is null ) return;
+
+		bool down = Input.Down( "Attack1" );
+		bool pressed = Input.Pressed( "Attack1" );
+		if ( !down && !pressed ) return;
+
+		var liquid = LiquidLibrary.Get( _held.Liquid );
+		if ( liquid is null || _held.Litres < 0.005f )
+		{
+			if ( pressed ) { Notify( $"The {_held.Display.ToLowerInvariant()} is empty" ); Sfx.Play( Sfx.Deny ); }
+			return;
+		}
+
+		var origin = camera.WorldPosition;
+		var tr = Scene.Trace.Ray( origin, origin + camera.WorldRotation.Forward * 320f ).IgnoreGameObjectHierarchy( GameObject ).WithoutTags( "held" ).Run();
+		CarAssembly car = null;
+		Item target = null;
+		if ( tr.Hit && tr.GameObject.IsValid() )
+		{
+			car = tr.GameObject.Components.Get<CarAssembly>( FindMode.EverythingInSelfAndParent );
+			target = tr.GameObject.Components.Get<Item>( FindMode.EverythingInSelfAndParent );
+			if ( target == _held || target?.Definition?.Container is null ) target = null;
+		}
+
+		float flow = PourRate * Time.Delta;
+
+		if ( car is not null && down )
+		{
+			float moved = Liquids.FillTank( _held, car, flow );
+			if ( moved <= 0f ) { Complain( Liquids.LastProblem ); return; }
+			_pour.Show( Scene, _held.WorldPosition + Vector3.Up * 4f, tr.HitPosition, liquid.Color );
+			return;
+		}
+
+		if ( target is not null && down )
+		{
+			float moved = Liquids.Transfer( _held, target, flow );
+			if ( moved <= 0f ) { Complain( Liquids.LastProblem ); return; }
+			_pour.Show( Scene, _held.WorldPosition + Vector3.Up * 4f, tr.HitPosition, liquid.Color );
+			return;
+		}
+
+		// nothing aimed at: a click is a mouthful
+		if ( pressed && target is null && car is null )
+		{
+			float sip = MathF.Min( 0.3f, _held.Litres );
+			_stats?.Drink( liquid.Thirst * sip );
+			_stats?.Eat( liquid.Food * sip );
+			if ( liquid.Toxic > 0f ) _stats?.Damage( liquid.Toxic * sip );
+			Drained( sip / cap.Capacity );
+			Sfx.Play( Sfx.Press );
+			Notify( liquid.Toxic > 0f ? $"You swallow {liquid.Name.ToLowerInvariant()}. That was a mistake" : $"You drink some {liquid.Name.ToLowerInvariant()}" );
+		}
+	}
+
+	private void Drained( float fraction )
+	{
+		_held.Amount = MathF.Max( 0f, _held.Amount - fraction );
+		if ( _held.Litres < 0.005f ) { _held.Amount = 0f; _held.Liquid = null; }
+		_held.RefreshMass();
+	}
+
+	private void Complain( string text )
+	{
+		if ( _lastLiquidNotice < 1.5f ) return;
+		_lastLiquidNotice = 0f;
+		Notify( text );
+		Sfx.Play( Sfx.Deny );
 	}
 
 	private static string UsePrompt( ItemDefinition def ) => def.Use switch

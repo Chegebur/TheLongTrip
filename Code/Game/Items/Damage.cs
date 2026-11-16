@@ -35,7 +35,12 @@ public sealed class Damageable : Component
 		IsDead = true;
 		var position = WorldPosition;
 		var self = GameObject;
-		if ( Explosion is not null ) Boom( position, Explosion.Radius, Explosion.Force, Explosion.Damage );
+		var blast = Explosion;
+		var held = Components.Get<Item>();
+		// anything holding fuel goes up when it breaks: the more fuel, the bigger the blast
+		if ( blast is null && held is not null && held.Liquid == "fuel" && held.Litres > 3f )
+			blast = new ExplosionConfig { Radius = MathF.Min( 9f, 2f + held.Litres * 0.05f ), Force = MathF.Min( 12f, 3f + held.Litres * 0.06f ), Damage = MathF.Min( 60f, 10f + held.Litres * 0.3f ) };
+		if ( blast is not null ) Boom( position, blast.Radius, blast.Force, blast.Damage );
 		if ( self.IsValid() ) self.Destroy();
 	}
 

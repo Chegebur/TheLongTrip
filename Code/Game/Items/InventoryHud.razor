@@ -421,7 +421,7 @@
 		if ( def.Use == UseKind.Eat ) _tipLines.Add( $"Restores {def.Restore * s.Amount:0} food" );
 		if ( def.Use == UseKind.Drink ) _tipLines.Add( $"Restores up to {def.Restore * s.Amount:0} water ({s.Amount * 100f:0}% left)" );
 		if ( def.Use == UseKind.Refuel ) _tipLines.Add( $"Fuel: {s.Amount * def.Capacity:0} / {def.Capacity:0} L" );
-		if ( def.Container is { } c ) _tipLines.Add( s.Amount > 0.01f ? $"Holds {s.Amount * c.Capacity:0} / {c.Capacity:0} L of {s.Liquid}" : $"Empty ({c.Capacity:0} L)" );
+		if ( def.Container is { } c ) _tipLines.Add( s.Amount > 0.01f ? $"Holds {s.Amount * c.Capacity:0.#} / {c.Capacity:0} L of {LiquidLibrary.NameOf( s.Liquid ).ToLowerInvariant()}" : $"Empty ({c.Capacity:0} L)" );
 		if ( def.Explosion is not null ) _tipLines.Add( "Explodes when hit hard enough" );
 
 		_tipHint = def.ArmorSlot is not null || def.BackpackTier > 0 ? "Drag to move. Right click to wear." : kind == "hot" ? "Drag to move. Right click: to pockets." : "Drag to move. Right click: to hotbar.";
