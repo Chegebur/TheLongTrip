@@ -3,7 +3,12 @@ using LongTrip.World.Props;
 
 namespace LongTrip.Gameplay;
 
-public enum WeatherKind { Clear, Overcast, Fog, Rain, Storm, Dust, Snow, Blizzard }
+public enum WeatherKind
+{
+	Clear, Overcast, Fog, Rain, Storm, Dust, Snow, Blizzard,
+	// the dense variants (added at the end so saved values keep their meaning)
+	HeavyRain, Sandstorm, HeavySnow, DenseFog, HeavyOvercast,
+}
 
 /// <summary>
 /// The weather. One host decides (a random walk between kinds that suit the biome you are in, a few minutes each) and the kind and its
@@ -39,7 +44,15 @@ public sealed class Weather : Component
 	public float Wetness { get; private set; }          // 0..1, rain and snow on the ground (for future grip changes)
 	public float Wind { get; private set; }
 
-	private struct Target { public float Fog, Light, Dim, Desat, Rain, Snow, Dust; public Color Tint; }
+	private struct Target { public float Fog, Light, Dim, Desat, Rain, Snow, Dust, Dense; public Color Tint; }
+
+	/// <summary>The name shown for a kind ("Heavy rain", "Snow storm"...).</summary>
+	public static string NameOf( WeatherKind k ) => k switch
+	{
+		WeatherKind.HeavyRain => "Heavy rain", WeatherKind.Storm => "Thunderstorm", WeatherKind.Dust => "Dust", WeatherKind.Sandstorm => "Sandstorm",
+		WeatherKind.HeavySnow => "Heavy snow", WeatherKind.Blizzard => "Snow storm", WeatherKind.DenseFog => "Dense fog", WeatherKind.HeavyOvercast => "Heavy cloud",
+		_ => k.ToString(),
+	};
 
 	private static Target TargetFor( WeatherKind k, float s ) => k switch
 	{
@@ -50,10 +63,15 @@ public sealed class Weather : Component
 		WeatherKind.Dust => new Target { Fog = MathX.Lerp( 0.45f, 0.05f, s ), Light = 0.65f, Dim = 0.95f, Desat = 0.1f, Dust = s, Tint = new Color( 1f, 0.82f, 0.55f ) },
 		WeatherKind.Snow => new Target { Fog = MathX.Lerp( 0.6f, 0.25f, s ), Light = 0.6f, Dim = 0.95f, Desat = 0.15f, Snow = s, Tint = new Color( 0.92f, 0.96f, 1f ) },
 		WeatherKind.Blizzard => new Target { Fog = 0.045f, Light = 0.45f, Dim = 0.9f, Desat = 0.3f, Snow = 1f, Tint = new Color( 0.88f, 0.93f, 1f ) },
+		WeatherKind.HeavyOvercast => new Target { Fog = 0.55f, Light = 0.3f, Dim = 0.7f, Desat = 0.4f, Tint = new Color( 0.75f, 0.8f, 0.9f ) },
+		WeatherKind.DenseFog => new Target { Fog = 0.025f, Light = 0.55f, Dim = 0.95f, Desat = 0.45f, Tint = new Color( 0.88f, 0.9f, 0.95f ) },
+		WeatherKind.HeavyRain => new Target { Fog = 0.1f, Light = 0.25f, Dim = 0.65f, Desat = 0.45f, Rain = 1f, Dense = 1.6f, Tint = new Color( 0.68f, 0.76f, 0.92f ) },
+		WeatherKind.Sandstorm => new Target { Fog = 0.022f, Light = 0.5f, Dim = 0.9f, Desat = 0.1f, Dust = 1f, Dense = 1.6f, Tint = new Color( 1f, 0.72f, 0.4f ) },
+		WeatherKind.HeavySnow => new Target { Fog = 0.1f, Light = 0.5f, Dim = 0.95f, Desat = 0.2f, Snow = 1f, Dense = 1.6f, Tint = new Color( 0.9f, 0.95f, 1f ) },
 		_ => new Target { Fog = 1f, Light = 1f, Dim = 1f, Tint = Color.White },
 	};
 
-	private float _rain, _snow, _dust;
+	private float _rain, _snow, _dust, _dense = 1f;
 	private TimeUntil _next = 45f;   // the first minute is clear
 	private TimeUntil _nextFlash = 5f;
 	private readonly System.Random _random = new();
@@ -102,8 +120,9 @@ public sealed class Weather : Component
 		_rain = MathX.Lerp( _rain, t.Rain, k );
 		_snow = MathX.Lerp( _snow, t.Snow, k );
 		_dust = MathX.Lerp( _dust, t.Dust, k );
+		_dense = MathX.Lerp( _dense, t.Dense > 0f ? t.Dense : 1f, k );
 		Wetness = MathX.Lerp( Wetness, MathF.Max( _rain, 0f ), 0.1f * Time.Delta * (_rain > Wetness ? 1f : 0.2f) );
-		Wind = MathX.Lerp( Wind, Kind is WeatherKind.Storm or WeatherKind.Blizzard or WeatherKind.Dust ? 1f : 0.2f, k );
+		Wind = MathX.Lerp( Wind, Kind is WeatherKind.Storm or WeatherKind.Blizzard or WeatherKind.Dust or WeatherKind.Sandstorm or WeatherKind.HeavyRain or WeatherKind.HeavySnow ? 1f : 0.2f, k );
 
 		// ---- lightning in a storm: a quick double flash
 		if ( Kind == WeatherKind.Storm && _nextFlash )
@@ -125,11 +144,11 @@ public sealed class Weather : Component
 
 		(WeatherKind, float)[] options;
 		if ( biome == BiomeLibrary.Desert )
-			options = new[] { (WeatherKind.Clear, 6f), (WeatherKind.Dust, 2.5f), (WeatherKind.Overcast, 1.5f), (WeatherKind.Fog, 0.4f), (WeatherKind.Storm, 0.4f) };
+			options = new[] { (WeatherKind.Clear, 6f), (WeatherKind.Dust, 2.5f), (WeatherKind.Overcast, 1.5f), (WeatherKind.Fog, 0.4f), (WeatherKind.Storm, 0.4f), (WeatherKind.Sandstorm, 1.2f), (WeatherKind.HeavyOvercast, 0.5f) };
 		else if ( biome == BiomeLibrary.IcePlains )
-			options = new[] { (WeatherKind.Clear, 3f), (WeatherKind.Snow, 4f), (WeatherKind.Blizzard, 1.5f), (WeatherKind.Overcast, 2f), (WeatherKind.Fog, 1f) };
+			options = new[] { (WeatherKind.Clear, 3f), (WeatherKind.Snow, 4f), (WeatherKind.Blizzard, 1.5f), (WeatherKind.Overcast, 2f), (WeatherKind.Fog, 1f), (WeatherKind.HeavySnow, 1.5f), (WeatherKind.DenseFog, 0.5f) };
 		else
-			options = new[] { (WeatherKind.Clear, 4f), (WeatherKind.Overcast, 2.5f), (WeatherKind.Rain, 3f), (WeatherKind.Storm, 1f), (WeatherKind.Fog, 1.5f) };
+			options = new[] { (WeatherKind.Clear, 4f), (WeatherKind.Overcast, 2.5f), (WeatherKind.Rain, 3f), (WeatherKind.Storm, 1f), (WeatherKind.Fog, 1.5f), (WeatherKind.HeavyRain, 1.6f), (WeatherKind.HeavyOvercast, 1f), (WeatherKind.DenseFog, 0.5f) };
 
 		float total = options.Sum( o => o.Item2 );
 		float r = (float)_random.NextDouble() * total;
@@ -139,7 +158,7 @@ public sealed class Weather : Component
 			if ( r > 0f ) continue;
 			Kind = kind;
 			Strength = 0.5f + (float)_random.NextDouble() * 0.5f;
-			Log.Info( $"[weather] {Kind} ({Strength:F2})" );
+			Log.Info( $"[weather] {NameOf( Kind )} ({Strength:F2})" );
 			return;
 		}
 	}
@@ -173,7 +192,7 @@ public sealed class Weather : Component
 	{
 		float intensity = MathF.Max( _rain, MathF.Max( _snow, _dust ) );
 		var cam = Scene.Camera;
-		int wanted = (int)(MaxStreaks * Math.Clamp( intensity, 0f, 1f ) * (_dust > 0.05f ? 0.8f : 1f));
+		int wanted = (int)(MaxStreaks * Math.Clamp( intensity, 0f, 1f ) * _dense * (_dust > 0.05f ? 0.8f : 1f));
 
 		if ( wanted <= 0 && _streaks.Count == 0 ) return;
 		EnsureModels();
@@ -187,6 +206,7 @@ public sealed class Weather : Component
 
 		var model = _rain >= _snow && _rain >= _dust ? _rainModel : _snow >= _dust ? _flakeModel : _dustModel;
 		float fall = model == _rainModel ? 2300f : model == _flakeModel ? 160f : 60f;
+		fall *= 1f + (_dense - 1f) * 0.4f;
 		float sideways = (model == _dustModel ? 1400f : model == _rainModel ? 300f : 220f) * (0.4f + Wind);
 		var windDir = new Vector3( 0.8f, 0.6f, 0f ).Normal;
 

@@ -1,10 +1,75 @@
 {
   "roofLevel": 4,
+  "roofX": [
+    4,
+    9
+  ],
+  "roofY": [
+    1,
+    6
+  ],
   "pieces": [
-    { "id": "floor", "name": "Wood floor", "model": "models/building/nordic/nordic_floor/nordic_floor.vmdl", "scale": 0.5, "cells": [2, 2, 1], "layer": "floor" },
-    { "id": "floor_cracked", "name": "Cracked floor", "model": "models/building/nordic/nordic_floor_cracked/nordic_floor_cracked.vmdl", "scale": 0.5, "cells": [2, 2, 1], "layer": "floor" },
-    { "id": "wall", "name": "Wall", "model": "models/building/nordic/nordic_wall_01/nordic_wall_01.vmdl", "scale": 0.2048, "cells": [1, 2, 3], "layer": "wall" },
-    { "id": "wall_narrow", "name": "Narrow wall", "model": "models/building/nordic/nordic_wall_02/nordic_wall_02.vmdl", "scale": 0.2048, "cells": [1, 1, 3], "layer": "wall" },
-    { "id": "wall_low", "name": "Low wall", "model": "models/building/nordic/nordic_wall_03/nordic_wall_03.vmdl", "scale": 0.2048, "cells": [1, 2, 2], "layer": "wall" }
+    {
+      "id": "floor",
+      "name": "Wood floor",
+      "model": "models/building/nordic/nordic_floor/nordic_floor.vmdl",
+      "cells": [
+        2,
+        2,
+        1
+      ],
+      "layer": "floor",
+      "fit": "xy",
+      "rest": 0.6
+    },
+    {
+      "id": "floor_cracked",
+      "name": "Cracked floor",
+      "model": "models/building/nordic/nordic_floor_cracked/nordic_floor_cracked.vmdl",
+      "cells": [
+        2,
+        2,
+        1
+      ],
+      "layer": "floor",
+      "fit": "xy",
+      "rest": 0.6
+    },
+    {
+      "id": "wall",
+      "name": "Wall",
+      "model": "models/building/nordic/nordic_wall_01/nordic_wall_01.vmdl",
+      "cells": [
+        1,
+        2,
+        3
+      ],
+      "layer": "wall",
+      "fit": "yz"
+    },
+    {
+      "id": "wall_narrow",
+      "name": "Narrow wall",
+      "model": "models/building/nordic/nordic_wall_02/nordic_wall_02.vmdl",
+      "cells": [
+        1,
+        1,
+        3
+      ],
+      "layer": "wall",
+      "fit": "yz"
+    },
+    {
+      "id": "wall_low",
+      "name": "Low wall",
+      "model": "models/building/nordic/nordic_wall_03/nordic_wall_03.vmdl",
+      "cells": [
+        1,
+        2,
+        2
+      ],
+      "layer": "wall",
+      "fit": "y"
+    }
   ]
 }

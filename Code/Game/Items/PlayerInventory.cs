@@ -80,6 +80,61 @@ public sealed class PlayerInventory : Component
 		return true;
 	}
 
+	// ---- nails (they let a building piece go where nothing holds it up) ----
+
+	public const string NailId = "nails";
+
+	/// <summary>How many nails you have: in your hands, the hotbar and the pockets and pack. A box of nails holds <see cref="ItemDefinition.Uses"/> of them.</summary>
+	public int NailsLeft
+	{
+		get
+		{
+			float uses = ItemLibrary.Get( NailId )?.Uses ?? 1;
+			float total = 0f;
+			var held = PlayerGrabber.Instance?.Held;
+			if ( held.IsValid() && held.ItemId == NailId ) total += held.Amount * uses;
+			var hotbar = Hotbar;
+			for ( int i = 0; hotbar is not null && i < hotbar.Slots.Count; i++ ) if ( hotbar.Get( i )?.ItemId == NailId ) total += hotbar.Get( i ).Amount * uses;
+			for ( int i = 0; i < Unlocked && i < MaxStorage; i++ ) if ( Storage[i]?.ItemId == NailId ) total += Storage[i].Amount * uses;
+			return (int)MathF.Floor( total + 0.001f );
+		}
+	}
+
+	/// <summary>Use up one nail (from what you hold first, then the pockets, then the hotbar). An empty box is thrown away. False if there are none.</summary>
+	public bool ConsumeNail()
+	{
+		float uses = MathF.Max( 1f, ItemLibrary.Get( NailId )?.Uses ?? 1 );
+		float one = 1f / uses;
+
+		var held = PlayerGrabber.Instance?.Held;
+		if ( held.IsValid() && held.ItemId == NailId && held.Amount * uses >= 0.999f )
+		{
+			held.Amount -= one;
+			if ( held.Amount * uses < 0.5f ) held.GameObject.Destroy();
+			return true;
+		}
+
+		for ( int i = 0; i < MaxStorage && i < Unlocked; i++ )
+		{
+			var s = Storage[i];
+			if ( s?.ItemId != NailId || s.Amount * uses < 0.999f ) continue;
+			var left = s.Amount - one;
+			Storage[i] = left * uses < 0.5f ? null : s with { Amount = left };
+			return true;
+		}
+
+		var hotbar = Hotbar;
+		for ( int i = 0; hotbar is not null && i < hotbar.Slots.Count; i++ )
+		{
+			var s = hotbar.Get( i );
+			if ( s?.ItemId != NailId || s.Amount * uses < 0.999f ) continue;
+			var left = s.Amount - one;
+			hotbar.Set( i, left * uses < 0.5f ? null : s with { Amount = left } );
+			return true;
+		}
+		return false;
+	}
+
 	/// <summary>Index into <see cref="ArmorSlots"/> an item goes in, or -1 if it is not armor.</summary>
 	public static int ArmorIndex( string itemId )
 	{

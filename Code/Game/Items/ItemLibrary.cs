@@ -133,6 +133,9 @@ public sealed class ItemDefinition
 	/// <summary>0 common, 1 uncommon, 2 rare, 3 epic, 4 legendary (see <see cref="Rarity"/>).</summary>
 	public int Rarity;
 
+	/// <summary>For items used up a bit at a time (a box of nails): how many uses a full one holds. 0: not counted.</summary>
+	public int Uses;
+
 	/// <summary>The orientation it is held in, in degrees (pitch, yaw, roll) in your view. Null: however it was lying.</summary>
 	public Angles? HoldAngles;
 
@@ -230,6 +233,7 @@ public static class ItemLibrary
 		public int backpack { get; set; }
 		public string clothing { get; set; }
 		public string rarity { get; set; }
+		public int uses { get; set; }
 		public float[] hold { get; set; }
 		public float holdDistance { get; set; }
 		public int hands { get; set; } = 2;
@@ -287,7 +291,7 @@ public static class ItemLibrary
 				PortionPerUse = r.portionPerUse <= 0f ? 1f : r.portionPerUse,
 				ConsumedWhenEmpty = r.consumedWhenEmpty,
 				Stowable = r.stowable,
-				ArmorSlot = r.armorSlot, Defense = r.defense, BackpackTier = r.backpack, Clothing = r.clothing, Rarity = LongTrip.Gameplay.Rarity.Parse( r.rarity ),
+				ArmorSlot = r.armorSlot, Defense = r.defense, BackpackTier = r.backpack, Clothing = r.clothing, Rarity = LongTrip.Gameplay.Rarity.Parse( r.rarity ), Uses = r.uses,
 				HoldAngles = r.hold is { Length: 3 } ? new Angles( r.hold[0], r.hold[1], r.hold[2] ) : null,
 				HoldDistance = r.holdDistance,
 				Hands = r.hands == 1 ? 1 : 2,
@@ -429,6 +433,7 @@ public static class ItemLibrary
 				"water_bottle" => WaterBottle(),
 				"can" => Can(),
 				"fuel_can" => FuelCan(),
+				"nails" => Nails(),
 				_ => null,
 			};
 		}
@@ -460,6 +465,18 @@ public static class ItemLibrary
 		b.Cylinder( Metal, Vector3.Zero, 1.5f, 4.5f, 18, Rotation.Identity, PropMeshBuilder.Flat( 186, 188, 194, 0.3f ) );
 		b.Cylinder( Flat, Vector3.Zero, 1.53f, 2.8f, 18, Rotation.Identity, PropMeshBuilder.Flat( 176, 42, 36, 0.7f ) );   // label
 		return b.Build( "item_can" );
+	}
+
+	private static Model Nails()
+	{
+		var b = new PropMeshBuilder();
+		var card = PropMeshBuilder.Flat( 176, 140, 92, 0.85f );
+		b.Box( Flat, new Vector3( 0, 0, -0.6f ), new Vector3( 5f, 8f, 2.4f ), 0f, true, 1f, card );                          // the box
+		b.Box( Flat, new Vector3( 0, 0, 0.7f ), new Vector3( 4.6f, 7.6f, 0.2f ), 0f, true, 1f, PropMeshBuilder.Flat( 40, 38, 36, 0.9f ) );   // the dark inside
+		var steel = PropMeshBuilder.Flat( 170, 172, 178, 0.35f );
+		for ( int i = -3; i <= 3; i++ )   // nails lying across the top
+			b.Box( Metal, new Vector3( (i % 2) * 0.5f, i * 0.9f, 1.15f ), new Vector3( 3.4f, 0.28f, 0.28f ), 0f, true, 1f, steel );
+		return b.Build( "item_nails" );
 	}
 
 	private static Model FuelCan()
