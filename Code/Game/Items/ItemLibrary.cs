@@ -354,11 +354,12 @@ public static class ItemLibrary
 		go.Flags |= GameObjectFlags.NotSaved;
 
 		var model = ModelFor( def );
+		GameObject visual = null;
 		// Many models (clothes, tools) have their origin far from their middle. The visible model hangs off a child so that the item's own origin
 		// is the middle of the model: the collider, the centre of mass and the ground check all then agree (an off-centre origin made items sink and jitter).
 		if ( model.IsValid() )
 		{
-			var visual = scene.CreateObject();
+			visual = scene.CreateObject();
 			visual.Name = "Visual";
 			visual.SetParent( go, false );
 			visual.LocalPosition = def.Size.HasValue ? Vector3.Zero : -model.Bounds.Center;
@@ -375,9 +376,19 @@ public static class ItemLibrary
 		body.AngularDamping = 0.8f;
 		body.EnhancedCcd = true;
 
-		var collider = go.Components.Create<BoxCollider>();
-		collider.Scale = size;
-		collider.Center = centre;
+		// the collision follows the shape when the shape needs it (a jug with a handle, a tool, a bent pipe); a box otherwise
+		var shaped = visual.IsValid() ? LongTrip.World.Props.ColliderGenerator.For( model, false ) : null;
+		if ( shaped is not null )
+		{
+			var mc = visual.Components.Create<ModelCollider>();
+			mc.Model = shaped;
+		}
+		else
+		{
+			var collider = go.Components.Create<BoxCollider>();
+			collider.Scale = size;
+			collider.Center = centre;
+		}
 
 		var item = go.Components.Create<Item>();
 		item.ItemId = id;

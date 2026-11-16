@@ -89,6 +89,10 @@ public sealed class BuiltPiece : Component
 	public Vector3Int Size { get; set; }
 	public bool Nailed { get; set; }
 
+	/// <summary>How far (in cells, in the grid's frame) the piece sits off the middle of its cells: a wall is centred on the edge line of the floor it stands on.</summary>
+	public Vector3 Shift { get; set; }
+	public int Turn { get; set; }
+
 	public Vector3Int Max => new( Min.x + Size.x, Min.y + Size.y, Min.z + Size.z );
 }
 
@@ -113,6 +117,7 @@ public sealed class BuildSystem : Component
 	private BuildGrid _grid;
 	private int _selected;
 	private int _turn;   // quarter turns
+	private Vector3 _shift;   // the snapped piece's offset onto an edge (cells)
 	private GameObject _ghost;
 	private ModelRenderer _ghostRenderer;
 	private Material _ghostMaterial;
@@ -165,6 +170,7 @@ public sealed class BuildSystem : Component
 		var min = snap.Min;
 		var size = snap.Size;
 		_turn = snap.Turn;   // walls turn themselves to lie along the edge they snap to
+		_shift = snap.Shift;
 		var (verdict, why) = (snap.Verdict, snap.Why);
 
 		ShowGhost( def, min, size, verdict );
@@ -216,8 +222,8 @@ public sealed class BuildSystem : Component
 
 	private Vector3Int FootprintSize( BuildPieceDef def, int turn ) => turn % 2 == 1 ? new Vector3Int( def.Cells.y, def.Cells.x, def.Cells.z ) : def.Cells;
 
-	private readonly record struct Snap( Vector3Int Min, Vector3Int Size, int Turn, Verdict Verdict, string Why );
-	private readonly record struct Candidate( Vector3Int Min, int Turn );
+	private readonly record struct Snap( Vector3Int Min, Vector3Int Size, int Turn, Verdict Verdict, string Why, Vector3 Shift );
+	private readonly record struct Candidate( Vector3Int Min, int Turn, Vector3 Shift );
 
 	/// <summary>
 	/// Where the piece goes: it snaps to what is already built, the way building works in Fortnite. A floor goes edge to edge next to a floor, on the same
@@ -249,7 +255,7 @@ public sealed class BuildSystem : Component
 		{
 			var size = FootprintSize( def, c.Turn );
 			var (verdict, why) = Evaluate( def, c.Min, size );
-			var candidate = new Snap( c.Min, size, c.Turn, verdict, why );
+			var candidate = new Snap( c.Min, size, c.Turn, verdict, why, c.Shift );
 
 			var lo = new Vector3( c.Min.x, c.Min.y, c.Min.z );
 			var hi = new Vector3( c.Min.x + size.x, c.Min.y + size.y, c.Min.z + size.z );
@@ -273,7 +279,7 @@ public sealed class BuildSystem : Component
 		// 1. the piece you are looking through, 2. the nearest one to the crosshair (only if close), 3. show the nearest spot in red with the reason
 		if ( bestHit is { } h ) snap = h;
 		else if ( bestNear is { } n && nearD < 1.2f ) snap = n;
-		else snap = bestAny ?? new Snap( new Vector3Int( BuildLibrary.RoofX.Min, BuildLibrary.RoofY.Min, BuildLibrary.RoofLevel ), FootprintSize( def, _turn ), _turn, Verdict.Blocked, "Nowhere to put it" );
+		else snap = bestAny ?? new Snap( new Vector3Int( BuildLibrary.RoofX.Min, BuildLibrary.RoofY.Min, BuildLibrary.RoofLevel ), FootprintSize( def, _turn ), _turn, Verdict.Blocked, "Nowhere to put it", Vector3.Zero );
 	}
 
 	/// <summary>Slab test: does the ray cross the box, and at what distance along it?</summary>
@@ -309,18 +315,31 @@ public sealed class BuildSystem : Component
 		return parity == _turn % 2 ? _turn : (_turn + 1) % 4;
 	}
 
+	/// <summary>
+	/// The offset a wall has from the middle of its cell so that it is centred on the edge line of the floor beside it: towards the low side of the
+	/// cell (<paramref name="high"/> false) or the high side. Only along the wall's thin axis (x when it is not turned, y when it is turned a quarter).
+	/// </summary>
+	private static Vector3 EdgeShift( BuildPieceDef def, int turn, bool high )
+	{
+		if ( def.Layer != "wall" ) return Vector3.Zero;
+		float d = high ? 0.5f : -0.5f;
+		return turn % 2 == 0 ? new Vector3( d, 0f, 0f ) : new Vector3( 0f, d, 0f );
+	}
+
 	private IEnumerable<Candidate> Candidates( BuildPieceDef def )
 	{
 		int roof = BuildLibrary.RoofLevel;
 		var rx = BuildLibrary.RoofX;
 		var ry = BuildLibrary.RoofY;
-		var seen = new HashSet<(int, int, int, int)>();
+		var seen = new HashSet<(int, int, int, int, int)>();
 		var found = new List<Candidate>();
 
-		void Add( int x, int y, int z, int turn )
+		void Add( int x, int y, int z, int turn, Vector3 shift )
 		{
-			if ( !seen.Add( (x, y, z, turn % 2) ) ) return;
-			found.Add( new Candidate( new Vector3Int( x, y, z ), turn ) );
+			// the same cells with the edge on the other side are different placements for a wall
+			int side = shift.x > 0f || shift.y > 0f ? 1 : 0;
+			if ( !seen.Add( (x, y, z, turn % 2, side) ) ) return;
+			found.Add( new Candidate( new Vector3Int( x, y, z ), turn, shift ) );
 		}
 
 		int parities = def.Cells.x == def.Cells.y ? 1 : 2;
@@ -332,7 +351,15 @@ public sealed class BuildSystem : Component
 			var size = FootprintSize( def, turn );
 			for ( int x = rx.Min - size.x; x < rx.Max + size.x; x += size.x )
 			for ( int y = ry.Min - size.y; y < ry.Max + size.y; y += size.y )
-				Add( x, y, roof, turn );
+			{
+				if ( def.Layer == "wall" )
+				{
+					// on an edge line of the lattice: the line at the low side of the cell, or at the high side (the far edge of the roof)
+					Add( x, y, roof, turn, EdgeShift( def, turn, false ) );
+					Add( x, y, roof, turn, EdgeShift( def, turn, true ) );
+				}
+				else Add( x, y, roof, turn, Vector3.Zero );
+			}
 		}
 
 		// 2. against what is already built
@@ -344,47 +371,55 @@ public sealed class BuildSystem : Component
 			{
 				int turn = TurnFor( def, p );
 				var size = FootprintSize( def, turn );
+				var low = EdgeShift( def, turn, false );
+				var high = EdgeShift( def, turn, true );
 
 				if ( b.Def.Layer == def.Layer )
 				{
-					// next to it on the same lattice (a piece's width along the edge, so tiles stay in step) ...
-					for ( int k = -1; k <= 1; k++ )
-					{
-						Add( b.Max.x, b.Min.y + k * size.y, b.Min.z, turn );
-						Add( b.Min.x - size.x, b.Min.y + k * size.y, b.Min.z, turn );
-						Add( b.Min.x + k * size.x, b.Max.y, b.Min.z, turn );
-						Add( b.Min.x + k * size.x, b.Min.y - size.y, b.Min.z, turn );
-					}
+					// a neighbour of the same kind that lies the same way keeps its edge line; a differently turned one gets either
+					Vector3[] shifts = def.Layer == "wall" && b.Turn % 2 == turn % 2 ? new[] { b.Shift } : new[] { low, high };
 
-					// ... or stacked on it, for walls
-					if ( def.Layer == "wall" ) Add( b.Min.x, b.Min.y, b.Max.z, turn );
+					foreach ( var sh in shifts )
+					{
+						// next to it on the same lattice (a piece's width along the edge, so tiles stay in step) ...
+						for ( int k = -1; k <= 1; k++ )
+						{
+							Add( b.Max.x, b.Min.y + k * size.y, b.Min.z, turn, sh );
+							Add( b.Min.x - size.x, b.Min.y + k * size.y, b.Min.z, turn, sh );
+							Add( b.Min.x + k * size.x, b.Max.y, b.Min.z, turn, sh );
+							Add( b.Min.x + k * size.x, b.Min.y - size.y, b.Min.z, turn, sh );
+						}
+
+						// ... or stacked on it, for walls
+						if ( def.Layer == "wall" ) Add( b.Min.x, b.Min.y, b.Max.z, turn, sh );
+					}
 				}
 				else if ( def.Layer == "wall" && b.Def.Layer == "floor" )
 				{
-					// a wall stands on the edge of a floor, along that edge
-					if ( size.x == 1 )
+					// a wall stands on the edge of a floor, along that edge, centred on the edge line
+					if ( turn % 2 == 0 )
 					{
 						for ( int k = 0; k * size.y < b.Size.y; k++ )
 						{
-							Add( b.Min.x, b.Min.y + k * size.y, b.Min.z, turn );
-							Add( b.Max.x - 1, b.Min.y + k * size.y, b.Min.z, turn );
+							Add( b.Min.x, b.Min.y + k * size.y, b.Min.z, turn, low );
+							Add( b.Max.x - size.x, b.Min.y + k * size.y, b.Min.z, turn, high );
 						}
 					}
-					if ( size.y == 1 )
+					else
 					{
 						for ( int k = 0; k * size.x < b.Size.x; k++ )
 						{
-							Add( b.Min.x + k * size.x, b.Min.y, b.Min.z, turn );
-							Add( b.Min.x + k * size.x, b.Max.y - 1, b.Min.z, turn );
+							Add( b.Min.x + k * size.x, b.Min.y, b.Min.z, turn, low );
+							Add( b.Min.x + k * size.x, b.Max.y - size.y, b.Min.z, turn, high );
 						}
 					}
 				}
 				else if ( def.Layer == "floor" && b.Def.Layer == "wall" )
 				{
-					// a floor goes on the top of a wall, its edge on the wall
+					// a floor goes on the top of a wall, its edge on the wall's edge line
 					foreach ( int x in new[] { b.Min.x, b.Max.x - size.x } )
 					foreach ( int y in new[] { b.Min.y, b.Max.y - size.y } )
-						Add( x, y, b.Max.z, turn );
+						Add( x, y, b.Max.z, turn, Vector3.Zero );
 				}
 			}
 		}
@@ -532,13 +567,13 @@ public sealed class BuildSystem : Component
 	/// Where a piece's pivot goes (in the grid's frame). The models' pivots are not at their middles (some are metres away), so the middle of the
 	/// scaled model is what is centred over the piece's cells, standing on the bottom of them, and the pivot goes wherever that puts it.
 	/// </summary>
-	private Vector3 PieceLocalPosition( BuildPieceDef def, Vector3Int min, Vector3Int size, Model model, int turn )
+	private Vector3 PieceLocalPosition( BuildPieceDef def, Vector3Int min, Vector3Int size, Model model, int turn, Vector3 shift )
 	{
 		float cell = _grid.CellSize;
 		var scale = model is null ? Vector3.One : ScaleOf( def, model );
 		var centre = model is null ? Vector3.Zero : model.Bounds.Center * scale;
 		float height = model is null ? 0f : model.Bounds.Size.z * scale.z;
-		var middle = _grid.Origin + new Vector3( (min.x + size.x * 0.5f) * cell, (min.y + size.y * 0.5f) * cell, min.z * cell + height * 0.5f + def.Rest );
+		var middle = _grid.Origin + new Vector3( (min.x + size.x * 0.5f + shift.x) * cell, (min.y + size.y * 0.5f + shift.y) * cell, min.z * cell + height * 0.5f + def.Rest );
 		return middle - Rotation.FromYaw( turn * 90f ) * centre;
 	}
 
@@ -562,7 +597,7 @@ public sealed class BuildSystem : Component
 
 		var frame = _grid.Frame;
 		_ghost.WorldScale = ScaleOf( def, model );
-		_ghost.WorldPosition = frame.PointToWorld( PieceLocalPosition( def, min, size, model, _turn ) );
+		_ghost.WorldPosition = frame.PointToWorld( PieceLocalPosition( def, min, size, model, _turn, _shift ) );
 		_ghost.WorldRotation = frame.Rotation * Rotation.FromYaw( _turn * 90f );
 		_ghostRenderer.Tint = verdict switch
 		{
@@ -583,17 +618,15 @@ public sealed class BuildSystem : Component
 		go.Name = "Built " + def.Name;
 		go.Flags |= GameObjectFlags.NotSaved;
 		go.SetParent( anchor, false );
-		go.LocalPosition = PieceLocalPosition( def, min, size, model, _turn );
+		go.LocalPosition = PieceLocalPosition( def, min, size, model, _turn, _shift );
 		go.LocalRotation = Rotation.FromYaw( _turn * 90f );
 		go.LocalScale = ScaleOf( def, model );
 
 		go.Components.Create<ModelRenderer>().Model = model;
-		var box = go.Components.Create<BoxCollider>();
-		box.Center = model.Bounds.Center;
-		box.Scale = model.Bounds.Size;
+		LongTrip.World.Props.ColliderGenerator.Add( go, model );   // shaped from the piece's real geometry (door and window openings stay open)
 
 		var piece = go.Components.Create<BuiltPiece>();
-		piece.Def = def; piece.Min = min; piece.Size = size; piece.Nailed = nailed;
+		piece.Def = def; piece.Min = min; piece.Size = size; piece.Nailed = nailed; piece.Shift = _shift; piece.Turn = _turn;
 		_built.Add( piece );
 		Sfx.Play( nailed ? Sfx.Metal : Sfx.Wood, go.WorldPosition );
 	}

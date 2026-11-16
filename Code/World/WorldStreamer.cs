@@ -561,9 +561,13 @@ public sealed class WorldStreamer : Component
 
 			if ( def.Kind != CactusKind.Pear || def.Height > 18f )
 			{
-				var box = go.AddComponent<BoxCollider>();
-				box.Scale = new Vector3( def.Width * 0.5f, def.Width * 0.5f, def.Height );
-				box.Center = new Vector3( 0, 0, def.Height * 0.5f );
+				if ( ColliderGenerator.For( model ) is not null ) ColliderGenerator.Add( go, model );
+				else
+				{
+					var box = go.AddComponent<BoxCollider>();
+					box.Scale = new Vector3( def.Width * 0.5f, def.Width * 0.5f, def.Height );
+					box.Center = new Vector3( 0, 0, def.Height * 0.5f );
+				}
 			}
 		}
 	}
@@ -617,10 +621,8 @@ public sealed class WorldStreamer : Component
 			}
 
 			if ( inst.Def.Collide == "none" ) continue;
-			var b = model.Bounds;
-			var box = go.AddComponent<BoxCollider>();
-			box.Center = b.Center;
-			box.Scale = inst.Def.Collide == "upright" ? new Vector3( b.Size.x * 0.7f, b.Size.y * 0.7f, b.Size.z ) : b.Size;
+			// real collision from the model's geometry (rocks, fences and so on get their actual shape); a box only where a box fits
+			ColliderGenerator.Add( go, model, inst.Def.Collide == "upright" ? new Vector3( 0.7f, 0.7f, 1f ) : Vector3.One );
 		}
 	}
 

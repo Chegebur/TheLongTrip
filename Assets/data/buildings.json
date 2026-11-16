@@ -45,7 +45,8 @@
         3
       ],
       "layer": "wall",
-      "fit": "yz"
+      "fit": "yz",
+      "rest": 0.6
     },
     {
       "id": "wall_narrow",
@@ -57,7 +58,8 @@
         3
       ],
       "layer": "wall",
-      "fit": "yz"
+      "fit": "yz",
+      "rest": 0.6
     },
     {
       "id": "wall_low",
@@ -69,7 +71,8 @@
         2
       ],
       "layer": "wall",
-      "fit": "y"
+      "fit": "y",
+      "rest": 0.6
     }
   ]
 }
