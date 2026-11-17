@@ -43,6 +43,8 @@ public sealed class Weather : Component
 	public float Flash { get; private set; }            // lightning, 0..1
 	public float Wetness { get; private set; }          // 0..1, rain and snow on the ground (for future grip changes)
 	public float Wind { get; private set; }
+	public float RainLevel => _rain;     // 0..1, how hard it is raining (for the sound of it)
+	private float _thunderAt = -1f;
 
 	private struct Target { public float Fog, Light, Dim, Desat, Rain, Snow, Dust, Dense; public Color Tint; }
 
@@ -129,8 +131,10 @@ public sealed class Weather : Component
 		{
 			Flash = 1f;
 			_nextFlash = 4f + (float)_random.NextDouble() * 12f;
+			_thunderAt = Time.Now + 0.4f + (float)_random.NextDouble() * 2.6f;   // the thunder follows the flash
 		}
 		Flash = MathX.Approach( Flash, 0f, Time.Delta * (Flash > 0.5f ? 4f : 2.2f) );
+		if ( _thunderAt > 0f && Time.Now >= _thunderAt ) { _thunderAt = -1f; Sfx.Play( Sfx.Pick( Sfx.Thunder ) ); }
 
 		UpdateStreaks();
 	}

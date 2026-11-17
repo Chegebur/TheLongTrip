@@ -40,20 +40,20 @@
 
 	<div style="position: absolute; left: 28px; bottom: 28px; width: 420px; display: flex; flex-direction: column; align-items: stretch; padding: 14px 16px; border-radius: 10px; background-color: rgba(0,0,0,0.4); color: white; font-size: 17px; font-weight: 600;">
 		<div style="display: flex; flex-direction: row; align-items: center; margin-top: 8px;">
-			<div style="width: 70px;">Health</div>
-			<div style="flex-grow: 1; height: 20px; border-radius: 10px; background-color: rgba(255,255,255,0.15);">
+			<div style="width: 78px; min-width: 78px; flex-grow: 0; flex-shrink: 0;">Health</div>
+			<div style="flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-width: 0; overflow: hidden; height: 20px; border-radius: 10px; background-color: rgba(255,255,255,0.15);">
 				<div style="width: @(Percent( Health ))%; height: 20px; border-radius: 10px; background-color: rgba(210,70,70,0.95);"></div>
 			</div>
 		</div>
 		<div style="display: flex; flex-direction: row; align-items: center; margin-top: 8px;">
-			<div style="width: 70px;">Food</div>
-			<div style="flex-grow: 1; height: 20px; border-radius: 10px; background-color: rgba(255,255,255,0.15);">
+			<div style="width: 78px; min-width: 78px; flex-grow: 0; flex-shrink: 0;">Food</div>
+			<div style="flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-width: 0; overflow: hidden; height: 20px; border-radius: 10px; background-color: rgba(255,255,255,0.15);">
 				<div style="width: @(Percent( Food ))%; height: 20px; border-radius: 10px; background-color: rgba(225,170,60,0.95);"></div>
 			</div>
 		</div>
 		<div style="display: flex; flex-direction: row; align-items: center; margin-top: 8px;">
-			<div style="width: 70px;">Water</div>
-			<div style="flex-grow: 1; height: 20px; border-radius: 10px; background-color: rgba(255,255,255,0.15);">
+			<div style="width: 78px; min-width: 78px; flex-grow: 0; flex-shrink: 0;">Water</div>
+			<div style="flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-width: 0; overflow: hidden; height: 20px; border-radius: 10px; background-color: rgba(255,255,255,0.15);">
 				<div style="width: @(Percent( Water ))%; height: 20px; border-radius: 10px; background-color: rgba(80,160,230,0.95);"></div>
 			</div>
 		</div>

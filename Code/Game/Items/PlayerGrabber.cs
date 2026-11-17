@@ -617,7 +617,7 @@ public sealed class PlayerGrabber : Component
 				_held.LightOn = true;
 			}
 			else _held.LightOn = false;
-			Sfx.Play( Sfx.Press );
+			Sfx.Play( Sfx.FlashlightClick );
 			return true;
 		}
 

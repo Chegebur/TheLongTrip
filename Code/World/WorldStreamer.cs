@@ -16,7 +16,18 @@ namespace LongTrip.World;
 /// </summary>
 public sealed class WorldStreamer : Component
 {
-	[Property, Group( "World" )] public int Seed { get; set; } = 1337;
+	/// <summary>
+	/// The world seed: the same number always makes the same world (terrain, road, biomes, houses, trees). 0 picks a new random world every time the game starts
+	/// (a joined multiplayer game uses 1337 until the host's seed is shared, so everybody sees the same land).
+	/// </summary>
+	[Property, Group( "World" )] public int WorldSeed { get; set; } = 0;
+
+	/// <summary>The seed the current world was made from.</summary>
+	public int Seed { get; private set; } = 1337;
+
+	/// <summary>Start over with a new random world.</summary>
+	[Button( "New random world" ), Group( "World" )]
+	public void NewRandomWorld() { WorldSeed = 0; Rebuild(); }
 
 	/// <summary>Who the world loads around. Falls back to the scene's player, then the main camera.</summary>
 	[Property, Group( "World" )] public GameObject Target { get; set; }
@@ -138,6 +149,9 @@ public sealed class WorldStreamer : Component
 		Clear();
 		HouseBuilder.ClearCache();
 		ScatterLibrary.Reset();
+
+		Seed = WorldSeed != 0 ? WorldSeed : Networking.IsActive ? 1337 : Game.Random.Int( 1, 99999999 );
+		Log.Info( $"[world] seed {Seed}" );
 
 		Generator = new WorldGenerator( new WorldSettings
 		{

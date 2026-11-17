@@ -189,7 +189,7 @@
 					<div class="row">@line</div>
 				}
 			}
-			<div class="help">Drag items between slots. Hover for details. Right click sends an item to the other bar or puts armor on.</div>
+			<div class="help">Drag items between slots. Hover for details. Shift click (or right click) sends an item to the other bar or puts armor on.</div>
 		</div>
 
 		@* ---- the item on the cursor (moved every frame by code) ---- *@
@@ -443,7 +443,7 @@
 		if ( def.Light is not null ) _tipLines.Add( $"Battery: {s.Amount * 100f:0}% ({def.Light.Minutes:0.#} min of light when full)" );
 		if ( def.Uses > 0 ) _tipLines.Add( $"{(int)MathF.Round( s.Amount * def.Uses )} left (a nail holds one building piece up)" );
 
-		_tipHint = kind == "pack" ? "Drag to move. Right click to take off." : def.ArmorSlot is not null || def.BackpackTier > 0 ? "Drag to move. Right click to wear." : kind == "hot" ? "Drag to move. Right click: to pockets." : "Drag to move. Right click: to hotbar.";
+		_tipHint = kind == "pack" ? "Drag to move. Shift click or right click to take off." : def.ArmorSlot is not null || def.BackpackTier > 0 ? "Drag to move. Shift click or right click to wear." : kind == "hot" ? "Drag to move. Shift click: to pockets." : "Drag to move. Shift click: to hotbar.";
 	}
 
 	private Panel _dialog;
@@ -493,6 +493,13 @@
 	{
 		if ( Inv is null || _cursor is not null ) return;
 		if ( kind == "bag" && !Unlocked( i ) ) return;
+
+		// shift + click sends the item to the other place at once (hotbar <-> pockets and pack, worn armor and the pack back into the bags), like a right click
+		if ( Input.Keyboard.Down( "shift" ) )
+		{
+			if ( GetSlot( kind, i ) is not null ) RightClick( kind, i );
+			return;
+		}
 
 		var here = GetSlot( kind, i );
 		if ( here is null ) return;

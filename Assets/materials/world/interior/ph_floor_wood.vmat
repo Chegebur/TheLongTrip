@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/textures/laminate_floor_02/laminate_floor_02_color.png"
+	"TextureNormal"		"materials/world/textures/laminate_floor_02/laminate_floor_02_normal.png"
+	"TextureRoughness"		"materials/world/textures/laminate_floor_02/laminate_floor_02_rough.png"
+	"g_flMetalness"		"0.000"
+}

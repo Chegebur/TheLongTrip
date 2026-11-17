@@ -164,6 +164,12 @@ public static class ScatterLibrary
 		float x0 = chunk.x * size, y0 = chunk.y * size;
 		float R( int k ) => WorldNoise.Hash01( seed + 9100 + k, chunk.x, chunk.y );
 
+		// the houses in and around this chunk: nothing is planted through them
+		var houses = new List<PropInstance>();
+		for ( int dx = -1; dx <= 1; dx++ )
+		for ( int dy = -1; dy <= 1; dy++ )
+			houses.AddRange( PropPlacer.Houses( gen, new Vector2Int( chunk.x + dx, chunk.y + dy ), size ) );
+
 		// ---- wild: anywhere away from the road, thicker where vegetation would be
 		// Things in nature come in groups: a few cluster centres per chunk, everything gathers round them (a boulder with smaller rocks
 		// at its feet, a patch of shrubs) and the gaps between stay empty.
@@ -181,7 +187,7 @@ public static class ScatterLibrary
 			if ( px < x0 || px >= x0 + size || py < y0 || py >= y0 + size ) continue;
 			float dist = MathF.Abs( py - gen.RoadCenterY( px ) );
 			if ( dist < 700f ) continue;
-			TryAdd( gen, list, "wild", px, py, R( a * 11 + 2 ), R( a * 11 + 3 ), R( a * 11 + 4 ), R( a * 11 + 5 ), R( a * 11 + 6 ) );
+			TryAdd( gen, list, houses, "wild", px, py, R( a * 11 + 2 ), R( a * 11 + 3 ), R( a * 11 + 4 ), R( a * 11 + 5 ), R( a * 11 + 6 ) );
 		}
 
 		// ---- roadside: the levelled verge next to the road
@@ -196,7 +202,7 @@ public static class ScatterLibrary
 				float sign = R( 500 + a * 11 + 1 ) < 0.5f ? -1f : 1f;
 				float py = roadY + sign * (420f + R( 500 + a * 11 + 2 ) * 380f);
 				if ( py < y0 || py >= y0 + size ) continue;
-				TryAdd( gen, list, "roadside", px, py, R( 500 + a * 11 + 3 ), R( 500 + a * 11 + 4 ), R( 500 + a * 11 + 5 ), R( 500 + a * 11 + 6 ), R( 500 + a * 11 + 7 ) );
+				TryAdd( gen, list, houses, "roadside", px, py, R( 500 + a * 11 + 3 ), R( 500 + a * 11 + 4 ), R( 500 + a * 11 + 5 ), R( 500 + a * 11 + 6 ), R( 500 + a * 11 + 7 ) );
 			}
 		}
 
@@ -209,14 +215,14 @@ public static class ScatterLibrary
 				float rad = 330f + R( 901 + a * 7 ) * 520f;
 				float px = house.Position.x + MathF.Cos( ang ) * rad, py = house.Position.y + MathF.Sin( ang ) * rad;
 				if ( MathF.Abs( py - gen.RoadCenterY( px ) ) < 420f ) continue;
-				TryAdd( gen, list, "civ", px, py, R( 902 + a * 7 ), R( 903 + a * 7 ), R( 904 + a * 7 ), R( 905 + a * 7 ), R( 906 + a * 7 ) );
+				TryAdd( gen, list, houses, "civ", px, py, R( 902 + a * 7 ), R( 903 + a * 7 ), R( 904 + a * 7 ), R( 905 + a * 7 ), R( 906 + a * 7 ) );
 			}
 		}
 
 		return list;
 	}
 
-	private static void TryAdd( WorldGenerator gen, List<ScatterInstance> list, string zone, float px, float py, float rPick, float rYaw, float rScale, float rLean, float rVeg )
+	private static void TryAdd( WorldGenerator gen, List<ScatterInstance> list, List<PropInstance> houses, string zone, float px, float py, float rPick, float rYaw, float rScale, float rLean, float rVeg )
 	{
 		string biome = BiomeName( gen, px, py );
 		var def = Pick( zone, biome, rPick );
@@ -231,6 +237,19 @@ public static class ScatterLibrary
 			if ( (o.Position.x - px) * (o.Position.x - px) + (o.Position.y - py) * (o.Position.y - py) < 90f * 90f ) return;
 
 		float scale = MathX.Lerp( def.MinScale, def.MaxScale, rScale );
+
+		// keep clear of houses: the house's footprint (the largest a house gets) grown by the prop's own size, so a tree's crown never reaches the roof
+		var model = GetModel( def );
+		float reach = model is null ? 60f : MathF.Max( model.Bounds.Size.x, model.Bounds.Size.y ) * 0.4f * scale;
+		float margin = zone == "civ" ? 40f : Math.Clamp( reach, 90f, 520f );
+		foreach ( var house in houses )
+		{
+			float rad = house.Yaw * (MathF.PI / 180f);
+			float dx = px - house.Position.x, dy = py - house.Position.y;
+			float lx = dx * MathF.Cos( rad ) + dy * MathF.Sin( rad );
+			float ly = -dx * MathF.Sin( rad ) + dy * MathF.Cos( rad );
+			if ( MathF.Abs( lx ) < 270f * house.Scale + margin && MathF.Abs( ly ) < 360f * house.Scale + margin ) return;
+		}
 		list.Add( new ScatterInstance( def, new Vector3( px, py, h - def.Sink * scale ), rYaw * 360f, scale, (rLean - 0.5f) * 2f * def.Lean ) );
 	}
 }

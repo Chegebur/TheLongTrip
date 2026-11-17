@@ -25,6 +25,29 @@ Models downloaded from Sketchfab; the authors and licences are on each page (ple
 | Backpack | "Backpack" | https://sketchfab.com/3d-models/backpack-4732564eec0542ed8b1855f381e64127 |
 | Camping backpack | "Backpack" (large camping) | https://sketchfab.com/3d-models/backpack-5655596f9efe47deb09df57a79b44e04 |
 
+## Sounds (s&box catalog)
+
+Installed from the s&box package catalog through the project's package references (`the_long_trip.sbproj`). The catalog entries do not state a licence, so check each package page before you redistribute the game.
+
+| Used for | Package |
+|---|---|
+| Flashlight click | `drakefruit.flashlightclick` |
+| Thunder | `titanovsky.csz_thunder1` .. `csz_thunder4` |
+| Rain | `niclude.rain1_fall_metal_roof` |
+| Wind | `subzerostudios.windoutdoors` |
+| Birds | `subzerostudios.morningbirds` |
+| Explosions | `igrotronika.explosion1`, `drakefruit.explosionurban` |
+| Street lamp hum | `drakefruit.fluorescent_light` |
+| Night ambience | `notpointless.ambvoidhollowhum` |
+
+## Street lamp and backpacks
+
+Models from Sketchfab: "Medellin street lamp" (https://sketchfab.com/3d-models/medellin-street-lamp-6cfedb57645b42b4a11d6c06411014b6). The authors and licences are on the pages; check them before redistributing.
+
+## House interiors (Polyhaven, CC0)
+
+Plaster (`beige_wall_001`), ceiling (`ceiling_interior`), floors (`laminate_floor_02`, `floor_tiles_06`) and stair wood (`dark_wooden_planks`) from https://polyhaven.com.
+
 ## Models and materials (CC0)
 
 Most props, items and surface materials come from [Poly Haven](https://polyhaven.com) (CC0, no attribution required).

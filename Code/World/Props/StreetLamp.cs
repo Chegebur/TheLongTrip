@@ -33,6 +33,7 @@ public sealed class StreetLamp : Component
 	private TimeUntil _nextFlicker = 0f;
 	private bool _on;
 	private float _baseIntensity;
+	private SoundHandle _buzz;
 
 	private static readonly Dictionary<Model, List<Vector3>> _heads = new();
 
@@ -128,6 +129,16 @@ public sealed class StreetLamp : Component
 			_on = near && GraphicsSettings.Darkness > 0.3f;
 			foreach ( var go in _lights ) if ( go.IsValid() ) go.Enabled = _on;
 		}
+
+		// the hum of a lit lamp, heard only when you are close
+		var camera = Scene.Camera;
+		bool close = _on && camera.IsValid() && (camera.WorldPosition - WorldPosition).Length < 2600f;
+		if ( close && (_buzz is null || !_buzz.IsPlaying) )
+		{
+			_buzz = Sfx.Loop( Sfx.LampBuzz, WorldPosition + Vector3.Up * 220f );
+			if ( _buzz is not null ) _buzz.Volume = 0.35f;
+		}
+		else if ( !close && _buzz is not null ) { _buzz.Stop( 0.3f ); _buzz = null; }
 
 		if ( !_on || !_flicker ) return;
 

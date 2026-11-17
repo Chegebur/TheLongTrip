@@ -1,0 +1,9 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/textures/beige_wall_001/beige_wall_001_color.png"
+	"TextureNormal"		"materials/world/textures/beige_wall_001/beige_wall_001_normal.png"
+	"TextureRoughness"		"materials/world/textures/beige_wall_001/beige_wall_001_rough.png"
+	"g_vColorTint"		"[0.980 0.940 0.860 0.000]"
+	"g_flMetalness"		"0.000"
+}

@@ -70,6 +70,7 @@ public sealed class Atmosphere : Component
 		_ambient = Scene.GetAllComponents<AmbientLight>().FirstOrDefault();
 		_sky = Scene.GetAllComponents<SkyBox2D>().FirstOrDefault();
 		Components.GetOrCreate<Weather>();
+		Components.GetOrCreate<Ambience>();
 	}
 
 	private void FindCameraEffects()

@@ -1,0 +1,8 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/textures/floor_tiles_06/floor_tiles_06_color.png"
+	"TextureNormal"		"materials/world/textures/floor_tiles_06/floor_tiles_06_normal.png"
+	"TextureRoughness"		"materials/world/textures/floor_tiles_06/floor_tiles_06_rough.png"
+	"g_flMetalness"		"0.000"
+}

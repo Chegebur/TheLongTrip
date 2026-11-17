@@ -62,8 +62,23 @@ internal sealed class HouseGen
 	private const string Glass = MI + "glass_window.vmat";
 	private const string Flat = MI + "flat_lit.vmat";
 	private const string FlatMetal = MI + "flat_metal.vmat";
-	private const string FloorWood = MI + "floor_wood.vmat";
-	private const string FloorTile = MI + "floor_tile.vmat";
+	// Polyhaven (CC0) materials: laminate planks, floor tiles, plaster painted per room, a ceiling and dark wood for the stairs
+	private const string FloorWood = MI + "ph_floor_wood.vmat";
+	private const string FloorTile = MI + "ph_floor_tile.vmat";
+	private const string StairWood = MI + "ph_stairs_wood.vmat";
+	private const string PlasterWhite = MI + "ph_plaster_white.vmat";
+	private const string PlasterEdge = MI + "ph_plaster_edge.vmat";
+	private const float PlasterUv = 1.7f;   // plaster repeats every ~65 inches
+
+	/// <summary>Each room's paint colour (see <see cref="Wash"/>) stands for the plaster material tinted that colour.</summary>
+	private static readonly Dictionary<(byte, byte, byte), string> Plaster = new()
+	{
+		{ (208, 198, 176), MI + "ph_plaster_living.vmat" }, { (212, 202, 150), MI + "ph_plaster_kitchen.vmat" }, { (150, 172, 194), MI + "ph_plaster_master.vmat" },
+		{ (160, 186, 156), MI + "ph_plaster_bed2.vmat" }, { (160, 192, 198), MI + "ph_plaster_bath.vmat" }, { (204, 196, 180), MI + "ph_plaster_hall.vmat" },
+		{ (236, 234, 228), PlasterWhite }, { (222, 220, 214), MI + "ph_ceiling.vmat" }, { (200, 192, 176), PlasterEdge },
+	};
+
+	private static string PlasterOf( Color32? c, string fallback ) => c is { } v && Plaster.TryGetValue( (v.r, v.g, v.b), out var m ) ? m : fallback;
 
 	// ---- dimensions (inches) -----------------------------------------------------------------------
 	private const float T = 7f;          // exterior wall thickness
@@ -95,6 +110,7 @@ internal sealed class HouseGen
 	private float _yA, _yB;                 // single storey: partitions between back rooms
 	private float _yH, _yBt;                // two storey: hall edge, and upstairs bath/bedroom split
 	private float _stairW = 40f, _run = 10.5f;
+	private const float StairGap = 10f;      // clearance between the stairs and the walls they run along (they are not built into the wall)
 	private float _holeX, _holeY;           // stair opening in the upper slab
 
 	private enum Room { Living, Kitchen, Master, Bed2, Bath, Hall, Landing }
@@ -126,10 +142,10 @@ internal sealed class HouseGen
 
 		_yA = _iy0 + (_iy1 - _iy0) * 0.36f;
 		_yB = _iy0 + (_iy1 - _iy0) * 0.64f;
-		_yH = _iy0 + _stairW + 64f;
+		_yH = _iy0 + StairGap + _stairW + 64f;
 		_yBt = _yH + (_iy1 - _yH) * 0.5f;
-		_holeX = (StairSteps - 1) * _run;
-		_holeY = _stairW + 2f;
+		_holeX = StairGap + (StairSteps - 1) * _run;
+		_holeY = StairGap + _stairW + 2f;
 
 		float wallTop = Z0 + _floors * H;
 
@@ -188,8 +204,14 @@ internal sealed class HouseGen
 			var fc = frontColor?.Invoke( Plan( tm, oFront + 3f ) );
 			var bc = backColor?.Invoke( Plan( tm, oBack - 3f ) );
 
-			_b.Quad( frontMat, P( ta, za, oFront ), P( tb, za, oFront ), P( tb, zb, oFront ), P( ta, zb, oFront ), 1f, fc, ta, za );
-			_b.Quad( backMat, P( tb, za, oBack ), P( ta, za, oBack ), P( ta, zb, oBack ), P( tb, zb, oBack ), 1f, bc, L - tb, za );
+			// painted faces become the plaster material in that colour
+			string fm = frontMat, bm = backMat;
+			float fuv = 1f, buv = 1f;
+			if ( frontMat == Flat && PlasterOf( fc, Flat ) is var pf && pf != Flat ) { fm = pf; fc = null; fuv = PlasterUv; }
+			if ( backMat == Flat && PlasterOf( bc, Flat ) is var pb && pb != Flat ) { bm = pb; bc = null; buv = PlasterUv; }
+
+			_b.Quad( fm, P( ta, za, oFront ), P( tb, za, oFront ), P( tb, zb, oFront ), P( ta, zb, oFront ), fuv, fc, ta, za );
+			_b.Quad( bm, P( tb, za, oBack ), P( ta, za, oBack ), P( ta, zb, oBack ), P( tb, zb, oBack ), buv, bc, L - tb, za );
 
 			if ( collide )
 			{
@@ -485,7 +507,8 @@ internal sealed class HouseGen
 
 	private void FloorQuad( R r, float z, string mat, Color32? color, bool up )
 	{
-		const float tile = 1.1f;   // 110 inch texture tile -> 100 inch floor boards
+		float tile = 1.1f;   // 110 inch texture tile -> 100 inch floor boards
+		if ( mat == Flat && PlasterOf( color, Flat ) is var painted && painted != Flat ) { mat = painted; color = null; tile = PlasterUv; }
 		if ( up )
 			_b.Quad( mat, new Vector3( r.X0, r.Y0, z ), new Vector3( r.X1, r.Y0, z ), new Vector3( r.X1, r.Y1, z ), new Vector3( r.X0, r.Y1, z ), tile, color, r.X0, r.Y0 );
 		else
@@ -526,8 +549,8 @@ internal sealed class HouseGen
 			}
 
 			// the edge of the slab around the stairwell
-			_b.Quad( Flat, new Vector3( hole.X1, hole.Y0, zSlabBottom ), new Vector3( hole.X1, hole.Y1, zSlabBottom ), new Vector3( hole.X1, hole.Y1, zFloor ), new Vector3( hole.X1, hole.Y0, zFloor ), 1f, Paint( 200, 192, 176 ) );
-			_b.Quad( Flat, new Vector3( hole.X1, hole.Y1, zSlabBottom ), new Vector3( hole.X0, hole.Y1, zSlabBottom ), new Vector3( hole.X0, hole.Y1, zFloor ), new Vector3( hole.X1, hole.Y1, zFloor ), 1f, Paint( 200, 192, 176 ) );
+			_b.Quad( PlasterEdge, new Vector3( hole.X1, hole.Y0, zSlabBottom ), new Vector3( hole.X1, hole.Y1, zSlabBottom ), new Vector3( hole.X1, hole.Y1, zFloor ), new Vector3( hole.X1, hole.Y0, zFloor ), PlasterUv, null );
+			_b.Quad( PlasterEdge, new Vector3( hole.X1, hole.Y1, zSlabBottom ), new Vector3( hole.X0, hole.Y1, zSlabBottom ), new Vector3( hole.X0, hole.Y1, zFloor ), new Vector3( hole.X1, hole.Y1, zFloor ), PlasterUv, null );
 
 			// ceiling of the top floor
 			FloorQuad( all, zFloor + CeilH, Flat, ceil, false );
@@ -586,7 +609,7 @@ internal sealed class HouseGen
 			}
 			else if ( f == 0 )
 			{
-				p1.Add( Door( (_iy0 + _stairW + _yH) * 0.5f, _iy0 ) );   // into the hall (beside the stairs)
+				p1.Add( Door( (_iy0 + StairGap + _stairW + _yH) * 0.5f, _iy0 ) );   // into the hall (beside the stairs)
 				p1.Add( Door( (_yH + _iy1) * 0.5f, _iy0 ) );              // into the kitchen
 			}
 			else
@@ -632,36 +655,40 @@ internal sealed class HouseGen
 
 		for ( int k = 1; k < StairSteps; k++ )
 		{
-			float x0 = _ix0 + (k - 1) * _run;
+			float xa = _ix0 + StairGap + (k - 1) * _run, xb = xa + _run;
+			float ya = _iy0 + StairGap, yb = ya + _stairW;
 			float top = Z0 + k * rise;
 			float height = top - Z0;
-			var centre = new Vector3( x0 + _run * 0.5f, _iy0 + _stairW * 0.5f, Z0 + height * 0.5f );
-			_b.Box( Flat, centre, new Vector3( _run, _stairW, height ), 0, false, 1f, riser );
-			// tread on top, slightly proud
-			_b.Box( Flat, new Vector3( x0 + _run * 0.5f + 0.8f, _iy0 + _stairW * 0.5f, top - 0.6f ), new Vector3( _run + 1.6f, _stairW, 1.2f ), 0, false, 1f, tread );
-			_b.Collide( centre, new Vector3( _run, _stairW, height ) );
+
+			// a step is its riser (facing back down the stairs), its two sides and its tread, as separate faces: the tread is not a second box lying
+			// on the first, so no two faces share a plane (that was what flickered). The back is hidden by the next step.
+			_b.Quad( PlasterWhite, new Vector3( xa, yb, Z0 ), new Vector3( xa, ya, Z0 ), new Vector3( xa, ya, top ), new Vector3( xa, yb, top ), PlasterUv );
+			_b.Quad( PlasterWhite, new Vector3( xb, yb, Z0 ), new Vector3( xa, yb, Z0 ), new Vector3( xa, yb, top ), new Vector3( xb, yb, top ), PlasterUv );
+			_b.Quad( PlasterWhite, new Vector3( xa, ya, Z0 ), new Vector3( xb, ya, Z0 ), new Vector3( xb, ya, top ), new Vector3( xa, ya, top ), PlasterUv );
+			_b.Quad( StairWood, new Vector3( xa, ya, top ), new Vector3( xb, ya, top ), new Vector3( xb, yb, top ), new Vector3( xa, yb, top ), 1.2f );
+			_b.Collide( new Vector3( (xa + xb) * 0.5f, (ya + yb) * 0.5f, Z0 + height * 0.5f ), new Vector3( _run, _stairW, height ) );
 		}
 
 		// handrail along the open side of the stairs
-		float y = _iy0 + _stairW;
+		float y = _iy0 + StairGap + _stairW;
 		var rail = Paint( 92, 62, 38, 0.6f );
-		var a = new Vector3( _ix0, y - 1.5f, Z0 + 34f );
+		var a = new Vector3( _ix0 + StairGap, y - 1.5f, Z0 + 34f );
 		var b = new Vector3( _ix0 + _holeX, y - 1.5f, Z0 + H - rise + 34f );
 		var rot = Rotation.LookAt( (b - a).Normal, Vector3.Up );
-		_b.Box( Flat, (a + b) * 0.5f, new Vector3( (b - a).Length, 2.4f, 2.4f ), rot, true, 1f, rail );
+		_b.Box( StairWood, (a + b) * 0.5f, new Vector3( (b - a).Length, 2.4f, 2.4f ), rot, true, 1.2f, null );
 		for ( int k = 0; k < StairSteps; k += 3 )
 		{
-			float x = _ix0 + 2f + k * _run;
+			float x = _ix0 + StairGap + 2f + k * _run;
 			float top = Z0 + Math.Max( k, 1 ) * rise;
 			float railZ = a.z + (b.z - a.z) * ((x - a.x) / (b.x - a.x));
-			_b.Box( Flat, new Vector3( x, y - 1.5f, (top + railZ) * 0.5f ), new Vector3( 2f, 2f, railZ - top ), 0, true, 1f, rail );
+			_b.Box( StairWood, new Vector3( x, y - 1.5f, (top + railZ) * 0.5f ), new Vector3( 2f, 2f, railZ - top ), 0, true, 1.2f, null );
 		}
 
 		// guard rail on the upstairs side of the stairwell opening
 		float zF = Z0 + H;
-		_b.Box( Flat, new Vector3( _ix0 + _holeX * 0.5f, _iy0 + _holeY + 1f, zF + 33f ), new Vector3( _holeX, 2.4f, 2.4f ), 0, true, 1f, rail );
+		_b.Box( StairWood, new Vector3( _ix0 + _holeX * 0.5f, _iy0 + _holeY + 1f, zF + 33f ), new Vector3( _holeX, 2.4f, 2.4f ), 0, true, 1.2f, null );
 		for ( int i = 0; i <= 4; i++ )
-			_b.Box( Flat, new Vector3( _ix0 + _holeX * i / 4f, _iy0 + _holeY + 1f, zF + 17f ), new Vector3( 2f, 2f, 34f ), 0, true, 1f, rail );
+			_b.Box( StairWood, new Vector3( _ix0 + _holeX * i / 4f, _iy0 + _holeY + 1f, zF + 17f ), new Vector3( 2f, 2f, 34f ), 0, true, 1.2f, null );
 		_b.Collide( new Vector3( _ix0 + _holeX * 0.5f, _iy0 + _holeY + 1f, zF + 22f ), new Vector3( _holeX, 3f, 44f ) );
 	}
 
@@ -695,6 +722,9 @@ internal sealed class HouseGen
 	private void Prop( string name, Vector2 at, float yaw, float z, float scale = 1f, float tall = 1f )
 		=> _furn.Add( new FurniturePiece( $"models/world/furniture/{name}/{name}.vmdl", new Vector3( at.x, at.y, z ), yaw, new Vector3( scale, scale, scale * tall ) ) );
 
+	/// <summary>Whether the rooms get furniture (sofas, beds, kitchens, bathrooms). Off: the houses are empty.</summary>
+	private const bool Furnished = false;
+
 	private void Furnish()
 	{
 		var r = new Random( 31 * (_variant % HouseBuilder.SnowVariantStart) + 7 );
@@ -710,13 +740,13 @@ internal sealed class HouseGen
 		{
 			// ---------------- living / kitchen across the front
 			float yMid = (_iy0 + _iy1) * 0.5f;
-			Living( new R( _xP + PT, _ix1, _iy0, _iy1 ), Z0, Fabric(), 0 );
+			if ( Furnished ) Living( new R( _xP + PT, _ix1, _iy0, _iy1 ), Z0, Fabric(), 0 );
 			Light( (_xP + _ix1) * 0.5f, _iy0 + (_iy1 - _iy0) * 0.30f, Z0 + CeilH - 10 );
 			Light( (_xP + _ix1) * 0.5f, _iy0 + (_iy1 - _iy0) * 0.72f, Z0 + CeilH - 10 );
 
-			Bedroom( new R( _ix0, _xP - PT, _yB + PT, _iy1 ), Z0, Fabric(), true );
-			Bedroom( new R( _ix0, _xP - PT, _iy0, _yA - PT ), Z0, Fabric(), false );
-			Bathroom( new R( _ix0, _xP - PT, _yA + PT, _yB - PT ), Z0 );
+			if ( Furnished ) Bedroom( new R( _ix0, _xP - PT, _yB + PT, _iy1 ), Z0, Fabric(), true );
+			if ( Furnished ) Bedroom( new R( _ix0, _xP - PT, _iy0, _yA - PT ), Z0, Fabric(), false );
+			if ( Furnished ) Bathroom( new R( _ix0, _xP - PT, _yA + PT, _yB - PT ), Z0 );
 			Light( (_ix0 + _xP) * 0.5f, (_yB + _iy1) * 0.5f, Z0 + CeilH - 10 );
 			Light( (_ix0 + _xP) * 0.5f, (_iy0 + _yA) * 0.5f, Z0 + CeilH - 10 );
 			Light( (_ix0 + _xP) * 0.5f, (_yA + _yB) * 0.5f, Z0 + CeilH - 10 );
@@ -724,17 +754,17 @@ internal sealed class HouseGen
 		else
 		{
 			// ---------------- ground floor: living in front, kitchen and hall behind
-			Living( new R( _xP + PT, _ix1, _iy0, _iy1 ), Z0, Fabric(), 0 );
-			Kitchen( new R( _ix0, _xP - PT, _yH + PT, _iy1 ), Z0 );
+			if ( Furnished ) Living( new R( _xP + PT, _ix1, _iy0, _iy1 ), Z0, Fabric(), 0 );
+			if ( Furnished ) Kitchen( new R( _ix0, _xP - PT, _yH + PT, _iy1 ), Z0 );
 			Light( (_xP + _ix1) * 0.5f, (_iy0 + _iy1) * 0.5f, Z0 + CeilH - 10 );
 			Light( (_ix0 + _xP) * 0.5f, (_yH + _iy1) * 0.5f, Z0 + CeilH - 10 );
 			Light( (_ix0 + _xP) * 0.5f, (_iy0 + _yH) * 0.5f, Z0 + CeilH - 10 );
 
 			// ---------------- upstairs
 			float zU = Z0 + H;
-			Bedroom( new R( _xP + PT, _ix1, _iy0, _iy1 ), zU, Fabric(), true );
-			Bedroom( new R( _ix0, _xP - PT, _yBt + PT, _iy1 ), zU, Fabric(), false );
-			Bathroom( new R( _ix0, _xP - PT, _yH + PT, _yBt - PT ), zU );
+			if ( Furnished ) Bedroom( new R( _xP + PT, _ix1, _iy0, _iy1 ), zU, Fabric(), true );
+			if ( Furnished ) Bedroom( new R( _ix0, _xP - PT, _yBt + PT, _iy1 ), zU, Fabric(), false );
+			if ( Furnished ) Bathroom( new R( _ix0, _xP - PT, _yH + PT, _yBt - PT ), zU );
 			Light( (_xP + _ix1) * 0.5f, (_iy0 + _iy1) * 0.5f, zU + CeilH - 10 );
 			Light( (_ix0 + _xP) * 0.5f, (_yBt + _iy1) * 0.5f, zU + CeilH - 10 );
 			Light( (_ix0 + _xP) * 0.5f, (_yH + _yBt) * 0.5f, zU + CeilH - 10 );

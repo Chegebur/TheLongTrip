@@ -34,6 +34,7 @@ public static class WorldInfo
 			$"{Clock}   {heading}",
 			$"Mile {mile:0.00}",
 			$"X {p.x:0}  Y {p.y:0}  Z {p.z:0} m",
+			$"Seed {scene.GetAllComponents<LongTrip.World.WorldStreamer>().FirstOrDefault()?.Seed}",
 		};
 	}
 }

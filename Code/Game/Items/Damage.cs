@@ -142,6 +142,8 @@ public static class Blast
 			player.Damage( config.Damage * (1f - distance / radius) );
 		}
 
+		Sfx.Play( Sfx.Pick( Sfx.Explosions ), position );
+
 		// a quick orange flash
 		var flash = scene.CreateObject();
 		flash.Name = "Blast flash";
