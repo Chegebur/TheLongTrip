@@ -41,6 +41,18 @@
 									}
 								</div>
 							}
+								@{ var packed = Inv?.Pack; var packPic = IconOf( packed ); }
+								<div class="slot" slotid="pack:0" onmousedown=@(() => BeginDrag( "pack", 0 )) onmouseup=@FinishDrag onmouseover=@(() => Hover( "pack", 0 )) onmouseout=@Unhover onrightclick=@(() => RightClick( "pack", 0 )) style="@Rarity.SlotLook( packed?.ItemId )">
+									<div class="hl"></div>
+									@if ( packed is null )
+									{
+										<div class="tag">PACK</div>
+									}
+									else if ( packPic is not null )
+									{
+										<Image class="icon" Texture=@packPic />
+									}
+								</div>
 						</div>
 					</div>
 
@@ -331,6 +343,7 @@
 		"hot" => Inv?.Hotbar?.Get( i ),
 		"bag" => Inv is not null && i < PlayerInventory.MaxStorage ? Inv.Storage[i] : null,
 		"arm" => Inv is not null && i < 4 ? Inv.Armor[i] : null,
+		"pack" => Inv?.Pack,
 		_ => null,
 	};
 
@@ -340,6 +353,7 @@
 		if ( kind == "hot" ) Inv.Hotbar?.Set( i, s );
 		else if ( kind == "bag" ) Inv.Storage[i] = s;
 		else if ( kind == "arm" ) Inv.Armor[i] = s;
+		else if ( kind == "pack" ) Inv.Pack = s;
 	}
 
 	private bool Accepts( string kind, int i, ItemContainer.Stored s )
@@ -349,6 +363,7 @@
 		return kind switch
 		{
 			"arm" => PlayerInventory.ArmorIndex( s.ItemId ) == i,
+			"pack" => def.BackpackTier > 0 && Inv.PackFits( def.BackpackTier ),
 			"bag" => Unlocked( i ) && def.Stowable,
 			_ => def.Stowable,
 		};
@@ -417,7 +432,7 @@
 		_tipLines.Add( $"{(def.Hands == 1 ? "One-handed" : "Two-handed")}, {def.Mass:0.#} kg" );
 		if ( def.Use == UseKind.Melee ) _tipLines.Add( $"Hits for up to {def.Damage.Cap:0} damage (faster swings hit harder)" );
 		if ( def.ArmorSlot is not null ) _tipLines.Add( $"Armor: {def.Defense * 100f:0}% less damage ({def.ArmorSlot})" );
-		if ( def.BackpackTier > 0 ) _tipLines.Add( $"Backpack: adds {PlayerInventory.SlotsPerTier} slots" );
+		if ( def.BackpackTier > 0 ) _tipLines.Add( $"Backpack: adds {def.BackpackTier * PlayerInventory.SlotsPerTier} slots" );
 		if ( def.Use == UseKind.Eat ) _tipLines.Add( $"Restores {def.Restore * s.Amount:0} food" );
 		if ( def.Use == UseKind.Drink ) _tipLines.Add( $"Restores up to {def.Restore * s.Amount:0} water ({s.Amount * 100f:0}% left)" );
 		if ( def.Use == UseKind.Refuel ) _tipLines.Add( $"Fuel: {s.Amount * def.Capacity:0} / {def.Capacity:0} L" );
@@ -425,7 +440,7 @@
 		if ( def.Explosion is not null ) _tipLines.Add( "Explodes when hit hard enough" );
 		if ( def.Uses > 0 ) _tipLines.Add( $"{(int)MathF.Round( s.Amount * def.Uses )} left (a nail holds one building piece up)" );
 
-		_tipHint = def.ArmorSlot is not null || def.BackpackTier > 0 ? "Drag to move. Right click to wear." : kind == "hot" ? "Drag to move. Right click: to pockets." : "Drag to move. Right click: to hotbar.";
+		_tipHint = kind == "pack" ? "Drag to move. Right click to take off." : def.ArmorSlot is not null || def.BackpackTier > 0 ? "Drag to move. Right click to wear." : kind == "hot" ? "Drag to move. Right click: to pockets." : "Drag to move. Right click: to hotbar.";
 	}
 
 	private Panel _dialog;
@@ -478,6 +493,7 @@
 
 		var here = GetSlot( kind, i );
 		if ( here is null ) return;
+		if ( kind == "pack" && !Inv.CanTakeOffPack ) { Sfx.Play( Sfx.Deny ); PlayerGrabber.Instance?.Notify( "Empty the pack slots first" ); return; }
 
 		_cursor = here;
 		_dragKind = kind;
@@ -495,7 +511,7 @@
 		if ( !Accepts( kind, i, _cursor ) || (kind == "bag" && !Unlocked( i )) )
 		{
 			Sfx.Play( Sfx.Deny );
-			PlayerGrabber.Instance?.Notify( kind == "arm" ? "That does not go there" : "It does not fit" );
+			PlayerGrabber.Instance?.Notify( kind == "arm" ? "That does not go there" : kind == "pack" ? "Only a backpack goes there, and it must be big enough for what you carry" : "It does not fit" );
 			ReturnToOrigin();
 			return;
 		}
@@ -510,7 +526,7 @@
 			if ( Accepts( _dragKind, _dragIndex, old ) && GetSlot( _dragKind, _dragIndex ) is null ) SetSlot( _dragKind, _dragIndex, old );
 			else if ( !Inv.TryAdd( old ) ) DropInFront( old );
 		}
-		Sfx.Play( kind == "arm" ? Sfx.Cloth : Sfx.DragStop );
+		Sfx.Play( kind is "arm" or "pack" ? Sfx.Cloth : Sfx.DragStop );
 		_version++;
 	}
 
@@ -549,7 +565,23 @@
 		if ( here is null ) return;
 
 		bool moved;
+		if ( kind == "pack" )
+		{
+			if ( !Inv.TakeOffPack() ) { Sfx.Play( Sfx.Deny ); PlayerGrabber.Instance?.Notify( Inv.CanTakeOffPack ? "No room for it" : "Empty the pack slots first" ); }
+			else Sfx.Play( Sfx.Cloth );
+			_version++;
+			return;
+		}
 		if ( kind == "arm" ) moved = Inv.TryAdd( here );
+		else if ( (ItemLibrary.Get( here.ItemId )?.BackpackTier ?? 0) > 0 )
+		{
+			SetSlot( kind, i, null );
+			moved = Inv.WearPack( here );
+			if ( !moved ) { SetSlot( kind, i, here ); Sfx.Play( Sfx.Deny ); PlayerGrabber.Instance?.Notify( "Empty the pack slots first (or there is no room for the old pack)" ); }
+			else Sfx.Play( Sfx.Cloth );
+			_version++;
+			return;
+		}
 		else if ( PlayerInventory.ArmorIndex( here.ItemId ) >= 0 ) { SetSlot( kind, i, null ); moved = Inv.Wear( here ); if ( !moved ) SetSlot( kind, i, here ); }
 		else if ( kind == "hot" ) moved = Inv.TryAddStorage( here );
 		else { int free = Inv.Hotbar?.FirstFree() ?? -1; moved = free >= 0; if ( moved ) Inv.Hotbar.Set( free, here ); }
@@ -715,7 +747,7 @@
 			var inv = Inv;
 			if ( inv is not null )
 			{
-				hash.Add( inv.BackpackTier );
+				hash.Add( inv.BackpackTier ); hash.Add( inv.Pack );
 				for ( int i = 0; i < inv.Storage.Length; i++ ) hash.Add( inv.Storage[i] );
 				for ( int i = 0; i < inv.Armor.Length; i++ ) hash.Add( inv.Armor[i] );
 				for ( int i = 0; inv.Hotbar is not null && i < inv.Hotbar.Slots.Count; i++ ) hash.Add( inv.Hotbar.Get( i ) );

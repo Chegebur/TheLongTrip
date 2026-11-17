@@ -42,7 +42,7 @@ public static class Rarity
 	/// </summary>
 	public static string SlotLook( string itemId, bool open = true )
 	{
-		if ( !open ) return "background-image: none; box-shadow: none; border-color: rgba(255,255,255,0.05);";
+		if ( !open ) return "background-image: none; background-color: rgba(0,0,0,0.72); box-shadow: inset 0 0 18px rgba(0,0,0,0.85); border-color: rgba(0,0,0,0.65);";
 		if ( itemId is null ) return "background-image: none; box-shadow: none; border-color: rgba(255,255,255,0.10);";
 
 		int r = Of( itemId );

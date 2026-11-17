@@ -592,10 +592,10 @@ public sealed class PlayerGrabber : Component
 			if ( _inventory is null ) return true;
 			var worn = _held;
 			bool ok;
-			if ( def.BackpackTier > 0 ) ok = _inventory.WearPack( def.BackpackTier );
+			if ( def.BackpackTier > 0 ) ok = _inventory.WearPack( new ItemContainer.Stored( worn.ItemId, worn.Amount, worn.Liquid ) );
 			else ok = _inventory.Wear( new ItemContainer.Stored( worn.ItemId, worn.Amount, worn.Liquid ) );
 
-			if ( !ok ) { Notify( def.BackpackTier > 0 ? "You already have an equal or bigger pack" : "No room to swap that" ); return true; }
+			if ( !ok ) { Notify( def.BackpackTier > 0 ? "Empty the pack slots first (or there is no room for the old pack)" : "No room to swap that" ); return true; }
 			Sfx.Play( Sfx.Cloth );
 			Notify( def.BackpackTier > 0 ? $"You put on the {def.Name.ToLowerInvariant()}" : $"You wear the {def.Name.ToLowerInvariant()}" );
 			Release( false );

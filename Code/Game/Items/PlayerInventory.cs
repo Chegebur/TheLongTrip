@@ -18,8 +18,11 @@ public sealed class PlayerInventory : Component
 	public ItemContainer.Stored[] Storage { get; } = new ItemContainer.Stored[MaxStorage];
 	public ItemContainer.Stored[] Armor { get; } = new ItemContainer.Stored[4];
 
-	/// <summary>0 = pockets only, 1 = small, 2 = medium, 3 = large backpack.</summary>
-	public int BackpackTier { get; set; }
+	/// <summary>The backpack being worn (an item, so it can be taken off and swapped). Null: pockets only.</summary>
+	public ItemContainer.Stored Pack { get; set; }
+
+	/// <summary>0 = pockets only, 1 = small, 2 = medium, 3 = large backpack: the worn pack's tier.</summary>
+	public int BackpackTier => Pack is null ? 0 : Math.Max( 0, ItemLibrary.Get( Pack.ItemId )?.BackpackTier ?? 0 );
 
 	public ItemContainer Hotbar => Components.Get<ItemContainer>();
 
@@ -154,12 +157,38 @@ public sealed class PlayerInventory : Component
 		return true;
 	}
 
-	/// <summary>Put on a backpack: it sets the tier (a bigger pack replaces a smaller one). False if you already have an equal or bigger one.</summary>
-	public bool WearPack( int tier )
+	/// <summary>Would a pack of this tier hold everything that is in the pack slots now? (A smaller pack has fewer slots: they have to be empty.)</summary>
+	public bool PackFits( int tier )
 	{
-		if ( tier <= BackpackTier ) return false;
-		BackpackTier = tier;
+		for ( int i = PocketSlots + tier * SlotsPerTier; i < MaxStorage; i++ )
+			if ( Storage[i] is not null ) return false;
 		return true;
+	}
+
+	/// <summary>Can the worn pack come off? Only when none of its slots hold anything.</summary>
+	public bool CanTakeOffPack => PackFits( 0 );
+
+	/// <summary>Put on a backpack. The pack you were wearing goes back into your inventory. False if the new pack is too small for what the old one holds, or the old one has nowhere to go.</summary>
+	public bool WearPack( ItemContainer.Stored stored )
+	{
+		int tier = Math.Max( 0, ItemLibrary.Get( stored.ItemId )?.BackpackTier ?? 0 );
+		if ( tier <= 0 || !PackFits( tier ) ) return false;
+
+		var old = Pack;
+		Pack = stored;
+		if ( old is not null && !TryAdd( old ) ) { Pack = old; return false; }
+		return true;
+	}
+
+	/// <summary>Take the backpack off into the hotbar or pockets. False if its slots are not empty or there is no room.</summary>
+	public bool TakeOffPack()
+	{
+		if ( Pack is null || !CanTakeOffPack ) return false;
+		var old = Pack;
+		Pack = null;
+		if ( TryAdd( old ) ) return true;
+		Pack = old;
+		return false;
 	}
 }
 

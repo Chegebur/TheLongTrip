@@ -100,7 +100,7 @@ InventoryHud
 	{
 		display: flex;
 		flex-direction: row;
-		height: 408px;
+		height: 496px;
 	}
 
 	.col
@@ -157,8 +157,8 @@ InventoryHud
 
 		&.locked
 		{
-			background-color: rgba(255, 255, 255, 0.01);
-			border-color: rgba(255, 255, 255, 0.05);
+			background-color: rgba(0, 0, 0, 0.72);
+			border-color: rgba(0, 0, 0, 0.65);
 
 			&:hover .hl
 			{
@@ -175,6 +175,9 @@ InventoryHud
 
 		.tag
 		{
+			width: 100%;
+			text-align: center;
+			padding-left: 2px;
 			font-size: 11px;
 			letter-spacing: 2px;
 			font-weight: 600;
@@ -449,7 +452,7 @@ InventoryHud
 	{
 		display: flex;
 		flex-direction: column;
-		width: 276px;
+		width: 360px;
 		flex-shrink: 0;
 		margin-left: 20px;
 		margin-top: 96px;
