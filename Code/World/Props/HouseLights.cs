@@ -53,7 +53,11 @@ public sealed class HouseLights : Component
 		if ( !camera.IsValid() ) return;
 
 		// the lights in the house come on at dusk (and not every house has power)
-		bool near = (camera.WorldPosition - WorldPosition).Length < OnDistance && !_noPower && LongTrip.Gameplay.GraphicsSettings.Darkness > 0.25f;
+		// the lamps are on at dusk, and always when you are inside (a house is lit from within); not every house has power
+		var local = WorldRotation.Inverse * (camera.WorldPosition - WorldPosition);
+		float footprintScale = MathF.Max( 0.01f, WorldScale.x );
+		bool inside = MathF.Abs( local.x ) < 262f * footprintScale && MathF.Abs( local.y ) < 352f * footprintScale && local.z > -20f && local.z < 300f * footprintScale;
+		bool near = (camera.WorldPosition - WorldPosition).Length < OnDistance && !_noPower && (inside || LongTrip.Gameplay.GraphicsSettings.Darkness > 0.25f);
 		if ( near == _on ) return;
 		_on = near;
 

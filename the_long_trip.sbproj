@@ -19,7 +19,12 @@
     "igrotronika.explosion1",
     "drakefruit.explosionurban",
     "drakefruit.fluorescent_light",
-    "notpointless.ambvoidhollowhum"
+    "notpointless.ambvoidhollowhum",
+    "ozmium.hurt1",
+    "ozmium.hurt4",
+    "ozmium.hurt5",
+    "ozmium.death",
+    "klibatocorp.heartbeatclose"
   ],
   "EditorReferences": null,
   "Mounts": null,

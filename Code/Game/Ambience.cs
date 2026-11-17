@@ -24,6 +24,8 @@ public sealed class Ambience : Component
 	private readonly Layer _wind = new() { Sound = Sfx.WindLoop, Gain = 0.7f };
 	private readonly Layer _birds = new() { Sound = Sfx.Birds, Gain = 0.55f };
 	private readonly Layer _night = new() { Sound = Sfx.NightHum, Gain = 0.5f };
+	private readonly Layer _heart = new() { Sound = Sfx.Heartbeat, Gain = 0.9f };
+	private PlayerStats _stats;
 
 	private WorldStreamer _world;
 
@@ -53,7 +55,12 @@ public sealed class Ambience : Component
 		_birds.Target = (1f - dark) * (1f - Math.Clamp( rain * 1.4f, 0f, 1f )) * (1f - windiness) * green;
 		_night.Target = dark * (1f - rain * 0.5f);
 
-		foreach ( var layer in new[] { _rain, _wind, _birds, _night } ) Tick( layer );
+		// a pounding heart when you are badly hurt
+		_stats ??= Scene.GetAllComponents<PlayerStats>().FirstOrDefault();
+		float health = _stats.IsValid() ? _stats.Health : PlayerStats.Max;
+		_heart.Target = health <= 0f ? 0f : Math.Clamp( (35f - health) / 35f, 0f, 1f );
+
+		foreach ( var layer in new[] { _rain, _wind, _birds, _night, _heart } ) Tick( layer );
 	}
 
 	private void Tick( Layer layer )
@@ -73,6 +80,6 @@ public sealed class Ambience : Component
 
 	protected override void OnDisabled()
 	{
-		foreach ( var layer in new[] { _rain, _wind, _birds, _night } ) { layer.Handle?.Stop( 0.2f ); layer.Handle = null; }
+		foreach ( var layer in new[] { _rain, _wind, _birds, _night, _heart } ) { layer.Handle?.Stop( 0.2f ); layer.Handle = null; }
 	}
 }

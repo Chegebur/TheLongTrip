@@ -24,8 +24,9 @@ public sealed class GraphicsSettings : Component
 	[Property, Group( "Time of day" ), Range( 0.5f, 2f ), Title( "Daylight: vibrance" )] public float DayVibrance { get; set; } = 1.2f;
 	[Property, Group( "Time of day" ), Range( 0f, 1f ), Title( "Sunset: orange glow" )] public float SunsetGlow { get; set; } = 0.8f;
 	[Property, Group( "Time of day" ), Range( 0f, 4f ), Title( "Night: moonlight and ambient (0 = pitch dark)" )] public float NightBrightness { get; set; } = 1f;
-	[Property, Group( "Time of day" ), Range( 0f, 1f ), Title( "Night: fog closing in" )] public float NightFog { get; set; } = 0.65f;
-	[Property, Group( "Time of day" ), Range( 0f, 1f ), Title( "Night: drained colour" )] public float NightDrain { get; set; } = 0.45f;
+	[Property, Group( "Time of day" ), Range( 0f, 1f ), Title( "Night: fog closing in" )] public float NightFog { get; set; } = 0.35f;
+	[Property, Group( "Time of day" ), Range( 0f, 4f ), Title( "Night: eyes adjusting (exposure, EV)" )] public float NightExposure { get; set; } = 2.1f;
+	[Property, Group( "Time of day" ), Range( 0f, 1f ), Title( "Night: drained colour" )] public float NightDrain { get; set; } = 0.25f;
 
 	/// <summary>Sun height above the horizon in degrees (negative: night).</summary>
 	public float SunElevation => MathF.Sin( (Hour - 6f) / 24f * MathF.PI * 2f ) * 68f;
@@ -82,26 +83,26 @@ public sealed class GraphicsSettings : Component
 	[Property, Group( "Exposure" ), Range( -3f, 3f ), Title( "Exposure compensation" )] public float Exposure { get; set; } = 0f;
 
 	[Property, Group( "Ambient occlusion" ), Title( "AO on" )] public bool AoEnabled { get; set; } = true;
-	[Property, Group( "Ambient occlusion" ), Range( 0f, 4f ), Title( "Intensity" )] public float AoIntensity { get; set; } = 0.9f;
-	[Property, Group( "Ambient occlusion" ), Range( 0f, 256f ), Title( "Radius" )] public float AoRadius { get; set; } = 96f;
+	[Property, Group( "Ambient occlusion" ), Range( 0f, 4f ), Title( "Intensity" )] public float AoIntensity { get; set; } = 0.5f;
+	[Property, Group( "Ambient occlusion" ), Range( 0f, 256f ), Title( "Radius" )] public float AoRadius { get; set; } = 48f;
 
 	[Property, Group( "Camera" ), Range( 40f, 120f ), Title( "Field of view on foot" )] public float FootFov { get; set; } = 78f;
-	[Property, Group( "Camera" ), Range( 0f, 1f ), Title( "Vignette standing" )] public float VignetteStanding { get; set; } = 0.16f;
-	[Property, Group( "Camera" ), Range( 0f, 1f ), Title( "Vignette at speed" )] public float VignetteSpeed { get; set; } = 0.34f;
+	[Property, Group( "Camera" ), Range( 0f, 1f ), Title( "Vignette standing" )] public float VignetteStanding { get; set; } = 0f;
+	[Property, Group( "Camera" ), Range( 0f, 1f ), Title( "Vignette at speed" )] public float VignetteSpeed { get; set; } = 0f;
 	[Property, Group( "Camera" ), Range( 0f, 2f ), Title( "Sharpening" )] public float Sharpening { get; set; } = 0f;
 
 	[Button( "Reset to defaults" )]
 	public void ResetToDefaults()
 	{
-		Hour = 8f; DayLengthMinutes = 24f; FreezeTime = false; DaySun = 1.3f; DayVibrance = 1.2f; SunsetGlow = 0.8f; NightBrightness = 1f; NightFog = 0.65f; NightDrain = 0.45f;
+		Hour = 8f; DayLengthMinutes = 24f; FreezeTime = false; DaySun = 1.3f; DayVibrance = 1.2f; SunsetGlow = 0.8f; NightBrightness = 1f; NightFog = 0.35f; NightDrain = 0.25f; NightExposure = 2.1f;
 		SunBrightness = AmbientBrightness = SkyBrightness = OtherLights = 1f;
 		SunTint = AmbientTint = SkyTint = FogTint = Color.White;
 		FogEnabled = true; FogDistance = FogStart = FogFalloff = 1f;
 		Saturation = Contrast = 1f; Brightness = 1f; HueShift = 0f;
 		BloomEnabled = true; BloomStrength = 0.35f; BloomThreshold = 1.4f;
 		Exposure = 0f;
-		AoEnabled = true; AoIntensity = 0.9f; AoRadius = 96f;
-		FootFov = 78f; VignetteStanding = 0.16f; VignetteSpeed = 0.34f; Sharpening = 0f;
+		AoEnabled = true; AoIntensity = 0.5f; AoRadius = 48f;
+		FootFov = 78f; VignetteStanding = 0f; VignetteSpeed = 0f; Sharpening = 0f;
 	}
 
 	protected override void OnEnabled() => Instance = this;
@@ -154,7 +155,7 @@ public sealed class GraphicsSettings : Component
 			if ( bloom.IsValid() ) { bloom.Enabled = BloomEnabled; bloom.Strength = BloomStrength; bloom.Threshold = BloomThreshold; }
 
 			var tone = cam.GameObject.Components.Get<Tonemapping>( true );
-			if ( tone.IsValid() ) tone.ExposureCompensation = Exposure;
+			if ( tone.IsValid() ) tone.ExposureCompensation = Exposure + Darkness * NightExposure;   // in the dark the eyes open up, like a camera's auto exposure
 
 			var ao = cam.GameObject.Components.Get<AmbientOcclusion>( true );
 			if ( ao.IsValid() ) { ao.Enabled = AoEnabled; ao.Intensity = AoIntensity; ao.Radius = (int)AoRadius; }
@@ -164,6 +165,10 @@ public sealed class GraphicsSettings : Component
 
 			var grade = cam.GameObject.Components.Get<ColorAdjustments>( true );
 			if ( grade.IsValid() ) { grade.Brightness = Brightness; grade.HueRotate = HueShift; }
+
+			// no vignette unless asked for: it darkens the edges of the picture
+			var vignette = cam.GameObject.Components.Get<Vignette>( true );
+			if ( vignette.IsValid() ) vignette.Enabled = VignetteStanding > 0.001f || VignetteSpeed > 0.001f;
 
 			var sharpen = cam.GameObject.Components.Get<Sharpen>( true );
 			if ( sharpen.IsValid() ) { sharpen.Enabled = Sharpening > 0.01f; sharpen.Scale = Sharpening; }   // off by default: sharpening draws outlines around edges

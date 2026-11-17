@@ -27,19 +27,19 @@ public sealed class Atmosphere : Component
 		// Desert: warm, dusty haze
 		new Look { FogColor = new Color( 0.88f, 0.80f, 0.66f ), FogStart = 4500, FogEnd = 62000, FogExponent = 1.25f,
 			Sun = new Color( 1.00f, 0.93f, 0.80f ), SunIntensity = 1.9f, Ambient = new Color( 0.40f, 0.43f, 0.50f ),
-			Saturation = 1.14f, Contrast = 1.07f, SkyTint = new Color( 1.00f, 0.97f, 0.90f ) },
+			Saturation = 1.14f, Contrast = 1.0f, SkyTint = new Color( 1.00f, 0.97f, 0.90f ) },
 		// Grasslands: clear and fresh
 		new Look { FogColor = new Color( 0.70f, 0.81f, 0.95f ), FogStart = 5000, FogEnd = 58000, FogExponent = 1.3f,
 			Sun = new Color( 1.00f, 0.96f, 0.88f ), SunIntensity = 1.8f, Ambient = new Color( 0.38f, 0.45f, 0.55f ),
-			Saturation = 1.16f, Contrast = 1.05f, SkyTint = new Color( 1f, 1f, 1f ) },
+			Saturation = 1.16f, Contrast = 1.0f, SkyTint = new Color( 1f, 1f, 1f ) },
 		// Ice plains: cold and closer
 		new Look { FogColor = new Color( 0.78f, 0.86f, 0.97f ), FogStart = 2500, FogEnd = 42000, FogExponent = 1.1f,
 			Sun = new Color( 0.96f, 0.98f, 1.00f ), SunIntensity = 1.55f, Ambient = new Color( 0.42f, 0.50f, 0.62f ),
-			Saturation = 1.00f, Contrast = 1.04f, SkyTint = new Color( 0.95f, 0.98f, 1.05f ) },
+			Saturation = 1.00f, Contrast = 1.0f, SkyTint = new Color( 0.95f, 0.98f, 1.05f ) },
 		// Forest: green-grey air, shorter sight lines, softer light under the canopy
 		new Look { FogColor = new Color( 0.62f, 0.72f, 0.66f ), FogStart = 1800, FogEnd = 30000, FogExponent = 1.2f,
 			Sun = new Color( 1.00f, 0.95f, 0.80f ), SunIntensity = 1.5f, Ambient = new Color( 0.34f, 0.44f, 0.40f ),
-			Saturation = 1.12f, Contrast = 1.06f, SkyTint = new Color( 0.96f, 1.00f, 0.96f ) },
+			Saturation = 1.12f, Contrast = 1.0f, SkyTint = new Color( 0.96f, 1.00f, 0.96f ) },
 	};
 
 	/// <summary>How quickly the look follows the biome (per second). Biome blends are long, so this is gentle.</summary>
@@ -112,7 +112,7 @@ public sealed class Atmosphere : Component
 		float s = Math.Clamp( speed / 40f, 0f, 1f );
 
 		if ( _vignette.IsValid() )
-			_vignette.Intensity = MathX.Lerp( G.VignetteStanding, G.VignetteSpeed, s ) + _night * 0.22f;
+			_vignette.Intensity = MathX.Lerp( G.VignetteStanding, G.VignetteSpeed, s );
 
 		// The chase camera owns the FOV while driving; on foot we ease back to the base value.
 		if ( !(_car.IsValid() && _car.IsDriving) )
@@ -171,7 +171,7 @@ public sealed class Atmosphere : Component
 		// daylight: sunnier and more vibrant
 		l.SunIntensity *= MathX.Lerp( 1f, g.DaySun, day );
 		l.Saturation *= MathX.Lerp( 1f, g.DayVibrance, day );
-		l.Contrast *= MathX.Lerp( 1f, 1.05f, day );
+		
 		l.Ambient = l.Ambient * MathX.Lerp( 1f, 1.15f, day );
 
 		// sunset and sunrise
@@ -183,14 +183,14 @@ public sealed class Atmosphere : Component
 		// night
 		float nb = g.NightBrightness;
 		l.Sun = Color.Lerp( l.Sun, new Color( 0.42f, 0.58f, 1f ), night );
-		l.SunIntensity = MathX.Lerp( l.SunIntensity, 0.11f * nb, night );
-		l.Ambient = Color.Lerp( l.Ambient, new Color( 0.014f, 0.024f, 0.05f ) * nb, night );
-		l.FogColor = Color.Lerp( l.FogColor, new Color( 0.012f, 0.022f, 0.04f ) * MathF.Min( 1f, nb ), night );
+		l.SunIntensity = MathX.Lerp( l.SunIntensity, 1.0f * nb, night );   // the moon: real light with real shadows
+		l.Ambient = Color.Lerp( l.Ambient, new Color( 0.09f, 0.115f, 0.2f ) * nb, night );   // starlight and sky glow: dark, but you see shapes
+		l.FogColor = Color.Lerp( l.FogColor, new Color( 0.05f, 0.075f, 0.13f ) * MathF.Min( 1.5f, nb ), night );
 		l.FogStart *= MathX.Lerp( 1f, 1f - g.NightFog * 0.8f, night );
 		l.FogEnd *= MathX.Lerp( 1f, 1f - g.NightFog * 0.7f, night );
-		l.SkyTint = Color.Lerp( l.SkyTint, new Color( 0.012f, 0.02f, 0.05f ) * MathF.Min( 1.5f, nb ), night );
+		l.SkyTint = Color.Lerp( l.SkyTint, new Color( 0.04f, 0.06f, 0.15f ) * MathF.Min( 2f, nb ), night );
 		l.Saturation *= MathX.Lerp( 1f, 1f - g.NightDrain, night );
-		l.Contrast *= MathX.Lerp( 1f, 1.12f, night );
+		l.Contrast *= MathX.Lerp( 1f, 1.02f, night );
 		return l;
 	}
 

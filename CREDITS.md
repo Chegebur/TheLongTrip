@@ -39,6 +39,8 @@ Installed from the s&box package catalog through the project's package reference
 | Explosions | `igrotronika.explosion1`, `drakefruit.explosionurban` |
 | Street lamp hum | `drakefruit.fluorescent_light` |
 | Night ambience | `notpointless.ambvoidhollowhum` |
+| Hurt, death | `ozmium.hurt1`, `ozmium.hurt4`, `ozmium.hurt5`, `ozmium.death` |
+| Heartbeat when badly hurt | `klibatocorp.heartbeatclose` |
 
 ## Street lamp and backpacks
 

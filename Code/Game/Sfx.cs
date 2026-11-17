@@ -27,6 +27,9 @@ public static class Sfx
 	public const string Birds = "sounds/subzero-studios/ambience/wind/morning-birds.sound";
 	public const string NightHum = "sound effects/amb_void_loop (wav)/ambvoidhollowhum.sound";
 	public const string LampBuzz = "sounds/fluorescent_light.sound";
+	public static readonly string[] Hurt = { "sounds/hurt1.sound", "sounds/hurt4.sound", "sounds/hurt5.sound" };
+	public const string Death = "sounds/death.sound";
+	public const string Heartbeat = "sound/heartbeat_close.sound";
 	public static readonly string[] Thunder = { "sounds/csz/nature/thunder1.sound", "sounds/csz/nature/thunder2.sound", "sounds/csz/nature/thunder3.sound", "sounds/csz/nature/thunder4.sound" };
 	public static readonly string[] Explosions = { "sound/explosion1.sound", "sounds/explosion_urban.sound" };
 

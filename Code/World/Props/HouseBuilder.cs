@@ -380,7 +380,7 @@ internal sealed class HouseGen
 	private static void AddWindow( List<Opening> list, float centre, float width, float z0, float z1 )
 		=> list.Add( new Opening( centre - width * 0.5f, centre + width * 0.5f, z0, z1 ) );
 
-	/// <summary>Frame, mullions and glass for each window; a door leaf swung open for the front door.</summary>
+	/// <summary>Frame, mullions and glass for each window; plain openings for the doors (there are no door leaves).</summary>
 	private void FrameOpenings( Vector2 a, Vector2 b, List<Opening> openings, float oFront, float oBack )
 	{
 		var d = (b - a).Normal;
@@ -403,11 +403,7 @@ internal sealed class HouseGen
 
 			if ( isDoor )
 			{
-				// open front door leaf, hinged on the left jamb, standing inside
-				var hinge = P( o.T0 + 1f, zm, (oFront + oBack) * 0.5f - 3f );
-				var inward = new Vector3( -nOut.x, -nOut.y, 0f );
-				_b.Box( Flat, hinge + inward * (w * 0.46f), new Vector3( MathF.Abs( inward.x ) * w * 0.92f + 1.8f, MathF.Abs( inward.y ) * w * 0.92f + 1.8f, h - 1f ), 0, true, 1f, Paint( 74, 42, 24, 0.6f ) );
-				_b.Box( FlatMetal, hinge + inward * (w * 0.86f) + new Vector3( 0, 0, -2 ), new Vector3( 2.4f, 2.4f, 2.4f ), 0, true, 1f, Paint( 200, 180, 110, 0.3f ) );
+				// no door: the doorway is just an opening
 				continue;
 			}
 

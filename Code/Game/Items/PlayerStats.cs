@@ -20,8 +20,15 @@ public sealed class PlayerStats : Component
 	public void Damage( float amount )
 	{
 		if ( IsProxy ) { DamageOwner( amount ); return; }
+		float before = Health;
 		Health = MathF.Max( 0f, Health - amount * (PlayerInventory.Instance?.DamageFactor ?? 1f) );   // armor takes a share of every hit
+
+		// a grunt for a real hit (not for every little knock), and a last one when it is the end
+		if ( before > 0f && Health <= 0f ) Sfx.Play( Sfx.Death );
+		else if ( before - Health > 1.5f && _sinceHurt > 0.35f ) { _sinceHurt = 0f; Sfx.Play( Sfx.Pick( Sfx.Hurt ) ); }
 	}
+
+	private TimeSince _sinceHurt = 1f;
 
 	[Rpc.Owner] private void DamageOwner( float amount ) => Damage( amount );
 
