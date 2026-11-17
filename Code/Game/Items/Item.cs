@@ -32,10 +32,16 @@ public class Item : Component
 	/// <summary>Time since it was last let go of (so a thrown item doesn't hurt the one who threw it).</summary>
 	public TimeSince SinceReleased { get; set; } = 999f;
 
-	/// <summary>The weld holding this item to something else (the car, another item), or null.</summary>
-	public FixedJoint Weld { get; set; }
+	/// <summary>
+	/// What this item is welded to (the car, another item), or null. A weld is not a joint: the item gives up its own rigid body and becomes a child of that
+	/// object, its colliders part of the object's one body. Nothing is left to stretch, give or bounce, so a welded item is as firm as the car itself.
+	/// </summary>
+	public GameObject WeldedTo { get; set; }
 
-	public bool IsWelded => Weld.IsValid();
+	public bool IsWelded => WeldedTo.IsValid();
+
+	private float _weldMass, _weldLinear, _weldAngular;
+	private bool _weldCcd;
 
 	/// <summary>Litres of liquid in a container item.</summary>
 	public float Litres => Definition?.Container is { } c ? Amount * c.Capacity : 0f;
@@ -50,12 +56,34 @@ public class Item : Component
 
 	public ItemDefinition Definition => ItemId is null ? null : ItemLibrary.Get( ItemId );
 
-	/// <summary>Break the weld, if there is one. Returns true if there was.</summary>
+	/// <summary>Make this item part of <paramref name="target"/>: no joint, no body of its own, a rock-solid connection.</summary>
+	public void WeldTo( GameObject target )
+	{
+		Unweld();
+		if ( Body.IsValid() )
+		{
+			_weldMass = Body.MassOverride; _weldLinear = Body.LinearDamping; _weldAngular = Body.AngularDamping; _weldCcd = Body.EnhancedCcd;
+			Body.Destroy();
+			Body = null;
+		}
+		WeldedTo = target;
+		GameObject.SetParent( target, true );   // keeps exactly where it is
+	}
+
+	/// <summary>Break the weld, if there is one: the item is loose again, with a body of its own. Returns true if there was a weld.</summary>
 	public bool Unweld()
 	{
 		if ( !IsWelded ) return false;
-		Weld.Destroy();
-		Weld = null;
+		GameObject.SetParent( null, true );
+		WeldedTo = null;
+
+		var body = GameObject.Components.Create<Rigidbody>();
+		body.MassOverride = _weldMass > 0f ? _weldMass : 1f;
+		body.LinearDamping = _weldLinear;
+		body.AngularDamping = _weldAngular;
+		body.EnhancedCcd = _weldCcd;
+		Body = body;
+		RefreshMass();
 		return true;
 	}
 

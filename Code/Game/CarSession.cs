@@ -146,8 +146,8 @@ public sealed class CarSession : Component
 		Car.Name = "Base Car";
 		Car.Flags |= GameObjectFlags.NotSaved;
 
-		// the car is a moving base: things standing on it ride along, and it carries a local building grid (no buildings yet)
-		Car.AddComponent<MovingBase>();
+		// the car is a moving base (a "ghost ship": people on it are simulated in a static clone of it) and it carries a local building grid
+		Car.AddComponent<GhostShip>();   // everything on the car is simulated in its static ghost (see GhostShip)
 		Car.AddComponent<CarNetwork>();
 		var grid = Car.AddComponent<BuildGrid>();
 		grid.Anchor = Car.Children.FirstOrDefault( c => c.Name == "Kit Body" );

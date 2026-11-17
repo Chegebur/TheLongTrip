@@ -562,13 +562,8 @@ public sealed class PlayerGrabber : Component
 		Release( false );
 		if ( !item.IsValid() || !target.IsValid() ) return;
 
-		if ( item.Body is not null ) { item.Body.Velocity = Vector3.Zero; item.Body.AngularVelocity = Vector3.Zero; }
-		item.Unweld();
-
-		var joint = item.GameObject.Components.Create<FixedJoint>();
-		joint.Body = target.GameObject;
-		joint.EnableCollision = false;
-		item.Weld = joint;
+		// welded for good: the item becomes a part of what it touches (see Item.WeldTo)
+		item.WeldTo( target.GameObject );
 		Notify( $"{item.Display} welded to {name}" );
 	}
 
@@ -671,9 +666,10 @@ public sealed class PlayerGrabber : Component
 
 	private void Pickup( CameraComponent camera, Item item )
 	{
-		if ( !item.IsValid() || item.Body is null ) return;
+		if ( !item.IsValid() ) return;
 
 		if ( item.Unweld() ) Notify( "Weld broken" );
+		if ( item.Body is null ) return;
 
 		// networked: the one who carries it simulates it (so it follows the hand with no lag), and it is theirs until somebody else grabs it
 		if ( item.GameObject.Network.Active && item.IsProxy ) item.GameObject.Network.TakeOwnership();
