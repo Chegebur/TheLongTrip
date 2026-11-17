@@ -1182,7 +1182,7 @@
       "id": "flashlight",
       "name": "Flashlight",
       "category": "Tool",
-      "description": "Switch it on with the left mouse. The battery lasts about ten minutes; a spare battery in your pockets is swapped in when it is flat.",
+      "description": "A wide beam that reaches a long way. Switch it on with the left mouse; the battery lasts about ten minutes, and a spare battery in your pockets is swapped in when it is flat.",
       "mass": 0.3,
       "model": "builtin:flashlight",
       "size": [
@@ -1211,9 +1211,9 @@
           0.95,
           0.82
         ],
-        "range": 1700,
-        "angle": 36,
-        "intensity": 3,
+        "range": 6000,
+        "angle": 62,
+        "intensity": 4.5,
         "minutes": 10,
         "offset": [
           4.2,
@@ -1226,7 +1226,7 @@
       "id": "power_flashlight",
       "name": "Power flashlight",
       "category": "Tool",
-      "description": "A big, bright beam that reaches far, and eats batteries about three times as fast.",
+      "description": "A big, bright beam that reaches very far, and eats batteries about three times as fast.",
       "mass": 0.9,
       "model": "builtin:power_flashlight",
       "size": [
@@ -1255,9 +1255,9 @@
           0.96,
           1
         ],
-        "range": 3600,
-        "angle": 30,
-        "intensity": 7,
+        "range": 14000,
+        "angle": 52,
+        "intensity": 10,
         "minutes": 3.5,
         "offset": [
           6,
@@ -1293,9 +1293,9 @@
           0.72,
           0.42
         ],
-        "range": 1200,
+        "range": 2400,
         "angle": 90,
-        "intensity": 2.4,
+        "intensity": 3.2,
         "minutes": 25,
         "offset": [
           0,

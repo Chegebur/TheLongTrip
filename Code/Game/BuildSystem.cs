@@ -14,6 +14,9 @@ public sealed class BuildPieceDef
 	/// <summary>How far (inches) it is lifted off the surface it stands on, so it does not fight it.</summary>
 	public float Rest;
 
+	/// <summary>What taking the piece apart gives back (item id and count). Empty for now: when pieces cost materials, list them here and in the data file.</summary>
+	public List<(string Item, int Count)> Refund = new();
+
 	public bool IsFloor => Kind == "floor";
 }
 
@@ -29,7 +32,9 @@ public static class BuildLibrary
 		public string kind { get; set; } = "wall";
 		public float height { get; set; } = 1f;
 		public float rest { get; set; }
+		public List<RefundRecord> refund { get; set; } = new();
 	}
+	private sealed class RefundRecord { public string item { get; set; } public int count { get; set; } = 1; }
 	private sealed class BuildFile
 	{
 		public float cell { get; set; } = 40f;
@@ -81,7 +86,7 @@ public static class BuildLibrary
 			foreach ( var p in file.pieces )
 			{
 				if ( string.IsNullOrEmpty( p.model ) ) continue;
-				_all.Add( new BuildPieceDef { Id = p.id ?? p.model, Name = p.name ?? p.id, Model = p.model, Kind = (p.kind ?? "wall").ToLowerInvariant(), Height = p.height <= 0f ? 1f : p.height, Rest = p.rest } );
+				_all.Add( new BuildPieceDef { Id = p.id ?? p.model, Name = p.name ?? p.id, Model = p.model, Kind = (p.kind ?? "wall").ToLowerInvariant(), Height = p.height <= 0f ? 1f : p.height, Rest = p.rest, Refund = (p.refund ?? new()).Where( x => !string.IsNullOrEmpty( x.item ) ).Select( x => (x.item, Math.Max( 1, x.count )) ).ToList() } );
 			}
 		}
 		catch ( System.Exception e ) { Log.Warning( $"[build] {DataPath} could not be read ({e.Message})" ); }
@@ -128,6 +133,8 @@ public sealed class BuildSystem : Component
 	[Property] public float StartRange { get; set; } = 1100f;
 
 	private BuildGrid _grid;
+	private bool _disassemble;
+	private ModelRenderer _marked;
 	private int _selected;
 	private GameObject _ghost;
 	private ModelRenderer _ghostRenderer;
@@ -187,6 +194,26 @@ public sealed class BuildSystem : Component
 		var cam = Scene.Camera;
 		if ( !cam.IsValid() ) return;
 
+		// X: building <-> taking apart
+		if ( Input.Keyboard.Pressed( "x" ) )
+		{
+			_disassemble = !_disassemble;
+			Sfx.Play( Sfx.Press );
+			if ( _ghost.IsValid() ) { _ghost.Destroy(); _ghost = null; _ghostFor = null; }
+			Mark( null );
+		}
+
+		if ( _disassemble )
+		{
+			var look = Scene.Trace.Ray( cam.WorldPosition, cam.WorldPosition + cam.WorldRotation.Forward * 800f ).IgnoreGameObjectHierarchy( Scene.GetAllObjects( true ).FirstOrDefault( g => g.Components.Get<PlayerController>( true ) is not null ) ?? GameObject ).Run();
+			var target = look.Hit && look.GameObject.IsValid() ? look.GameObject.Components.Get<BuiltPiece>( FindMode.EverythingInSelfAndParent ) : null;
+			Mark( target );
+			Hint = target is null ? "TAKING APART   Look at a piece     X: back to building     B: stop"
+				: $"TAKING APART   Left mouse: take apart the {target.Def.Name.ToLowerInvariant()}{(target.Nailed ? " (the nail comes back)" : "")}     X: back to building     B: stop";
+			if ( Input.Pressed( "Attack1" ) && target is not null ) TakeApart( target );
+			return;
+		}
+
 		Aim( cam, def, out var choice, out var looking );
 		ShowGhost( def, choice );
 
@@ -197,16 +224,12 @@ public sealed class BuildSystem : Component
 			Verdict.NeedsNail => $"{def.Name}   Left mouse: place with a nail ({nails} left)",
 			_ => $"{def.Name}   {choice.Why}",
 		};
-		Hint += "     Wheel: piece     Right mouse: remove     B: stop";
+		Hint += "     Wheel: piece     X: take apart     B: stop";
 
 		if ( Input.Pressed( "Attack1" ) )
 		{
 			if ( choice.Verdict == Verdict.Blocked ) { Sfx.Play( Sfx.Deny ); PlayerGrabber.Instance?.Notify( choice.Why ); }
 			else Place( def, choice.Slot, choice.Verdict == Verdict.NeedsNail );
-		}
-		else if ( Input.Pressed( "Attack2" ) && looking is not null )
-		{
-			Remove( looking );
 		}
 	}
 
@@ -230,6 +253,8 @@ public sealed class BuildSystem : Component
 		if ( _grid.IsValid() ) _grid.Visible = false;
 		if ( _ghost.IsValid() ) _ghost.Destroy();
 		_ghost = null; _ghostFor = null;
+		_disassemble = false;
+		Mark( null );
 		Sfx.Play( Sfx.Close );
 	}
 
@@ -613,6 +638,41 @@ public sealed class BuildSystem : Component
 		piece.Def = def; piece.Slot = slot; piece.Nailed = nailed;
 		_built[slot] = piece;
 		Sfx.Play( nailed ? Sfx.Metal : Sfx.Wood, go.WorldPosition );
+	}
+
+	/// <summary>Tint the piece you are about to take apart (null: none).</summary>
+	private void Mark( BuiltPiece piece )
+	{
+		var renderer = piece.IsValid() ? piece.Components.Get<ModelRenderer>() : null;
+		if ( renderer == _marked ) return;
+		if ( _marked.IsValid() ) _marked.Tint = Color.White;
+		_marked = renderer;
+		if ( _marked.IsValid() ) _marked.Tint = new Color( 1f, 0.55f, 0.5f );
+	}
+
+	/// <summary>Take a piece apart: what it cost comes back to you (into your pockets, or onto the floor if they are full), and a nail it was held with too.</summary>
+	private void TakeApart( BuiltPiece piece )
+	{
+		var def = piece.Def;
+		bool nailed = piece.Nailed;
+		Mark( null );
+		Remove( piece );
+
+		var inventory = PlayerInventory.Instance;
+		var cam = Scene.Camera;
+		void Give( string id, float amount )
+		{
+			var stored = new ItemContainer.Stored( id, amount, null );
+			if ( inventory is not null && inventory.TryAdd( stored ) ) return;
+			if ( cam.IsValid() ) ItemLibrary.Spawn( Scene, id, cam.WorldPosition + cam.WorldRotation.Forward * 70f, Rotation.Identity, amount );
+		}
+
+		foreach ( var (item, count) in def.Refund ) for ( int i = 0; i < count; i++ ) Give( item, 1f );
+		if ( nailed )
+		{
+			float uses = MathF.Max( 1f, ItemLibrary.Get( PlayerInventory.NailId )?.Uses ?? 1 );
+			Give( PlayerInventory.NailId, 1f / uses );
+		}
 	}
 
 	private void Remove( BuiltPiece piece )

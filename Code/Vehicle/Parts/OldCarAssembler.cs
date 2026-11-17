@@ -477,7 +477,7 @@ public static class OldCarAssembler
 		var parent = scene.CreateObject();
 		parent.Name = "Body Collision";
 		parent.SetParent( body, false );
-		parent.Components.Create<LongTrip.Gameplay.GhostIgnore>();
+		// (the exact ghost mesh stands in for the slabs, except the low ones: the floors of the cabin, the engine bay and the boot, which the mesh does not have, so people can walk inside)
 
 		float k = M * Scale;
 		foreach ( var s in BaseSlabs )
@@ -487,6 +487,7 @@ public static class OldCarAssembler
 			go.SetParent( parent, false );
 			go.LocalPosition = new Vector3( s.Fwd, s.Left, s.Up ) * k;
 			go.LocalRotation = s.TiltDeg == 0f ? Rotation.Identity : Rotation.FromAxis( Vector3.Left, s.TiltDeg );
+			if ( s.Up >= 0.6f ) go.Components.Create<LongTrip.Gameplay.GhostIgnore>();
 			var collider = go.Components.Create<BoxCollider>();
 			collider.Scale = new Vector3( s.SizeFwd, s.SizeLeft, s.SizeUp ) * k;
 			collider.Friction = 0.1f;

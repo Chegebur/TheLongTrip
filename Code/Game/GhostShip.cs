@@ -56,6 +56,9 @@ public sealed class GhostShip : Component
 	private Vector3 _groundNormal = Vector3.Up;
 	private float _airTime;
 	private TimeSince _sinceLeft = 99f;
+	private Vector3 _lastGood;       // the last place you stood properly: where you are put back if you fall for ever or get stuck
+	private bool _hasGood;
+	private float _noProgress, _recoverCooldown;
 	private Rotation _lastRotation;
 	private Vector3 _nearPrev;
 	public bool DebugNear { get; set; }
@@ -73,6 +76,7 @@ public sealed class GhostShip : Component
 	public int Boardings { get; private set; }
 	public string EndReason { get; private set; }
 	public int Leavings { get; private set; }
+	public int Recoveries { get; private set; }
 	private bool _nearValid;
 
 	/// <summary>Every ghost ship that exists.</summary>
@@ -257,6 +261,7 @@ public sealed class GhostShip : Component
 		_localVel = frame.Rotation.Inverse * (worldVelocity - CarVelocityAt( pc.WorldPosition ));
 		_grounded = true;
 		_airTime = 0f;
+		_lastGood = _localPos; _hasGood = true; _noProgress = 0f; _recoverCooldown = 0f;
 		_aboard = true;
 		Boardings++;
 		_lastRotation = WorldRotation;
@@ -332,6 +337,9 @@ public sealed class GhostShip : Component
 		var frame = Frame;
 		var now = frame.PointToLocal( pc.WorldPosition );
 		if ( !_nearValid ) { _nearPrev = now; _nearValid = true; return; }
+
+		// a jump of more than a few steps is a teleport (a respawn, a move by script), not walking: nothing to sweep through
+		if ( (now - _nearPrev).Length > 120f ) { _nearPrev = now; return; }
 
 		var up = (frame.Rotation.Inverse * Vector3.Up).Normal;
 		var resolved = Slide( _nearPrev, now - _nearPrev, up );
@@ -596,7 +604,25 @@ public sealed class GhostShip : Component
 
 		if ( _localVel.Length > 1500f ) _localVel = _localVel.Normal * 1500f;
 		_airTime = _grounded ? 0f : _airTime + dt;
+		var before = _localPos;
 		_localPos = Move( _localPos, dt, up );
+
+		// where you last stood properly (on a floor you can stand on, with something around you free)
+		if ( _grounded && standable && !probe.StartedSolid ) { _lastGood = _localPos; _hasGood = true; }
+
+		// no way out of a hole, no end to a fall: if you have been in the air for a long time, or you push and go nowhere, you are put back where you last stood
+		_recoverCooldown = MathF.Max( 0f, _recoverCooldown - dt );
+		bool pushing = target.Length > 1f;
+		_noProgress = pushing && (_localPos - before).Length < speed * dt * 0.1f ? _noProgress + dt : MathF.Max( 0f, _noProgress - dt * 2f );
+		if ( _recoverCooldown <= 0f && _hasGood && (_airTime > 1.4f || _noProgress > 1.2f) )
+		{
+			EndReason = $"recovered ({(_airTime > 1.4f ? "falling" : "stuck")}) at {_localPos}";
+			_localPos = _lastGood + up * 1f;
+			_localVel = Vector3.Zero;
+			_airTime = 0f; _noProgress = 0f;
+			_recoverCooldown = 0.6f;
+			Recoveries++;
+		}
 
 		// ---- back into the world
 		var world = frame.PointToWorld( _localPos );
