@@ -401,6 +401,34 @@ public sealed class CarAssembly : Component
 		_ghostGroup = null;
 	}
 
+	/// <summary>
+	/// TESTING: put every part on the car at once (wheels, doors, hood, trunk, seats, engine, radiator...), fill the tank and clear away the loose copies of the parts,
+	/// so the car can be driven and walked on straight away. F9 in the game, or the button in the inspector.
+	/// </summary>
+	[Button( "Assemble everything (testing)" )]
+	public void AssembleAll()
+	{
+		if ( _body is null ) Init();
+		foreach ( var s in Sockets.Values )
+		{
+			if ( s.IsAttached ) continue;
+			s.Attached = OldCarAssembler.BuildAttached( Scene, GameObject, s.Group );
+			if ( !s.IsAttached ) continue;
+			s.Angle = s.TargetAngle = 0f;   // fitted closed
+			int wheel = Array.IndexOf( WheelSockets, s.Group );
+			if ( wheel >= 0 ) SetWheelActive( wheel, true );
+		}
+		AddFuel( TankCapacity );
+
+		// the parts lying about are not needed any more
+		foreach ( var part in Scene.GetAllComponents<CarPartItem>().ToList() )
+			if ( part.IsValid() && !part.IsHeld ) part.GameObject.Destroy();
+
+		HideGhost();
+		UpdateEngineSound();
+		Log.Info( $"[assembly] assembled everything ({WheelsOn}/4 wheels, engine {HasEngine}, radiator {HasRadiator}, fuel {Fuel:F0} L)" );
+	}
+
 	// ---- attach / detach ----------------------------------------------------------------------------------
 
 	/// <summary>Put a held part on the car: its loose item is removed and the visuals appear on the socket.</summary>

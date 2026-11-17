@@ -78,6 +78,13 @@ public sealed class CarSession : Component
 			return;
 		}
 
+		// testing: F9 puts every part on the car
+		if ( Input.Keyboard.Pressed( "f9" ) && _assembly is not null )
+		{
+			_assembly.AssembleAll();
+			PlayerGrabber.Instance?.Notify( "Car fully assembled (testing, F9)" );
+		}
+
 		if ( !IsDriving )
 		{
 			// A parked car must not react to the keys the player is pressing on foot.

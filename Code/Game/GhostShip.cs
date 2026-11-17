@@ -59,6 +59,20 @@ public sealed class GhostShip : Component
 	private Rotation _lastRotation;
 	private Vector3 _nearPrev;
 	public bool DebugNear { get; set; }
+
+	/// <summary>Testing only: walk without a keyboard (forward, left) while standing on the car, and walk about on the ground (world units a second).</summary>
+	public Vector2? DebugAnalog { get; set; }
+	public Vector3? DebugWalk { get; set; }
+	public bool DebugJump { get; set; }
+
+	/// <summary>Testing only: when on, every fixed step of the player is written to <see cref="Trace"/>.</summary>
+	public bool Record { get; set; }
+	public readonly List<string> Trace = new();
+
+	/// <summary>Counters for tests: how often the player got on and off the car.</summary>
+	public int Boardings { get; private set; }
+	public string EndReason { get; private set; }
+	public int Leavings { get; private set; }
 	private bool _nearValid;
 
 	/// <summary>Every ghost ship that exists.</summary>
@@ -244,6 +258,7 @@ public sealed class GhostShip : Component
 		_grounded = true;
 		_airTime = 0f;
 		_aboard = true;
+		Boardings++;
 		_lastRotation = WorldRotation;
 
 		// the character stops walking by itself (the ghost walks it); its body no longer takes part in the real physics while aboard
@@ -256,6 +271,7 @@ public sealed class GhostShip : Component
 	{
 		if ( !_aboard ) return;
 		_aboard = false;
+		Leavings++;
 		_sinceLeft = 0f;
 
 		var pc = _player;
@@ -287,6 +303,7 @@ public sealed class GhostShip : Component
 
 		var pc = LocalPlayer();
 		if ( !pc.IsValid() ) return;
+		if ( DebugWalk is { } walk && !_aboard ) pc.WorldPosition += walk * Time.Delta;   // (testing: walking on the ground)
 		if ( !pc.GameObject.Tags.Has( "ghostrider" ) ) pc.GameObject.Tags.Add( "ghostrider" );   // (never collides with the real car)
 
 		_session ??= Scene.GetAllComponents<CarSession>().FirstOrDefault();
@@ -295,11 +312,12 @@ public sealed class GhostShip : Component
 		if ( !_aboard )
 		{
 			if ( _sinceLeft > 0.4f && StandingOnCar( pc ) ) Begin( pc );
-			if ( !_aboard ) { NearCar( pc ); return; }
+			if ( !_aboard ) { NearCar( pc ); if ( Record && Trace.Count < 4000 ) Trace.Add( $"{Time.Now:F2} GROUND local {Frame.PointToLocal( pc.WorldPosition )} near {_nearValid}" ); return; }
 		}
 
 		_nearValid = false;
 		Simulate( pc, Time.Delta );
+		if ( Record && Trace.Count < 4000 ) Trace.Add( $"{Time.Now:F2} ABOARD local {_localPos} vel {_localVel} grounded {_grounded} air {_airTime:F2}" );
 	}
 
 	/// <summary>
@@ -537,7 +555,7 @@ public sealed class GhostShip : Component
 		_groundNormal = normal;
 
 		// what you want to do
-		var analog = Input.AnalogMove;
+		var analog = DebugAnalog is { } fake ? new Vector3( fake.x, fake.y, 0f ) : Input.AnalogMove;
 		var wishWorld = Rotation.FromYaw( pc.EyeAngles.yaw ) * new Vector3( analog.x, analog.y, 0f ).ClampLength( 1f );
 		var wish = frame.Rotation.Inverse * wishWorld;
 		float speed = Input.Down( "Run" ) ? pc.RunSpeed : pc.WalkSpeed;
@@ -560,7 +578,7 @@ public sealed class GhostShip : Component
 			var downhill = down - normal * Vector3.Dot( down, normal );
 			_localVel = along + downhill * Gravity * slide * dt * 2f;
 
-			if ( Input.Pressed( "Jump" ) ) { _localVel += up * 300f; _grounded = false; }
+			if ( Input.Pressed( "Jump" ) || DebugJump ) { DebugJump = false; _localVel += up * 300f; _grounded = false; }
 		}
 		else
 		{
@@ -594,7 +612,11 @@ public sealed class GhostShip : Component
 		var ground = Scene.Trace.Ray( world + Vector3.Up * 12f, world + Vector3.Down * 8f ).IgnoreGameObjectHierarchy( GameObject ).IgnoreGameObjectHierarchy( pc.GameObject ).Run();
 		bool onRealGround = ground.Hit && ground.GameObject.IsValid() && !ground.GameObject.IsDescendant( GameObject ) && ground.GameObject.Components.Get<Item>() is null;   // (things lying on the car do not count as the road)
 		bool far = (world - WorldPosition).Length > Range + 120f;
-		if ( onRealGround || far || (_airTime > 0.35f && _localPos.z < -90f) ) End( true );
+		if ( onRealGround || far || (_airTime > 0.35f && _localPos.z < -90f) )
+		{
+			EndReason = $"{(onRealGround ? "real ground (" + ground.GameObject.Name + ") " : "")}{(far ? "far " : "")}{(_airTime > 0.35f && _localPos.z < -90f ? "fell " : "")} at local {_localPos} air {_airTime:F2}";
+			End( true );
+		}
 	}
 
 	/// <summary>Move through the ghost: slide along what is in the way, step up small ledges, push out of anything stuck in.</summary>
