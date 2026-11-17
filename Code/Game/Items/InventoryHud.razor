@@ -64,11 +64,11 @@
 					<div class="col" style="flex-grow: 1;">
 						<div class="caption">CARRIED</div>
 						<div class="slots">
-							@for ( int row = 0; row < 4; row++ )
+							@for ( int row = 0; row < 5; row++ )
 							{
 								int r = row;
 								<div class="packrow">
-									<div class="rowlabel @(Unlocked( r * 4 ) ? "" : "off")">@(new[] { "Pockets", "Small pack", "Medium pack", "Large pack" }[r])</div>
+									<div class="rowlabel @(Unlocked( r * 4 ) ? "" : "off")">@(new[] { "Pockets", "Small pack", "Medium pack", "Large pack", "Large pack +" }[r])</div>
 									@for ( int col = 0; col < 4; col++ )
 									{
 										int idx = r * 4 + col;
@@ -432,7 +432,7 @@
 		_tipLines.Add( $"{(def.Hands == 1 ? "One-handed" : "Two-handed")}, {def.Mass:0.#} kg" );
 		if ( def.Use == UseKind.Melee ) _tipLines.Add( $"Hits for up to {def.Damage.Cap:0} damage (faster swings hit harder)" );
 		if ( def.ArmorSlot is not null ) _tipLines.Add( $"Armor: {def.Defense * 100f:0}% less damage ({def.ArmorSlot})" );
-		if ( def.BackpackTier > 0 ) _tipLines.Add( $"Backpack: adds {def.BackpackTier * PlayerInventory.SlotsPerTier} slots" );
+		if ( def.BackpackTier > 0 ) _tipLines.Add( $"Backpack: adds {PlayerInventory.SlotsAdded( def.BackpackTier )} slots" );
 		if ( def.Use == UseKind.Eat ) _tipLines.Add( $"Restores {def.Restore * s.Amount:0} food" );
 		if ( def.Use == UseKind.Drink ) _tipLines.Add( $"Restores up to {def.Restore * s.Amount:0} water ({s.Amount * 100f:0}% left)" );
 		if ( def.Use == UseKind.Refuel ) _tipLines.Add( $"Fuel: {s.Amount * def.Capacity:0} / {def.Capacity:0} L" );

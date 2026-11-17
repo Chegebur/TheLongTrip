@@ -563,7 +563,7 @@
       "id": "footlocker_pack",
       "name": "Military crate (pack)",
       "category": "Backpack",
-      "description": "A large pack: twelve more slots.",
+      "description": "A large pack: sixteen more slots (two rows).",
       "mass": 4,
       "model": "models/items/crate_a/crate_a.vmdl",
       "modelScale": 1.2,

@@ -11,7 +11,13 @@ public sealed class PlayerInventory : Component
 
 	public const int PocketSlots = 4;
 	public const int SlotsPerTier = 4;
-	public const int MaxStorage = PocketSlots + 3 * SlotsPerTier;
+	public const int MaxStorage = PocketSlots + 4 * SlotsPerTier;   // five rows in all: pockets, small, medium and two for the large pack
+
+	/// <summary>How many storage slots you have with a pack of this tier: the pockets, plus a row for the small and the medium pack, and two rows for the large one.</summary>
+	public static int SlotsForTier( int tier ) => PocketSlots + (tier >= 3 ? 4 : tier) * SlotsPerTier;
+
+	/// <summary>How many slots a pack of this tier adds to the pockets.</summary>
+	public static int SlotsAdded( int tier ) => SlotsForTier( tier ) - PocketSlots;
 
 	public static readonly string[] ArmorSlots = { "head", "chest", "legs", "feet" };
 
@@ -26,7 +32,7 @@ public sealed class PlayerInventory : Component
 
 	public ItemContainer Hotbar => Components.Get<ItemContainer>();
 
-	public int Unlocked => PocketSlots + BackpackTier * SlotsPerTier;
+	public int Unlocked => SlotsForTier( BackpackTier );
 	public bool IsUnlocked( int slot ) => slot < Unlocked;
 
 	/// <summary>The share of each hit that gets through (armor takes the rest, never more than 70%).</summary>
@@ -160,7 +166,7 @@ public sealed class PlayerInventory : Component
 	/// <summary>Would a pack of this tier hold everything that is in the pack slots now? (A smaller pack has fewer slots: they have to be empty.)</summary>
 	public bool PackFits( int tier )
 	{
-		for ( int i = PocketSlots + tier * SlotsPerTier; i < MaxStorage; i++ )
+		for ( int i = SlotsForTier( tier ); i < MaxStorage; i++ )
 			if ( Storage[i] is not null ) return false;
 		return true;
 	}
