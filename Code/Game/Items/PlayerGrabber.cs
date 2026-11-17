@@ -495,6 +495,13 @@ public sealed class PlayerGrabber : Component
 			}
 		}
 
+		// things on the car live in its ghost: look there too
+		if ( !_hoverItem.IsValid() )
+		{
+			var ghostItem = GhostShip.RayItem( origin, direction, MathF.Min( ReachDistance, wallDistance + 40f ), out _ );
+			if ( ghostItem.IsValid() ) _hoverItem = ghostItem;
+		}
+
 		if ( assembly is not null && assembly.RaycastAttached( origin, direction, ReachDistance, out var socket, out float distance ) )
 		{
 			if ( !_hoverItem.IsValid() || distance < wallDistance )
@@ -667,6 +674,7 @@ public sealed class PlayerGrabber : Component
 	private void Pickup( CameraComponent camera, Item item )
 	{
 		if ( !item.IsValid() ) return;
+		GhostShip.Release( item );   // an item in a car's ghost comes back into the world before it is picked up
 
 		if ( item.Unweld() ) Notify( "Weld broken" );
 		if ( item.Body is null ) return;

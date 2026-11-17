@@ -57,6 +57,26 @@ public sealed class GhostShip : Component
 	private float _airTime;
 	private TimeSince _sinceLeft = 99f;
 	private Rotation _lastRotation;
+	private Vector3 _nearPrev;
+	public bool DebugNear { get; set; }
+	private bool _nearValid;
+
+	/// <summary>Every ghost ship that exists.</summary>
+	public static readonly List<GhostShip> All = new();
+
+	// things lying about on the car: they are simulated in the ghost too (see Board)
+	private sealed class Boarded
+	{
+		public Item Item;
+		public Rigidbody Body;
+		public GameObject Proxy, Light;
+		public readonly List<ModelRenderer> Originals = new();
+	}
+	private readonly List<Boarded> _boarded = new();
+	private TimeUntil _itemCheck = 0f;
+
+	/// <summary>The space on and above the car where loose things belong to it (the car's own frame, inches).</summary>
+	private static readonly Vector3 BayLo = new( -250f, -110f, -60f ), BayHi = new( 250f, 110f, 330f );
 
 	private Transform Frame => WorldTransform.WithScale( 1f );
 
@@ -69,15 +89,18 @@ public sealed class GhostShip : Component
 		_ghost.WorldPosition = Origin + Vector3.Right * (Scene.GetAllComponents<GhostShip>().Count() * 8000f);
 		_ghost.Tags.Add( Tag );
 		_lastRotation = WorldRotation;
+		All.Add( this );
 	}
 
 	protected override void OnDestroy()
 	{
+		All.Remove( this );
+		ReleaseAll();
 		End( false );
 		if ( _ghost.IsValid() ) _ghost.Destroy();
 	}
 
-	protected override void OnDisabled() => End( false );
+	protected override void OnDisabled() { ReleaseAll(); End( false ); }
 
 	/// <summary>True while the local player is being simulated in the ghost.</summary>
 	public bool Carrying => _aboard;
@@ -92,6 +115,10 @@ public sealed class GhostShip : Component
 		{
 			_seen.Clear();
 
+			// the real car's own collision is for the car's physics only: nothing a person or an item does ever touches it (Collision.config)
+			foreach ( var c in Components.GetAll<Collider>( FindMode.EverythingInSelfAndDescendants ) )
+				if ( c.IsValid() ) c.GameObject.Tags.Add( "realcar" );
+
 			foreach ( var c in Components.GetAll<Collider>( FindMode.EnabledInSelfAndDescendants ) )
 				if ( c.IsValid() && !c.IsTrigger && c.Components.Get<GhostIgnore>( FindMode.EverythingInSelfAndParent ) is null ) _seen.Add( c );
 
@@ -102,7 +129,7 @@ public sealed class GhostShip : Component
 			// loose and welded items lying on or fixed to the car
 			foreach ( var item in Scene.GetAllComponents<Item>() )
 			{
-				if ( !item.IsValid() || item.IsHeld ) continue;
+				if ( !item.IsValid() || item.IsHeld || IsBoarded( item ) ) continue;
 				if ( (item.WorldPosition - WorldPosition).Length > Range + 200f ) continue;
 				foreach ( var c in item.Components.GetAll<Collider>( FindMode.EnabledInSelfAndDescendants ) )
 					if ( c.IsValid() && !c.IsTrigger ) _seen.Add( c );
@@ -192,12 +219,19 @@ public sealed class GhostShip : Component
 
 	private Vector3 CarVelocityAt( Vector3 world ) => _carBody.IsValid() ? _carBody.GetVelocityAtPoint( world ) : Vector3.Zero;
 
-	/// <summary>Is the player on the car (its own collision, not just near it)?</summary>
+	/// <summary>
+	/// Is the player standing on a surface of the car? Asked of the ghost, not the real car (people never touch that): a floor-like surface of the clone right under the feet.
+	/// A side of the car, or the ground beside it, does not count, so walking past the car never counts as getting on it.
+	/// </summary>
 	private bool StandingOnCar( PlayerController pc )
 	{
 		if ( (pc.WorldPosition - WorldPosition).LengthSquared > Range * Range ) return false;
-		var tr = Scene.Trace.Ray( pc.WorldPosition + Vector3.Up * 6f, pc.WorldPosition + Vector3.Down * 18f ).IgnoreGameObjectHierarchy( pc.GameObject ).Run();
-		return tr.Hit && tr.GameObject.IsValid() && tr.GameObject.IsDescendant( GameObject );
+
+		var frame = Frame;
+		var local = frame.PointToLocal( pc.WorldPosition );
+		var up = (frame.Rotation.Inverse * Vector3.Up).Normal;
+		var tr = Sweep( local + up * 6f, local - up * 22f );
+		return tr.Hit && !tr.StartedSolid && Vector3.Dot( tr.Normal, up ) > 0.7f;
 	}
 
 	private void Begin( PlayerController pc )
@@ -249,19 +283,238 @@ public sealed class GhostShip : Component
 		Mirror( _refresh );
 		if ( _refresh ) _refresh = 0.25f;
 
+		TickItems( Time.Delta );
+
 		var pc = LocalPlayer();
 		if ( !pc.IsValid() ) return;
+		if ( !pc.GameObject.Tags.Has( "ghostrider" ) ) pc.GameObject.Tags.Add( "ghostrider" );   // (never collides with the real car)
 
 		_session ??= Scene.GetAllComponents<CarSession>().FirstOrDefault();
-		if ( _session.IsValid() && _session.IsDriving ) { End( false ); return; }   // sitting in a seat: the seat carries you
+		if ( _session.IsValid() && _session.IsDriving ) { End( false ); _nearValid = false; return; }   // sitting in a seat: the seat carries you
 
 		if ( !_aboard )
 		{
-			if ( _sinceLeft > 0.4f && !pc.IsAirborne && StandingOnCar( pc ) ) Begin( pc );
-			if ( !_aboard ) return;
+			if ( _sinceLeft > 0.4f && StandingOnCar( pc ) ) Begin( pc );
+			if ( !_aboard ) { NearCar( pc ); return; }
 		}
 
+		_nearValid = false;
 		Simulate( pc, Time.Delta );
+	}
+
+	/// <summary>
+	/// Walking about near the car on the ground (not on it): the real car never touches you, so the ghost keeps you out of it. Where you are, measured in the car's own
+	/// frame, is swept from where you were a moment ago (in the car's frame then): the car moving into you, or you walking into the car, is the same thing, and the
+	/// answer is a plain push out along the surface, with no impulse and no bounce.
+	/// </summary>
+	private void NearCar( PlayerController pc )
+	{
+		if ( (pc.WorldPosition - WorldPosition).Length > Range + 150f ) { _nearValid = false; return; }
+
+		var frame = Frame;
+		var now = frame.PointToLocal( pc.WorldPosition );
+		if ( !_nearValid ) { _nearPrev = now; _nearValid = true; return; }
+
+		var up = (frame.Rotation.Inverse * Vector3.Up).Normal;
+		var resolved = Slide( _nearPrev, now - _nearPrev, up );
+		_nearPrev = resolved;
+
+		var push = resolved - now;
+		if ( push.LengthSquared < 0.0004f ) return;
+
+		pc.WorldPosition = frame.PointToWorld( resolved );
+		var body = pc.Components.Get<Rigidbody>( true );
+		if ( body.IsValid() )
+		{
+			var direction = frame.Rotation * push.Normal;
+			float into = Vector3.Dot( body.Velocity, direction );
+			if ( into < 0f ) body.Velocity -= direction * into;
+		}
+	}
+
+	/// <summary>Slide a move through the ghost: stop at what is in the way and glide along it; no stepping, no velocity.</summary>
+	private Vector3 Slide( Vector3 pos, Vector3 move, Vector3 up )
+	{
+		for ( int i = 0; i < 3 && move.LengthSquared > 1e-6f; i++ )
+		{
+			var tr = Sweep( pos, pos + move );
+			if ( DebugNear ) Log.Info( $"[ghost] slide {i} pos {pos} move {move} hit {tr.Hit} solid {tr.StartedSolid} frac {tr.Fraction:F3} normal {tr.Normal}" );
+			if ( tr.StartedSolid )
+			{
+				foreach ( var lift in new[] { 0.5f, 1f, 2f, 4f, 8f, 16f } )
+				{
+					if ( Sweep( pos + up * lift, pos + up * lift + up * 0.05f ).StartedSolid ) continue;
+					pos += up * lift; break;
+				}
+				break;
+			}
+			pos = tr.EndPosition - _ghost.WorldPosition;
+			if ( !tr.Hit ) break;
+			var n = tr.Normal;
+			move = move * (1f - tr.Fraction);
+			move -= n * Vector3.Dot( move, n );
+			pos += n * 0.05f;
+		}
+		return pos;
+	}
+
+	// ---- loose things on the car ---------------------------------------------------------------------------------------------------------
+
+	private bool InBay( Vector3 local ) => local.x > BayLo.x && local.x < BayHi.x && local.y > BayLo.y && local.y < BayHi.y && local.z > BayLo.z && local.z < BayHi.z;
+
+	private bool IsBoarded( Item item ) => _boarded.Any( b => b.Item == item );
+
+	private void TickItems( float dt )
+	{
+		var frame = Frame;
+		var down = (frame.Rotation.Inverse * Vector3.Down).Normal;
+
+		for ( int i = _boarded.Count - 1; i >= 0; i-- )
+		{
+			var b = _boarded[i];
+			if ( !b.Item.IsValid() || !b.Body.IsValid() ) { CleanUp( b ); _boarded.RemoveAt( i ); continue; }
+			if ( b.Item.IsHeld || b.Item.IsWelded || !InBay( b.Item.WorldPosition - _ghost.WorldPosition ) ) { Unboard( b ); _boarded.RemoveAt( i ); continue; }
+			b.Body.Velocity += down * Gravity * dt;   // gravity as the car sees it
+		}
+
+		// a joined multiplayer game keeps loose items in the world (their position is what the others see)
+		if ( Networking.IsActive || !_itemCheck ) return;
+		_itemCheck = 0.1f;
+
+		foreach ( var item in Scene.GetAllComponents<Item>().ToList() )
+		{
+			if ( !item.IsValid() || item.IsHeld || item.IsWelded || item.IsProxy || !item.Body.IsValid() || IsBoarded( item ) ) continue;
+			if ( !InBay( frame.PointToLocal( item.WorldPosition ) ) ) continue;
+			if ( (item.Body.Velocity - CarVelocityAt( item.WorldPosition )).Length > 700f ) continue;
+			Board( item );
+		}
+	}
+
+	/// <summary>The item moves into the ghost: its real body lives there (on the static clone, in the car's frame, with the car's gravity); what you see is a copy at the matching place in the world.</summary>
+	private void Board( Item item )
+	{
+		var frame = Frame;
+		var go = item.GameObject;
+		var body = item.Body;
+		var itemTransform = go.WorldTransform;
+
+		var local = frame.PointToLocal( go.WorldPosition );
+		var rotation = frame.Rotation.Inverse * go.WorldRotation;
+		var velocity = frame.Rotation.Inverse * (body.Velocity - CarVelocityAt( go.WorldPosition ));
+		var spin = frame.Rotation.Inverse * body.AngularVelocity;
+
+		// the static clone of this item's colliders (made while it was only lying near) must go before the real body arrives: they would overlap and throw it away
+		foreach ( var c in go.Components.GetAll<Collider>( FindMode.EverythingInSelfAndDescendants ).ToList() )
+		{
+			if ( !_clones.TryGetValue( c, out var clone ) ) continue;
+			if ( clone.IsValid() ) { clone.Enabled = false; clone.Destroy(); }
+			_clones.Remove( c );
+		}
+
+		var b = new Boarded { Item = item, Body = body };
+		b.Proxy = Scene.CreateObject();
+		b.Proxy.Name = "Ghost proxy of " + go.Name;
+		b.Proxy.Flags |= GameObjectFlags.NotSaved;
+
+		foreach ( var r in go.Components.GetAll<ModelRenderer>( FindMode.EverythingInSelfAndDescendants ).ToList() )
+		{
+			if ( !r.IsValid() || !r.Enabled ) continue;
+			var t = r.GameObject.WorldTransform;
+			var child = Scene.CreateObject();
+			child.SetParent( b.Proxy, false );
+			child.LocalPosition = itemTransform.PointToLocal( t.Position );
+			child.LocalRotation = itemTransform.Rotation.Inverse * t.Rotation;
+			child.LocalScale = new Vector3( t.Scale.x / MathF.Max( 0.0001f, itemTransform.Scale.x ), t.Scale.y / MathF.Max( 0.0001f, itemTransform.Scale.y ), t.Scale.z / MathF.Max( 0.0001f, itemTransform.Scale.z ) );
+			var copy = child.Components.Create<ModelRenderer>();
+			copy.Model = r.Model; copy.Tint = r.Tint; copy.MaterialOverride = r.MaterialOverride; copy.RenderType = r.RenderType;
+			r.Enabled = false;
+			b.Originals.Add( r );
+		}
+
+		// a flashlight's light goes with the picture
+		b.Light = go.Children.FirstOrDefault( c => c.Name == "Light" );
+		if ( b.Light.IsValid() ) b.Light.SetParent( b.Proxy, false );
+
+		go.SetParent( _ghost, false );
+		go.WorldPosition = _ghost.WorldPosition + local;
+		go.WorldRotation = rotation;
+		body.Velocity = velocity;
+		body.AngularVelocity = spin;
+		body.Gravity = false;
+		TagTree( go, true );
+
+		_boarded.Add( b );
+	}
+
+	/// <summary>Back into the world with the car's speed plus its own.</summary>
+	private void Unboard( Boarded b )
+	{
+		var frame = Frame;
+		var go = b.Item.GameObject;
+		var local = go.WorldPosition - _ghost.WorldPosition;
+		var rotation = go.WorldRotation;
+		var velocity = b.Body.Velocity;
+		var spin = b.Body.AngularVelocity;
+
+		go.SetParent( Scene, false );
+		go.WorldPosition = frame.PointToWorld( local );
+		go.WorldRotation = frame.Rotation * rotation;
+		b.Body.Gravity = true;
+		b.Body.Velocity = CarVelocityAt( go.WorldPosition ) + frame.Rotation * velocity;
+		b.Body.AngularVelocity = frame.Rotation * spin;
+		TagTree( go, false );
+		CleanUp( b );
+	}
+
+	private void CleanUp( Boarded b )
+	{
+		foreach ( var r in b.Originals ) if ( r.IsValid() ) r.Enabled = true;
+		if ( b.Light.IsValid() && b.Item.IsValid() ) b.Light.SetParent( b.Item.GameObject, false );
+		if ( b.Item.IsValid() ) b.Item.ProxyPosition = null;
+		if ( b.Proxy.IsValid() ) b.Proxy.Destroy();
+	}
+
+	private static void TagTree( GameObject go, bool on )
+	{
+		if ( on ) go.Tags.Add( Tag ); else go.Tags.Remove( Tag );
+		foreach ( var child in go.Children ) TagTree( child, on );
+	}
+
+	private void ReleaseAll()
+	{
+		foreach ( var b in _boarded.ToList() ) { if ( b.Item.IsValid() && b.Body.IsValid() ) Unboard( b ); else CleanUp( b ); }
+		_boarded.Clear();
+	}
+
+	/// <summary>Bring an item out of any ghost it is in (before it is picked up).</summary>
+	public static void Release( Item item )
+	{
+		foreach ( var ship in All.ToList() )
+		{
+			if ( !ship.IsValid() ) continue;
+			var b = ship._boarded.FirstOrDefault( x => x.Item == item );
+			if ( b is null ) continue;
+			ship.Unboard( b );
+			ship._boarded.Remove( b );
+		}
+	}
+
+	/// <summary>Look for an item that lives in a ghost ship, along a ray in the world. Null if there is none.</summary>
+	public static Item RayItem( Vector3 origin, Vector3 direction, float maxDistance, out float distance )
+	{
+		distance = 0f;
+		foreach ( var ship in All )
+		{
+			if ( !ship.IsValid() || ship._boarded.Count == 0 ) continue;
+			var frame = ship.Frame;
+			var o = ship._ghost.WorldPosition + frame.PointToLocal( origin );
+			var d = frame.Rotation.Inverse * direction;
+			var tr = ship.Scene.Trace.Ray( o, o + d * maxDistance ).WithTag( Tag ).Run();
+			if ( !tr.Hit || !tr.GameObject.IsValid() ) continue;
+			var item = tr.GameObject.Components.Get<Item>( FindMode.EverythingInSelfAndParent );
+			if ( item.IsValid() && ship.IsBoarded( item ) ) { distance = tr.Distance; return item; }
+		}
+		return null;
 	}
 
 	private void Simulate( PlayerController pc, float dt )
@@ -399,8 +652,17 @@ public sealed class GhostShip : Component
 
 	protected override void OnUpdate()
 	{
+		var frame = Frame;
+		foreach ( var b in _boarded )
+		{
+			if ( !b.Item.IsValid() || !b.Proxy.IsValid() ) continue;
+			b.Proxy.WorldPosition = frame.PointToWorld( b.Item.WorldPosition - _ghost.WorldPosition );
+			b.Proxy.WorldRotation = frame.Rotation * b.Item.WorldRotation;
+			b.Item.ProxyPosition = b.Proxy.WorldPosition;
+		}
+
 		// between physics steps the player stays fixed to the car (the car's own transform is interpolated each frame), so there is no shake
 		if ( !_aboard || !_player.IsValid() ) return;
-		_player.WorldPosition = Frame.PointToWorld( _localPos );
+		_player.WorldPosition = frame.PointToWorld( _localPos );
 	}
 }

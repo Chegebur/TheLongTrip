@@ -39,6 +39,13 @@ public class Item : Component
 	public GameObject WeldedTo { get; set; }
 
 	public bool IsWelded => WeldedTo.IsValid();
+	/// <summary>While the item is being simulated in a ghost ship its real object is far away; this is where it is seen in the world (null otherwise).</summary>
+	public Vector3? ProxyPosition { get; set; }
+
+	/// <summary>Where the item is in the world, as anyone sees it.</summary>
+	public Vector3 SeenPosition => ProxyPosition ?? WorldPosition;
+
+
 
 	private float _weldMass, _weldLinear, _weldAngular;
 	private bool _weldCcd;

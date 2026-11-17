@@ -345,7 +345,7 @@ public sealed class BuildSystem : Component
 		if ( player.IsValid() && (Inside( player.WorldPosition + Vector3.Up * 6f ) || Inside( player.WorldPosition + Vector3.Up * 40f ) || Inside( player.WorldPosition + Vector3.Up * 70f )) ) return true;
 
 		foreach ( var item in Scene.GetAllComponents<Item>() )
-			if ( item.IsValid() && !item.IsHeld && !item.IsWelded && Inside( item.WorldPosition ) ) return true;
+			if ( item.IsValid() && !item.IsHeld && !item.IsWelded && Inside( item.SeenPosition ) ) return true;
 		return false;
 	}
 
