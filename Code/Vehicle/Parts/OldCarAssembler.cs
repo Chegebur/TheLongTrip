@@ -345,7 +345,7 @@ public static class OldCarAssembler
 	/// </summary>
 	private static bool BuildGeneratedBodyCollision( Scene scene, GameObject body, Model shell )
 	{
-		var generated = LongTrip.World.Props.ColliderGenerator.Hollow( shell, 4.5f, 700 );
+		var generated = LongTrip.World.Props.ColliderGenerator.LowPolyHulls( shell, 1.4f, 450 ) ?? LongTrip.World.Props.ColliderGenerator.Hollow( shell, 4.5f, 700 );   // the simplified body mesh as convex hulls; boxes only if it is missing
 		if ( generated is null ) return false;
 
 		var go = scene.CreateObject();
@@ -367,7 +367,7 @@ public static class OldCarAssembler
 		bool any = false;
 		for ( int i = 0; i < geometry.Models.Length; i++ )
 		{
-			var generated = LongTrip.World.Props.ColliderGenerator.Hollow( geometry.Models[i], group.StartsWith( "seat_" ) || group is "engine" or "radiator" ? 3f : 2.5f, 160 );
+			var generated = LongTrip.World.Props.ColliderGenerator.LowPolyHulls( geometry.Models[i], 1.2f, 24 ) ?? LongTrip.World.Props.ColliderGenerator.Hollow( geometry.Models[i], group.StartsWith( "seat_" ) || group is "engine" or "radiator" ? 3f : 2.5f, 160 );
 			if ( generated is null ) continue;
 
 			var go = scene.CreateObject();

@@ -27,7 +27,7 @@ public static class ColliderGenerator
 	private static readonly Dictionary<Model, Model> _generatedOnly = new();
 	private static readonly Dictionary<Model, int> _boxes = new();
 
-	public static void Reset() { _cache.Clear(); _generatedOnly.Clear(); _hollow.Clear(); _boxes.Clear(); }
+	public static void Reset() { _cache.Clear(); _generatedOnly.Clear(); _hollow.Clear(); _lowPoly.Clear(); _lowPolyHulls.Clear(); _boxes.Clear(); }
 
 	/// <summary>How many boxes the generated collision for this model has (0 if none was needed).</summary>
 	public static int BoxCount( Model model ) => model is not null && _boxes.TryGetValue( model, out var n ) ? n : 0;
@@ -74,6 +74,188 @@ public static class ColliderGenerator
 	}
 
 	private static readonly Dictionary<(Model, int), Model> _hollow = new();
+	private static readonly Dictionary<Model, Model> _lowPoly = new();
+	private static readonly Dictionary<Model, Model> _lowPolyHulls = new();
+
+	/// <summary>
+	/// The same low-polygon shape as <see cref="LowPoly"/>, cut into <b>convex hulls</b>, which is what a moving rigid body needs (a concave triangle mesh only works on
+	/// things that never move). The mesh is split again and again along its longest direction until every piece is nearly flat or curved no more than
+	/// <paramref name="tolerance"/> (inches) off a plane; each piece becomes one thin convex hull that follows the surface, so the body is smooth, not stepped.
+	/// The cabin and boot stay open inside. Null when there is no simplified mesh for the model.
+	/// </summary>
+	public static Model LowPolyHulls( Model model, float tolerance = 1.4f, int maxHulls = 400 )
+	{
+		if ( model is null || !model.IsValid() || model.IsError ) return null;
+		if ( _lowPolyHulls.TryGetValue( model, out var cached ) ) return cached;
+
+		Model result = null;
+		try
+		{
+			var path = LowPolyPath( model );
+			if ( FileSystem.Mounted.FileExists( path ) )
+			{
+				var record = Json.Deserialize<LowPolyRecord>( FileSystem.Mounted.ReadAllText( path ) );
+				if ( record?.v is { Length: >= 9 } && record.i is { Length: >= 3 } )
+				{
+					var positions = new Vector3[record.v.Length / 3];
+					for ( int k = 0; k < positions.Length; k++ ) positions[k] = new Vector3( record.v[k * 3], record.v[k * 3 + 1], record.v[k * 3 + 2] );
+
+					var hulls = Decompose( positions, record.i, tolerance, maxHulls );
+					if ( hulls.Count > 0 )
+					{
+						var builder = Model.Builder;
+						foreach ( var points in hulls ) builder = builder.AddCollisionHull( points );
+						result = builder.Create();
+						if ( result is not null ) Log.Info( $"[collider] {model.Name}: {hulls.Count} convex hulls from {record.i.Length / 3} triangles" );
+					}
+				}
+			}
+		}
+		catch ( Exception e ) { Log.Warning( $"[collider] convex hulls for {model.Name} failed ({e.Message})" ); }
+
+		_lowPolyHulls[model] = result;
+		return result;
+	}
+
+	/// <summary>Split a triangle mesh into nearly flat pieces and return each piece's points, ready for a convex hull.</summary>
+	private static List<List<Vector3>> Decompose( Vector3[] pos, int[] idx, float tolerance, int maxHulls )
+	{
+		var pieces = new List<(List<int> Tris, float Deviation)>();
+		var all = new List<int>( idx.Length / 3 );
+		for ( int t = 0; t < idx.Length / 3; t++ ) all.Add( t );
+		pieces.Add( (all, Flatness( pos, idx, all, out _, out _ )) );
+
+		// always split the piece that is furthest from flat, until all are flat enough (or there are as many hulls as allowed)
+		while ( pieces.Count < maxHulls )
+		{
+			int worst = -1; float worstDev = tolerance;
+			for ( int i = 0; i < pieces.Count; i++ )
+				if ( pieces[i].Deviation > worstDev && pieces[i].Tris.Count > 1 ) { worst = i; worstDev = pieces[i].Deviation; }
+			if ( worst < 0 ) break;
+
+			var piece = pieces[worst].Tris;
+			Flatness( pos, idx, piece, out var centre, out var axes );
+
+			List<int> left = null, right = null;
+			for ( int a = 0; a < 3 && (left is null || left.Count == 0 || right.Count == 0); a++ )
+			{
+				left = new List<int>(); right = new List<int>();
+				foreach ( var t in piece )
+				{
+					var c = (pos[idx[t * 3]] + pos[idx[t * 3 + 1]] + pos[idx[t * 3 + 2]]) / 3f;
+					( Vector3.Dot( c - centre, axes[a] ) < 0f ? left : right ).Add( t );
+				}
+			}
+			if ( left.Count == 0 || right.Count == 0 ) { pieces[worst] = (piece, 0f); continue; }   // cannot be split further
+
+			pieces.RemoveAt( worst );
+			pieces.Add( (left, Flatness( pos, idx, left, out _, out _ )) );
+			pieces.Add( (right, Flatness( pos, idx, right, out _, out _ )) );
+		}
+
+		var hulls = new List<List<Vector3>>();
+		foreach ( var (tris, _) in pieces )
+		{
+			var points = new List<Vector3>();
+			var seen = new HashSet<int>();
+			foreach ( var t in tris ) for ( int k = 0; k < 3; k++ ) if ( seen.Add( idx[t * 3 + k] ) ) points.Add( pos[idx[t * 3 + k]] );
+			if ( points.Count < 3 ) continue;
+
+			Flatness( pos, idx, tris, out _, out var axes );
+			var normal = axes[2];
+
+			// a hull needs some thickness: the piece is pushed out a little either side of its surface (about 1.4 inches in all)
+			var thick = new List<Vector3>( points.Count * 2 );
+			foreach ( var p in points ) { thick.Add( p + normal * 0.7f ); thick.Add( p - normal * 0.7f ); }
+
+			hulls.Add( thick.Count > 48 ? Reduce( thick ) : thick );
+		}
+		return hulls;
+	}
+
+	/// <summary>
+	/// How far a set of triangles is from a flat sheet: the biggest distance of any vertex from the best-fit plane. Also gives the centre and the three principal
+	/// directions (longest first, the sheet's normal last).
+	/// </summary>
+	private static float Flatness( Vector3[] pos, int[] idx, List<int> tris, out Vector3 centre, out Vector3[] axes )
+	{
+		var verts = new List<Vector3>();
+		var seen = new HashSet<int>();
+		foreach ( var t in tris ) for ( int k = 0; k < 3; k++ ) if ( seen.Add( idx[t * 3 + k] ) ) verts.Add( pos[idx[t * 3 + k]] );
+
+		centre = Vector3.Zero;
+		foreach ( var v in verts ) centre += v;
+		centre /= MathF.Max( 1, verts.Count );
+
+		// covariance, then its eigenvectors by Jacobi rotations
+		float xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+		foreach ( var v in verts ) { var d = v - centre; xx += d.x * d.x; xy += d.x * d.y; xz += d.x * d.z; yy += d.y * d.y; yz += d.y * d.z; zz += d.z * d.z; }
+		var m = new float[3, 3] { { xx, xy, xz }, { xy, yy, yz }, { xz, yz, zz } };
+		var vec = new float[3, 3] { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } };
+		for ( int sweep = 0; sweep < 12; sweep++ )
+		{
+			for ( int p = 0; p < 2; p++ )
+			for ( int q = p + 1; q < 3; q++ )
+			{
+				if ( MathF.Abs( m[p, q] ) < 1e-9f ) continue;
+				float theta = (m[q, q] - m[p, p]) / (2f * m[p, q]);
+				float t = theta == 0f ? 1f : MathF.Sign( theta ) / (MathF.Abs( theta ) + MathF.Sqrt( theta * theta + 1f ));
+				float c = 1f / MathF.Sqrt( t * t + 1f ), s = t * c;
+				for ( int k = 0; k < 3; k++ ) { float a = m[k, p], b = m[k, q]; m[k, p] = c * a - s * b; m[k, q] = s * a + c * b; }
+				for ( int k = 0; k < 3; k++ ) { float a = m[p, k], b = m[q, k]; m[p, k] = c * a - s * b; m[q, k] = s * a + c * b; }
+				for ( int k = 0; k < 3; k++ ) { float a = vec[k, p], b = vec[k, q]; vec[k, p] = c * a - s * b; vec[k, q] = s * a + c * b; }
+			}
+		}
+
+		var order = new[] { 0, 1, 2 }.OrderByDescending( i => m[i, i] ).ToArray();
+		axes = order.Select( i => new Vector3( vec[0, i], vec[1, i], vec[2, i] ).Normal ).ToArray();
+
+		float deviation = 0f, longest = 0f;
+		foreach ( var v in verts )
+		{
+			deviation = MathF.Max( deviation, MathF.Abs( Vector3.Dot( v - centre, axes[2] ) ) );
+			longest = MathF.Max( longest, MathF.Abs( Vector3.Dot( v - centre, axes[0] ) ) );
+		}
+
+		// a tiny piece is fine however it bends
+		return longest < 3f ? 0f : deviation;
+	}
+
+	private sealed class LowPolyRecord { public float[] v { get; set; } public int[] i { get; set; } }
+
+	/// <summary>Where the simplified collision mesh of a model is kept: <c>data/collision/&lt;model path with / as _&gt;.json</c>.</summary>
+	public static string LowPolyPath( Model model ) => "data/collision/" + model.Name.Replace( '/', '_' ).Replace( ".vmdl", "" ) + ".json";
+
+	/// <summary>
+	/// A <b>low-polygon collision mesh</b> of a model: the model's own shape with far fewer triangles (made offline by decimating the model, see
+	/// <c>Assets/data/collision</c>), as one smooth triangle mesh: no boxes, no steps. Null when there is no simplified mesh for this model.
+	/// </summary>
+	public static Model LowPoly( Model model )
+	{
+		if ( model is null || !model.IsValid() || model.IsError ) return null;
+		if ( _lowPoly.TryGetValue( model, out var cached ) ) return cached;
+
+		Model result = null;
+		try
+		{
+			var path = LowPolyPath( model );
+			if ( FileSystem.Mounted.FileExists( path ) )
+			{
+				var record = Json.Deserialize<LowPolyRecord>( FileSystem.Mounted.ReadAllText( path ) );
+				if ( record?.v is { Length: >= 9 } && record.i is { Length: >= 3 } )
+				{
+					var positions = new List<Vector3>( record.v.Length / 3 );
+					for ( int k = 0; k + 2 < record.v.Length; k += 3 ) positions.Add( new Vector3( record.v[k], record.v[k + 1], record.v[k + 2] ) );
+					result = Model.Builder.AddCollisionMesh( positions, new List<int>( record.i ) ).Create();
+					if ( result is not null ) Log.Info( $"[collider] {model.Name}: low-poly mesh, {record.i.Length / 3} triangles" );
+				}
+			}
+		}
+		catch ( Exception e ) { Log.Warning( $"[collider] low-poly mesh for {model.Name} failed ({e.Message})" ); }
+
+		_lowPoly[model] = result;
+		return result;
+	}
 
 	/// <summary>
 	/// Collision for a <b>hollow</b> thing (a car body, a door, a seat): the model's triangles become a skin of small boxes, merged into as few as possible, and the
