@@ -27,7 +27,7 @@ public static class ColliderGenerator
 	private static readonly Dictionary<Model, Model> _generatedOnly = new();
 	private static readonly Dictionary<Model, int> _boxes = new();
 
-	public static void Reset() { _cache.Clear(); _generatedOnly.Clear(); _boxes.Clear(); }
+	public static void Reset() { _cache.Clear(); _generatedOnly.Clear(); _hollow.Clear(); _boxes.Clear(); }
 
 	/// <summary>How many boxes the generated collision for this model has (0 if none was needed).</summary>
 	public static int BoxCount( Model model ) => model is not null && _boxes.TryGetValue( model, out var n ) ? n : 0;
@@ -73,6 +73,47 @@ public static class ColliderGenerator
 		return box;
 	}
 
+	private static readonly Dictionary<(Model, int), Model> _hollow = new();
+
+	/// <summary>
+	/// Collision for a <b>hollow</b> thing (a car body, a door, a seat): the model's triangles become a skin of small boxes, merged into as few as possible, and the
+	/// inside is left open, so things fit in the cabin and the boot. Boxes, not a triangle mesh, because a moving body can only have convex pieces. Null if the
+	/// geometry cannot be read. <paramref name="cell"/> is the size of the boxes' building block in the model's own units; it grows until at most
+	/// <paramref name="maxBoxes"/> boxes are needed.
+	/// </summary>
+	public static Model Hollow( Model model, float cell = 4.5f, int maxBoxes = 600 )
+	{
+		if ( model is null || !model.IsValid() || model.IsError ) return null;
+		var key = (model, (int)(cell * 10f));
+		if ( _hollow.TryGetValue( key, out var cached ) ) return cached;
+
+		Model result = null;
+		try
+		{
+			var verts = model.GetVertices();
+			var indices = model.GetIndices();
+			if ( verts is not null && indices is not null && verts.Length > 0 && indices.Length >= 3 )
+			{
+				for ( int attempt = 0; attempt < 6; attempt++, cell *= 1.25f )
+				{
+					var boxes = Voxelise( verts, indices, model.Bounds, cell, false, out _, out _ );
+					if ( boxes.Count == 0 ) break;
+					if ( boxes.Count > maxBoxes && attempt < 5 ) continue;
+
+					var builder = Model.Builder;
+					foreach ( var (centre, half) in boxes ) builder = builder.AddCollisionBox( half, centre, Rotation.Identity );
+					result = builder.Create();
+					if ( result is not null ) { _boxes[result] = boxes.Count; Log.Info( $"[collider] {model.Name}: {boxes.Count} hollow boxes (cell {cell:0.#})" ); }
+					break;
+				}
+			}
+		}
+		catch ( Exception e ) { Log.Warning( $"[collider] hollow collision for {model.Name} failed ({e.Message})" ); }
+
+		_hollow[key] = result;
+		return result;
+	}
+
 	// ---- generation -----------------------------------------------------------------------------------------------------------
 
 	private static Model Generate( Model model )
@@ -87,13 +128,13 @@ public static class ColliderGenerator
 		if ( longest < 0.01f ) return null;
 
 		// does one box fit well enough? Judged on a fine grid, so the answer does not depend on how coarsely the pieces are cut below
-		Voxelise( verts, indices, bounds, longest / 28f, out float fineFill, out _ );
+		Voxelise( verts, indices, bounds, longest / 28f, true, out float fineFill, out _ );
 		if ( fineFill >= SingleBoxFill ) { _boxes[model] = 0; return null; }
 
 		// start at about 8 cells along the longest side and refine while the piece count stays small: fewer, bigger pieces are cheaper
 		for ( float cells = 14f; cells >= 3f; cells *= 0.75f )
 		{
-			var boxes = Voxelise( verts, indices, bounds, longest / cells, out float fill, out var ownerOf );
+			var boxes = Voxelise( verts, indices, bounds, longest / cells, true, out float fill, out var ownerOf );
 			if ( boxes.Count == 0 ) return null;
 			if ( boxes.Count > MaxBoxes && cells > 3.5f ) continue;
 
@@ -164,7 +205,7 @@ public static class ColliderGenerator
 	}
 
 	/// <summary>Rasterise, fill, merge. Returns box centres and half sizes (model space), and how much of the bounds is solid.</summary>
-	private static List<(Vector3 Centre, Vector3 Half)> Voxelise( Vertex[] verts, uint[] indices, BBox bounds, float cell, out float fill, out Func<Vector3, int> ownerOf )
+	private static List<(Vector3 Centre, Vector3 Half)> Voxelise( Vertex[] verts, uint[] indices, BBox bounds, float cell, bool fillInterior, out float fill, out Func<Vector3, int> ownerOf )
 	{
 		var min = bounds.Mins;
 		int nx = Math.Max( 1, (int)MathF.Ceiling( bounds.Size.x / cell ) );
@@ -203,37 +244,48 @@ public static class ColliderGenerator
 			}
 		}
 
-		// the air outside: flood from a corner of the padding through everything that is not solid
-		var outside = new bool[solid.Length];
-		var stack = new Stack<int>();
-		stack.Push( 0 );
-		outside[0] = true;
-		while ( stack.Count > 0 )
-		{
-			int cur = stack.Pop();
-			int cx = cur % gx, cy = cur / gx % gy, cz = cur / (gx * gy);
-			void Visit( int x, int y, int z )
-			{
-				if ( x < 0 || y < 0 || z < 0 || x >= gx || y >= gy || z >= gz ) return;
-				int k = I( x, y, z );
-				if ( outside[k] || solid[k] ) return;
-				outside[k] = true;
-				stack.Push( k );
-			}
-			Visit( cx + 1, cy, cz ); Visit( cx - 1, cy, cz );
-			Visit( cx, cy + 1, cz ); Visit( cx, cy - 1, cz );
-			Visit( cx, cy, cz + 1 ); Visit( cx, cy, cz - 1 );
-		}
-
-		// everything that is not outside air is solid (sealed hollows fill in)
 		int count = 0;
-		for ( int z = 1; z <= nz; z++ )
-		for ( int y = 1; y <= ny; y++ )
-		for ( int x = 1; x <= nx; x++ )
+		if ( fillInterior )
 		{
-			int k = I( x, y, z );
-			solid[k] = !outside[k];
-			if ( solid[k] ) count++;
+			// the air outside: flood from a corner of the padding through everything that is not solid
+			var outside = new bool[solid.Length];
+			var stack = new Stack<int>();
+			stack.Push( 0 );
+			outside[0] = true;
+			while ( stack.Count > 0 )
+			{
+				int cur = stack.Pop();
+				int cx = cur % gx, cy = cur / gx % gy, cz = cur / (gx * gy);
+				void Visit( int x, int y, int z )
+				{
+					if ( x < 0 || y < 0 || z < 0 || x >= gx || y >= gy || z >= gz ) return;
+					int k = I( x, y, z );
+					if ( outside[k] || solid[k] ) return;
+					outside[k] = true;
+					stack.Push( k );
+				}
+				Visit( cx + 1, cy, cz ); Visit( cx - 1, cy, cz );
+				Visit( cx, cy + 1, cz ); Visit( cx, cy - 1, cz );
+				Visit( cx, cy, cz + 1 ); Visit( cx, cy, cz - 1 );
+			}
+
+			// everything that is not outside air is solid (sealed hollows fill in)
+			for ( int z = 1; z <= nz; z++ )
+			for ( int y = 1; y <= ny; y++ )
+			for ( int x = 1; x <= nx; x++ )
+			{
+				int k = I( x, y, z );
+				solid[k] = !outside[k];
+				if ( solid[k] ) count++;
+			}
+		}
+		else
+		{
+			// hollow things (a car body, a door): only the skin is solid, the inside stays open
+			for ( int z = 1; z <= nz; z++ )
+			for ( int y = 1; y <= ny; y++ )
+			for ( int x = 1; x <= nx; x++ )
+				if ( solid[I( x, y, z )] ) count++;
 		}
 		fill = count / (float)(nx * ny * nz);
 

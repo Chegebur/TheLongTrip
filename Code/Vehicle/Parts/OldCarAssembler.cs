@@ -86,7 +86,7 @@ public static class OldCarAssembler
 			// The kit's solid belly box would fill the whole cabin; it is replaced by real, hollow collision (floor, roof, pillars,
 			// firewall, panels...) so things can be put inside the car and you can crouch into it.
 			root.Components.Get<BoxCollider>()?.Destroy();
-			BuildBaseColliders( scene, body );
+			if ( !BuildGeneratedBodyCollision( scene, body, shell ) ) BuildBaseColliders( scene, body );   // (the hand-placed slabs are the fallback)
 
 			Log.Info( "[oldcar] body assembled" );
 			return true;
@@ -313,7 +313,7 @@ public static class OldCarAssembler
 		for ( int i = 0; i < geometry.Models.Length; i++ )
 			AddRenderer( scene, container, geometry.Names[i], geometry.Models[i], -origin + seatShift );
 
-		AddGroupCollider( scene, container, group, geometry, -origin + seatShift );
+		if ( !AddGeneratedGroupCollision( scene, container, group, geometry, -origin + seatShift ) ) AddGroupCollider( scene, container, group, geometry, -origin + seatShift );
 		return container;
 	}
 
@@ -337,6 +337,50 @@ public static class OldCarAssembler
 		axis = h.Axis;
 		maxAngle = h.MaxAngle;
 		return true;
+	}
+
+	/// <summary>
+	/// The body's collision made from the shell model itself (see <see cref="LongTrip.World.Props.ColliderGenerator.Hollow"/>): the floor, roof, pillars, panels and
+	/// firewall as they really are, with the cabin and the boot open inside. False when it cannot be made (the hand-placed slabs are used then).
+	/// </summary>
+	private static bool BuildGeneratedBodyCollision( Scene scene, GameObject body, Model shell )
+	{
+		var generated = LongTrip.World.Props.ColliderGenerator.Hollow( shell, 4.5f, 700 );
+		if ( generated is null ) return false;
+
+		var go = scene.CreateObject();
+		go.Name = "Body Collision";
+		go.SetParent( body, false );
+		go.LocalScale = Vector3.One * Scale;
+		var collider = go.Components.Create<ModelCollider>();
+		collider.Model = generated;
+		collider.Friction = 0.1f;
+		return true;
+	}
+
+	/// <summary>The collision of an attached part from its own models, in the same places as its renderers. Wheels, lights and the steering wheel have none. False if it cannot be made.</summary>
+	private static bool AddGeneratedGroupCollision( Scene scene, GameObject container, string group, GroupGeometry geometry, Vector3 shift )
+	{
+		bool wanted = group.StartsWith( "door_" ) || group is "hood" or "trunk" or "engine" or "radiator" or "windshield" or "rear_window" || group.StartsWith( "seat_" ) || group.StartsWith( "bumper_" );
+		if ( !wanted ) return true;   // nothing wanted: done (not a failure)
+
+		bool any = false;
+		for ( int i = 0; i < geometry.Models.Length; i++ )
+		{
+			var generated = LongTrip.World.Props.ColliderGenerator.Hollow( geometry.Models[i], group.StartsWith( "seat_" ) || group is "engine" or "radiator" ? 3f : 2.5f, 160 );
+			if ( generated is null ) continue;
+
+			var go = scene.CreateObject();
+			go.Name = "Collision";
+			go.SetParent( container, false );
+			go.LocalPosition = shift;
+			go.LocalScale = Vector3.One * Scale;
+			var collider = go.Components.Create<ModelCollider>();
+			collider.Model = generated;
+			collider.Friction = 0.1f;
+			any = true;
+		}
+		return any;
 	}
 
 	/// <summary>
