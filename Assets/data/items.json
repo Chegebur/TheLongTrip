@@ -529,8 +529,8 @@
       "category": "Backpack",
       "description": "A small pack: four more slots.",
       "mass": 0.3,
-      "model": "models/items/sack/sack.vmdl",
-      "modelScale": 1.2,
+      "model": "models/items/pack_sack/pack_sack.vmdl",
+      "modelScale": 1.0,
       "hands": 1,
       "use": "wear",
       "backpack": 1,
@@ -1141,6 +1141,42 @@
         "minSpeed": 5,
         "cap": 2
       }
+    },
+    {
+      "id": "hiking_pack",
+      "name": "Backpack",
+      "category": "Backpack",
+      "description": "A medium pack: eight more slots.",
+      "mass": 1.2,
+      "model": "models/items/pack_hiking/pack_hiking.vmdl",
+      "modelScale": 1.0,
+      "hands": 1,
+      "use": "wear",
+      "backpack": 2,
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      },
+      "rarity": "rare"
+    },
+    {
+      "id": "camping_pack",
+      "name": "Camping backpack",
+      "category": "Backpack",
+      "description": "A large pack: sixteen more slots (two rows).",
+      "mass": 2.0,
+      "model": "models/items/pack_camping/pack_camping.vmdl",
+      "modelScale": 1.0,
+      "hands": 2,
+      "use": "wear",
+      "backpack": 3,
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      },
+      "rarity": "epic"
     }
   ],
   "loot": [
@@ -1390,6 +1426,14 @@
     {
       "id": "nails",
       "count": 3
+    },
+    {
+      "id": "hiking_pack",
+      "count": 1
+    },
+    {
+      "id": "camping_pack",
+      "count": 1
     }
   ]
 }

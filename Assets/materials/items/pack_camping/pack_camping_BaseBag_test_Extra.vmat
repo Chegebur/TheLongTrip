@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/pack_camping/pack_camping_BaseBag_test_Extra_color.png"
+	"TextureNormal"		"materials/items/pack_camping/pack_camping_BaseBag_test_Extra_normal.png"
+	"TextureRoughness"		"materials/items/pack_camping/rough.png"
+}

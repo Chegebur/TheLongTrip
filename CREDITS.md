@@ -15,6 +15,16 @@ The models were converted to OBJ with their textures resized; nothing else was c
 
 Short link for the floor: https://skfb.ly/oGKSt
 
+## Backpacks (Sketchfab)
+
+Models downloaded from Sketchfab; the authors and licences are on each page (please check them before redistributing the game).
+
+| Item | Model | Link |
+|---|---|---|
+| Sack | "Old-fashioned sack" | https://sketchfab.com/3d-models/old-fashioned-sack-c2bb74d1f3e24e849b523f22456ffee3 |
+| Backpack | "Backpack" | https://sketchfab.com/3d-models/backpack-4732564eec0542ed8b1855f381e64127 |
+| Camping backpack | "Backpack" (large camping) | https://sketchfab.com/3d-models/backpack-5655596f9efe47deb09df57a79b44e04 |
+
 ## Models and materials (CC0)
 
 Most props, items and surface materials come from [Poly Haven](https://polyhaven.com) (CC0, no attribution required).

@@ -1,0 +1,6 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/pack_sack/pack_sack_lambert1_color.png"
+	"TextureRoughness"		"materials/items/pack_sack/rough.png"
+}

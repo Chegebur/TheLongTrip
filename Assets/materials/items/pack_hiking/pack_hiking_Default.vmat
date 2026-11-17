@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/items/pack_hiking/pack_hiking_Default_color.png"
+	"TextureNormal"		"materials/items/pack_hiking/pack_hiking_Default_normal.png"
+	"TextureRoughness"		"materials/items/pack_hiking/rough.png"
+}
