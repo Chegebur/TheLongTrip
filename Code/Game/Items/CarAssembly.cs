@@ -482,7 +482,7 @@ public sealed class CarAssembly : Component
 	// ---- picking parts that are on the car ---------------------------------------------------------------
 
 	/// <summary>The nearest attached part a ray passes through (their boxes in the car's frame), for grabbing a part off the car.</summary>
-	public bool RaycastAttached( Vector3 origin, Vector3 direction, float maxDistance, out Socket hit, out float distance )
+	public bool RaycastAttached( Vector3 origin, Vector3 direction, float maxDistance, out Socket hit, out float distance, Func<Socket, bool> only = null )
 	{
 		hit = null;
 		distance = maxDistance;
@@ -490,7 +490,7 @@ public sealed class CarAssembly : Component
 
 		foreach ( var s in Sockets.Values )
 		{
-			if ( !s.IsAttached ) continue;
+			if ( !s.IsAttached || (only is not null && !only( s )) ) continue;
 
 			// test in the part's own frame, so a swung-open door can still be looked at
 			var local = s.Attached.WorldTransform;

@@ -161,6 +161,8 @@ public sealed class PlayerGrabber : Component
 
 		if ( slotKey >= 0 ) { OnSlotKey( camera, slotKey ); }
 
+		var useHint = UpdateUse( camera, assembly );
+
 		if ( _held.IsValid() )
 		{
 			_hoverItem = null;
@@ -248,11 +250,51 @@ public sealed class PlayerGrabber : Component
 			_hud.Controls = null;
 		}
 
+		if ( useHint is not null ) _hud.Hint = string.IsNullOrEmpty( _hud.Hint ) ? useHint : useHint + "     " + _hud.Hint;
 		if ( _noticeAge < 3.5f && !string.IsNullOrEmpty( _notice ) ) _hud.Hint = _notice;
 
 		UpdateHud( assembly );
 		_arms.Tick( camera, _held, Time.Delta, _held.IsValid() ? (_held.Definition?.Hands ?? 2) : 2 );
 		ApplyCarrySpeed();
+	}
+
+	/// <summary>
+	/// The Use key (E) on things in the car: look at a seat and press it to sit down (however you got there: the door can be shut, the window down), at the seat you are in to
+	/// get up, at the other seat to move over, at the handbrake lever to pull it or push it off. Driving is just sitting in the driver's seat: nothing else changes.
+	/// Returns the hint to show.
+	/// </summary>
+	private string UpdateUse( CameraComponent camera, CarAssembly assembly )
+	{
+		var session = CarSession.Instance;
+		if ( assembly is null || session is null || !session.IsValid() ) return null;
+
+		var origin = camera.WorldPosition;
+		var direction = camera.WorldRotation.Forward;
+		float reach = ReachDistance + 80f;
+
+		if ( assembly.RaycastAttached( origin, direction, reach, out var lever, out _, g => g.Group == "handbrake" ) )
+		{
+			if ( Input.Pressed( "Use" ) ) session.ToggleHandbrake();
+			return $"E   Handbrake {(assembly.HandbrakeOn ? "off" : "on")}";
+		}
+
+		string looked = assembly.RaycastAttached( origin, direction, reach, out var seat, out _, g => g.Group is "seat_l" or "seat_r" ) ? seat.Group : null;
+
+		if ( session.Sitting )
+		{
+			string now = session.SeatNow;
+			if ( looked is not null && looked != now )
+			{
+				if ( Input.Pressed( "Use" ) ) session.UseSeat( looked );
+				return "E   Move to this seat";
+			}
+			if ( Input.Pressed( "Use" ) ) session.StandUp();
+			return "E   Get up";
+		}
+
+		if ( looked is null ) return null;
+		if ( Input.Pressed( "Use" ) ) session.UseSeat( looked );
+		return "E   Sit down";
 	}
 
 	private float _baseWalk = -1f, _baseRun = -1f;

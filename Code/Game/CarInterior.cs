@@ -171,14 +171,9 @@ public sealed class CockpitCamera : Component
 		if ( MathF.Abs( look.yaw ) > 0.02f || MathF.Abs( look.pitch ) > 0.02f )
 		{
 			_lastLook = 0f;
-			_yaw = Math.Clamp( _yaw + look.yaw, -135f, 135f );
-			_pitch = Math.Clamp( _pitch + look.pitch, -60f, 50f );
-		}
-		else if ( _lastLook > RecenterDelay )
-		{
-			float decay = 1f - MathF.Exp( -2.5f * Time.Delta );
-			_yaw = MathX.Lerp( _yaw, 0f, decay );
-			_pitch = MathX.Lerp( _pitch, 0f, decay );
+			// you are a person sitting in a seat: you can turn all the way round and look straight up or straight down at your feet, and the head stays where you put it
+			_yaw = (_yaw + look.yaw + 540f) % 360f - 180f;
+			_pitch = Math.Clamp( _pitch + look.pitch, -89f, 89f );
 		}
 
 		WorldPosition = Body.WorldTransform.PointToWorld( EyeM * M );

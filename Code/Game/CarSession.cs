@@ -4,7 +4,7 @@ namespace LongTrip.Gameplay;
 
 /// <summary>
 /// Puts the base car (the vendored Vehicle Physics Kit hatch) on the road and lets the player get in and out.
-/// Walk up to it and press Use (E). While driving the world streams around the car and the chase camera is on.
+/// Driving is not a mode: look at a seat and press Use (E) to sit, at the handbrake lever to pull it, at your seat to get up. While you sit in the driver's seat the world streams around the car.
 /// </summary>
 public sealed class CarSession : Component
 {
@@ -40,8 +40,12 @@ public sealed class CarSession : Component
 	/// <summary>Driving starts in first person from the driver's seat. Press View (C) to swap to the chase camera.</summary>
 	private bool _cockpitView = true;
 
+	/// <summary>The one car session (the player's grabber asks it to sit you down, stand you up and pull the handbrake).</summary>
+	public static CarSession Instance { get; private set; }
+
 	protected override void OnStart()
 	{
+		Instance = this;
 		_world = Components.Get<WorldStreamer>() ?? Scene.GetAllComponents<WorldStreamer>().FirstOrDefault();
 		_camera = Scene.Camera;
 	}
@@ -89,41 +93,65 @@ public sealed class CarSession : Component
 		{
 			// A parked car must not react to the keys the player is pressing on foot.
 			Controller.InputOverride = new DriveInputs { Handbrake = true };
-
-			if ( _playerObject.IsValid() && Input.Pressed( "Use" ) && (_playerObject.WorldPosition - Car.WorldPosition).Length < EnterRange )
-			{
-				// you get in on whichever side of the car you are standing
-				var local = Car.WorldTransform.PointToLocal( _playerObject.WorldPosition );
-				Enter( local.y >= 0f ? "seat_l" : "seat_r" );
-			}
 		}
-		else
+		else if ( _assembly is not null )
 		{
-			// the car only does what its parts allow: no engine or radiator, no throttle; no steering wheel, no steering
-			if ( _assembly is not null )
+			// sitting in a seat is just something you are doing: the pedals and the wheel are in front of the driver's seat, the passenger just rides
+			// (the car only does what its parts allow: no engine or radiator, no throttle; no steering wheel, no steering)
+			var raw = IsPassenger ? new DriveInputs() : DriveInputs.SampleDeviceInputs();
+			Controller.InputOverride = _assembly.Filter( raw );
+
+			if ( !IsPassenger && MathF.Abs( raw.MoveForward ) > 0.1f && _assembly.WhatIsMissing() is { } problem && _lastWarning > 4f )
 			{
-				// only the driver drives; a passenger just rides (the handbrake lever still holds the car)
-				var raw = IsPassenger ? new DriveInputs() : DriveInputs.SampleDeviceInputs();
-				Controller.InputOverride = _assembly.Filter( raw );
-
-				if ( Input.Keyboard.Pressed( "x" ) ) SwitchSeat();
-
-				if ( !IsPassenger && MathF.Abs( raw.MoveForward ) > 0.1f && _assembly.WhatIsMissing() is { } problem && _lastWarning > 4f )
-				{
-					_lastWarning = 0f;
-					PlayerGrabber.Instance?.Notify( problem );
-				}
+				_lastWarning = 0f;
+				PlayerGrabber.Instance?.Notify( problem );
 			}
-
-			if ( Input.Pressed( "View" ) )
-			{
-				_cockpitView = !_cockpitView;
-				ApplyView();
-			}
-
-			if ( Input.Pressed( "Use" ) && Controller.SpeedMs < MaxExitSpeed )
-				Exit();
 		}
+	}
+
+	// ---- what the player does (the grabber calls these when the Use key is pressed at a seat or the handbrake) ----------------------------
+
+	/// <summary>The seat of the car you are looking at (null if you are not looking at one).</summary>
+	public bool Sitting => IsDriving;
+
+	public string SeatNow => IsDriving ? _seat : null;
+
+	/// <summary>Sit down in a seat, however you got there (a window down, a door shut): it only has to be fitted. Looking at the seat you are in stands you up; at the other seat moves you over.</summary>
+	public void UseSeat( string seat )
+	{
+		if ( !Car.IsValid() || !_playerObject.IsValid() ) return;
+
+		if ( IsDriving )
+		{
+			if ( seat == _seat ) { StandUp(); return; }
+			if ( _assembly is not null && !_assembly.HasSeat( seat ) ) { PlayerGrabber.Instance?.Notify( "There is no seat there" ); return; }
+			PlaceInSeat( seat );
+			if ( _cockpit.IsValid() && _interior is not null ) _cockpit.EyeM = EyeForSeat();
+			if ( seat == "seat_l" ) Car.Components.Get<CarNetwork>()?.TakeControl(); else Car.Components.Get<CarNetwork>()?.ReleaseControl();
+			PlayerGrabber.Instance?.Notify( seat == "seat_l" ? "Driver's seat" : "Passenger seat" );
+			return;
+		}
+
+		if ( (_playerObject.WorldPosition - Car.WorldPosition).Length > EnterRange + 200f ) return;
+		Enter( seat );
+	}
+
+	/// <summary>Get up out of the seat (not while the car is going fast).</summary>
+	public void StandUp()
+	{
+		if ( !IsDriving ) return;
+		if ( Controller.SpeedMs >= MaxExitSpeed ) { PlayerGrabber.Instance?.Notify( "Stop the car first" ); return; }
+		Exit();
+	}
+
+	/// <summary>Pull the handbrake lever on, or push it off.</summary>
+	public void ToggleHandbrake()
+	{
+		if ( _assembly is null ) return;
+		bool on = !_assembly.HandbrakeOn;
+		_assembly.SetHandbrake( on );
+		Sfx.Play( Sfx.Metal, Car.WorldPosition );
+		PlayerGrabber.Instance?.Notify( on ? "Handbrake on" : "Handbrake off" );
 	}
 
 	/// <summary>Switch between the driver's-eye camera and the chase camera.</summary>
@@ -293,12 +321,6 @@ public sealed class CarSession : Component
 			PlayerGrabber.Instance?.Notify( seat == "seat_l" ? "The driver's seat is missing" : "The passenger seat is missing" );
 			return;
 		}
-		if ( _assembly is not null && !_assembly.CanEnter( OldCarAssembler.DoorFor( seat ) ) )
-		{
-			PlayerGrabber.Instance?.Notify( seat == "seat_l" ? "Open the driver's door first" : "Open the passenger door first" );
-			return;
-		}
-
 		IsDriving = true;
 		if ( seat == "seat_l" ) Car.Components.Get<CarNetwork>()?.TakeControl();   // the driver simulates the car
 		if ( _assembly is not null ) _assembly.Occupied = true;
@@ -306,17 +328,6 @@ public sealed class CarSession : Component
 		Controller.InputOverride = null; // live keyboard / gamepad (filtered by the car's parts every frame)
 
 		_camera = Scene.Camera ?? _camera;
-		_chase = _camera.GameObject.GetOrAddComponent<VehicleCamera>();
-		_chase.Target = Controller;
-		if ( Controller.Definition is { } def && OldCarAssembler.IsOldCar( def ) )
-		{
-			// a bigger car needs the chase camera pulled back and raised by the same factor
-			float k = OldCarAssembler.SizeFactor;
-			_chase.Distance = 6.5f * k;
-			_chase.Height = 2.2f * k;
-			_chase.MinDistance = 3f * k;
-			_chase.MaxDistance = 14f * k;
-		}
 
 		_cockpit = _camera.GameObject.GetOrAddComponent<CockpitCamera>();
 		_cockpit.Car = Car;
@@ -325,7 +336,7 @@ public sealed class CarSession : Component
 		_cockpit.Controller = Controller;
 
 		_camera.ZNear = 4f; // the dashboard is close to the eye
-		_cockpitView = _cockpit.Body.IsValid();   // no cabin (blockout fallback) means chase view
+		_cockpitView = true;
 		ApplyView();
 
 		_world.Target = Car;
@@ -345,8 +356,6 @@ public sealed class CarSession : Component
 
 		// The driver's door swings open, the handbrake goes on, and the player steps out on the driver's side.
 		if ( _assembly is not null ) _assembly.Occupied = false;
-		_assembly?.OpenDoor( OldCarAssembler.DoorFor( _seat ) );
-		_assembly?.SetHandbrake( true );
 
 		var side = _seat == "seat_r" ? Car.WorldRotation.Right : Car.WorldRotation.Left;
 		_playerObject.SetParent( null, true );

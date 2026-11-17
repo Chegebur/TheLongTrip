@@ -1,10 +1,10 @@
 {
   "cell": 48,
   "roofCenter": [
-    -21.6,
-    10.8
+    -32.6,
+    0.0
   ],
-  "roofZ": 101.84,
+  "roofZ": 100.6,
   "roofCells": [
     3,
     3
@@ -17,14 +17,14 @@
       "name": "Wood floor",
       "model": "models/building/nordic/nordic_floor/nordic_floor.vmdl",
       "kind": "floor",
-      "rest": 0.6
+      "rest": 0.2
     },
     {
       "id": "floor_cracked",
       "name": "Cracked floor",
       "model": "models/building/nordic/nordic_floor_cracked/nordic_floor_cracked.vmdl",
       "kind": "floor",
-      "rest": 0.6
+      "rest": 0.2
     },
     {
       "id": "wall",
@@ -32,7 +32,7 @@
       "model": "models/building/nordic/nordic_wall_01/nordic_wall_01.vmdl",
       "kind": "wall",
       "height": 1,
-      "rest": 0.6
+      "rest": 0.2
     },
     {
       "id": "wall_b",
@@ -40,7 +40,7 @@
       "model": "models/building/nordic/nordic_wall_02/nordic_wall_02.vmdl",
       "kind": "wall",
       "height": 1,
-      "rest": 0.6
+      "rest": 0.2
     },
     {
       "id": "wall_low",
@@ -48,7 +48,7 @@
       "model": "models/building/nordic/nordic_wall_03/nordic_wall_03.vmdl",
       "kind": "wall",
       "height": 0.5,
-      "rest": 0.6
+      "rest": 0.2
     }
   ]
 }

@@ -38,7 +38,7 @@ public sealed class GhostShip : Component
 	private static readonly Vector3 Origin = new( 0f, 900000f, 900000f );
 	private const string Tag = "ghostship";
 	private const float Gravity = 800f;
-	private const float Height = 72f, Radius = 15f;
+	private const float Height = 72f, Radius = 11f;   // (narrower than the body's capsule: a gap between you and a wall looks like the wall is padded)
 
 	private GameObject _ghost;
 	private readonly Dictionary<Component, GameObject> _clones = new();
@@ -342,7 +342,7 @@ public sealed class GhostShip : Component
 		if ( (now - _nearPrev).Length > 120f ) { _nearPrev = now; return; }
 
 		var up = (frame.Rotation.Inverse * Vector3.Up).Normal;
-		var resolved = Slide( _nearPrev, now - _nearPrev, up );
+		var resolved = Slide( _nearPrev, now - _nearPrev, up, true );
 		_nearPrev = resolved;
 
 		var push = resolved - now;
@@ -359,24 +359,54 @@ public sealed class GhostShip : Component
 	}
 
 	/// <summary>Slide a move through the ghost: stop at what is in the way and glide along it; no stepping, no velocity.</summary>
-	private Vector3 Slide( Vector3 pos, Vector3 move, Vector3 up )
+	private Vector3 Slide( Vector3 pos, Vector3 move, Vector3 up, bool horizontal = false )
 	{
+		// walking about next to the car only ever pushes you sideways: a slanted bit of the body (a bumper, a sill, the bonnet's edge) never lifts you, tilts your way or turns it into another direction
+		if ( horizontal ) move -= up * Vector3.Dot( move, up );
+
 		for ( int i = 0; i < 3 && move.LengthSquared > 1e-6f; i++ )
 		{
 			var tr = Sweep( pos, pos + move );
 			if ( DebugNear ) Log.Info( $"[ghost] slide {i} pos {pos} move {move} hit {tr.Hit} solid {tr.StartedSolid} frac {tr.Fraction:F3} normal {tr.Normal}" );
 			if ( tr.StartedSolid )
 			{
-				foreach ( var lift in new[] { 0.5f, 1f, 2f, 4f, 8f, 16f } )
+				// inside the car (it moved into you): out by the shortest way, sideways first
+				bool freed = false;
+				if ( horizontal )
 				{
-					if ( Sweep( pos + up * lift, pos + up * lift + up * 0.05f ).StartedSolid ) continue;
-					pos += up * lift; break;
+					var sideA = Vector3.Cross( up, Vector3.Forward ).Normal; if ( sideA.LengthSquared < 0.5f ) sideA = Vector3.Cross( up, Vector3.Right ).Normal;
+					var sideB = Vector3.Cross( up, sideA ).Normal;
+					foreach ( var dist in new[] { 1f, 2f, 4f, 8f, 16f, 32f, 64f } )
+					{
+						for ( int k = 0; k < 8 && !freed; k++ )
+						{
+							float a = k * MathF.PI / 4f;
+							var push = (sideA * MathF.Cos( a ) + sideB * MathF.Sin( a )) * dist;
+							if ( Sweep( pos + push, pos + push + up * 0.05f ).StartedSolid ) continue;
+							pos += push; freed = true;
+						}
+						if ( freed ) break;
+					}
+				}
+				if ( !freed )
+				{
+					foreach ( var lift in new[] { 0.5f, 1f, 2f, 4f, 8f, 16f } )
+					{
+						if ( Sweep( pos + up * lift, pos + up * lift + up * 0.05f ).StartedSolid ) continue;
+						pos += up * lift; break;
+					}
 				}
 				break;
 			}
 			pos = tr.EndPosition - _ghost.WorldPosition;
 			if ( !tr.Hit ) break;
 			var n = tr.Normal;
+			if ( horizontal )
+			{
+				n -= up * Vector3.Dot( n, up );
+				if ( n.LengthSquared < 0.04f ) { pos += move * (1f - tr.Fraction); break; }   // (a floor or a ledge underfoot, not a wall)
+				n = n.Normal;
+			}
 			move = move * (1f - tr.Fraction);
 			move -= n * Vector3.Dot( move, n );
 			pos += n * 0.05f;
@@ -696,6 +726,16 @@ public sealed class GhostShip : Component
 			pos += n * 0.05f;
 		}
 		return pos;
+	}
+
+	protected override void OnPreRender()
+	{
+		// the character is moved by the ghost while aboard, so its own ground check finds nothing (the real car does not touch people) and its animation says "falling": say what is true
+		if ( !_aboard || !_player.IsValid() ) return;
+		var renderer = _player.Renderer;
+		if ( !renderer.IsValid() ) return;
+		renderer.Set( "b_grounded", _grounded );
+		renderer.Set( "b_jump", !_grounded && Vector3.Dot( _localVel, Frame.Rotation.Inverse * Vector3.Up ) > 40f );
 	}
 
 	protected override void OnUpdate()

@@ -356,7 +356,7 @@ public static class OldCarAssembler
 
 	private static void AddGhostMeshes( Scene scene, GameObject container, string group, GroupGeometry geometry, Vector3 shift )
 	{
-		bool wanted = group.StartsWith( "door_" ) || group is "hood" or "trunk" or "engine" or "radiator" or "windshield" or "rear_window" || group.StartsWith( "seat_" ) || group.StartsWith( "bumper_" );
+		bool wanted = group.StartsWith( "door_" ) || group is "hood" or "trunk" or "engine" or "radiator" || group.StartsWith( "seat_" ) || group.StartsWith( "bumper_" );
 		if ( !wanted ) return;
 		for ( int i = 0; i < geometry.Models.Length; i++ ) AddGhostMesh( scene, container, geometry.Models[i], shift );
 	}
@@ -429,7 +429,7 @@ public static class OldCarAssembler
 		else if ( group == "windshield" || group == "rear_window" )
 		{
 			float slant = MathF.Atan2( size.z, size.x ) * 180f / MathF.PI;   // the glass runs this steeply
-			box = new Vector3( MathF.Sqrt( size.x * size.x + size.z * size.z ), size.y, 0.05f * M * Scale );
+			box = new Vector3( MathF.Sqrt( size.x * size.x + size.z * size.z ), size.y, 2.2f * Scale );
 			rotation = Rotation.FromAxis( Vector3.Left, group == "windshield" ? slant : -slant );
 		}
 		else return;
@@ -439,7 +439,8 @@ public static class OldCarAssembler
 		go.SetParent( container, false );
 		go.LocalPosition = centre;
 		go.LocalRotation = rotation;
-		go.Components.Create<LongTrip.Gameplay.GhostIgnore>();
+		// (the windscreen and the rear window are thin slanted slabs, and the ghost ship uses them as they are)
+		if ( group != "windshield" && group != "rear_window" ) go.Components.Create<LongTrip.Gameplay.GhostIgnore>();
 		var collider = go.Components.Create<BoxCollider>();
 		collider.Scale = box;
 		collider.Friction = 0.1f;

@@ -205,9 +205,9 @@ public sealed class BuildSystem : Component
 
 		if ( _disassemble )
 		{
-			var look = Scene.Trace.Ray( cam.WorldPosition, cam.WorldPosition + cam.WorldRotation.Forward * 800f ).IgnoreGameObjectHierarchy( Scene.GetAllObjects( true ).FirstOrDefault( g => g.Components.Get<PlayerController>( true ) is not null ) ?? GameObject ).Run();
-			var target = look.Hit && look.GameObject.IsValid() ? look.GameObject.Components.Get<BuiltPiece>( FindMode.EverythingInSelfAndParent ) : null;
+			var target = PieceUnderRay( cam );
 			Mark( target );
+			if ( target.IsValid() ) Outline( target );
 			Hint = target is null ? "TAKING APART   Look at a piece     X: back to building     B: stop"
 				: $"TAKING APART   Left mouse: take apart the {target.Def.Name.ToLowerInvariant()}{(target.Nailed ? " (the nail comes back)" : "")}     X: back to building     B: stop";
 			if ( Input.Pressed( "Attack1" ) && target is not null ) TakeApart( target );
@@ -640,6 +640,41 @@ public sealed class BuildSystem : Component
 		Sfx.Play( nailed ? Sfx.Metal : Sfx.Wood, go.WorldPosition );
 	}
 
+	/// <summary>The built piece the crosshair is on, found by testing the ray against every piece's own box (not the physics: nothing else can be in the way or have the wrong tag).</summary>
+	private BuiltPiece PieceUnderRay( CameraComponent cam )
+	{
+		BuiltPiece best = null;
+		float bestT = 800f;
+		var from = cam.WorldPosition;
+		var to = from + cam.WorldRotation.Forward * 100f;
+		foreach ( var piece in _built.Values )
+		{
+			if ( !piece.IsValid() ) continue;
+			var renderer = piece.Components.Get<ModelRenderer>();
+			if ( !renderer.IsValid() || renderer.Model is null ) continue;
+
+			// in the piece's own frame; the direction is made from two points so its length is still world units
+			var t = piece.WorldTransform;
+			var o = t.PointToLocal( from );
+			var d = (t.PointToLocal( to ) - o) / 100f;
+			var box = renderer.Model.Bounds;
+			var pad = new Vector3( 2f ) / MathF.Max( 0.01f, t.Scale.x );
+			if ( RayBox( o, d, box.Mins - pad, box.Maxs + pad, out float hit ) && hit < bestT ) { bestT = hit; best = piece; }
+		}
+		return best;
+	}
+
+	/// <summary>A red box round the piece you are about to take apart.</summary>
+	private void Outline( BuiltPiece piece )
+	{
+		var renderer = piece.Components.Get<ModelRenderer>();
+		if ( !renderer.IsValid() || renderer.Model is null ) return;
+		var t = piece.WorldTransform;
+		var box = renderer.Model.Bounds;
+		var scaled = new BBox( box.Mins * t.Scale, box.Maxs * t.Scale );
+		Scene.DebugOverlay.Box( scaled, new Color( 1f, 0.25f, 0.2f, 0.95f ), 0f, t.WithScale( 1f ) );
+	}
+
 	/// <summary>Tint the piece you are about to take apart (null: none).</summary>
 	private void Mark( BuiltPiece piece )
 	{
@@ -647,7 +682,7 @@ public sealed class BuildSystem : Component
 		if ( renderer == _marked ) return;
 		if ( _marked.IsValid() ) _marked.Tint = Color.White;
 		_marked = renderer;
-		if ( _marked.IsValid() ) _marked.Tint = new Color( 1f, 0.55f, 0.5f );
+		if ( _marked.IsValid() ) _marked.Tint = new Color( 1f, 0.3f, 0.25f );
 	}
 
 	/// <summary>Take a piece apart: what it cost comes back to you (into your pockets, or onto the floor if they are full), and a nail it was held with too.</summary>
