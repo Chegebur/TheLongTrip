@@ -23,7 +23,7 @@ public static class OldCarAssembler
 
 	/// <summary>How much bigger than the model's natural size (a 4.66 m sedan) the car is built: the visuals, the physics and
 	/// every position below all follow it.</summary>
-	public const float SizeFactor = 2.2f / 1.4f;   // 1.57: the user asked for 2.2x, then "1.4 times smaller" than that
+	public const float SizeFactor = 2.2f / 1.4f * 1.08f;   // 1.57: the user asked for 2.2x, then "1.4 times smaller" than that
 
 	/// <summary>Driver's seat, in the car frame (metres, origin on the ground at the middle of the wheelbase).</summary>
 	public static readonly Vector3 PelvisM = new Vector3( -0.09f, 0.333f, 0.56f ) * SizeFactor;
@@ -86,7 +86,8 @@ public static class OldCarAssembler
 			// The kit's solid belly box would fill the whole cabin; it is replaced by real, hollow collision (floor, roof, pillars,
 			// firewall, panels...) so things can be put inside the car and you can crouch into it.
 			root.Components.Get<BoxCollider>()?.Destroy();
-			if ( !BuildGeneratedBodyCollision( scene, body, shell ) ) BuildBaseColliders( scene, body );   // (the hand-placed slabs are the fallback)
+			BuildBaseColliders( scene, body );
+			AddGhostMesh( scene, body, shell, Vector3.Zero );   // what people walk on in the ghost ship
 
 			Log.Info( "[oldcar] body assembled" );
 			return true;
@@ -313,7 +314,8 @@ public static class OldCarAssembler
 		for ( int i = 0; i < geometry.Models.Length; i++ )
 			AddRenderer( scene, container, geometry.Names[i], geometry.Models[i], -origin + seatShift );
 
-		if ( !AddGeneratedGroupCollision( scene, container, group, geometry, -origin + seatShift ) ) AddGroupCollider( scene, container, group, geometry, -origin + seatShift );
+		AddGroupCollider( scene, container, group, geometry, -origin + seatShift );
+		AddGhostMeshes( scene, container, group, geometry, -origin + seatShift );
 		return container;
 	}
 
@@ -337,6 +339,26 @@ public static class OldCarAssembler
 		axis = h.Axis;
 		maxAngle = h.MaxAngle;
 		return true;
+	}
+
+	/// <summary>The exact (low-polygon) mesh of a model, for the ghost ship: people walk on this. It does not take part in the real physics.</summary>
+	private static void AddGhostMesh( Scene scene, GameObject parent, Model model, Vector3 localPosition )
+	{
+		var mesh = LongTrip.World.Props.ColliderGenerator.LowPoly( model );
+		if ( mesh is null ) return;
+		var go = scene.CreateObject();
+		go.Name = "Ghost mesh";
+		go.SetParent( parent, false );
+		go.LocalPosition = localPosition;
+		go.LocalScale = Vector3.One * Scale;
+		go.Components.Create<LongTrip.Gameplay.GhostMesh>().Mesh = mesh;
+	}
+
+	private static void AddGhostMeshes( Scene scene, GameObject container, string group, GroupGeometry geometry, Vector3 shift )
+	{
+		bool wanted = group.StartsWith( "door_" ) || group is "hood" or "trunk" or "engine" or "radiator" or "windshield" or "rear_window" || group.StartsWith( "seat_" ) || group.StartsWith( "bumper_" );
+		if ( !wanted ) return;
+		for ( int i = 0; i < geometry.Models.Length; i++ ) AddGhostMesh( scene, container, geometry.Models[i], shift );
 	}
 
 	/// <summary>
@@ -417,6 +439,7 @@ public static class OldCarAssembler
 		go.SetParent( container, false );
 		go.LocalPosition = centre;
 		go.LocalRotation = rotation;
+		go.Components.Create<LongTrip.Gameplay.GhostIgnore>();
 		var collider = go.Components.Create<BoxCollider>();
 		collider.Scale = box;
 		collider.Friction = 0.1f;
@@ -454,6 +477,7 @@ public static class OldCarAssembler
 		var parent = scene.CreateObject();
 		parent.Name = "Body Collision";
 		parent.SetParent( body, false );
+		parent.Components.Create<LongTrip.Gameplay.GhostIgnore>();
 
 		float k = M * Scale;
 		foreach ( var s in BaseSlabs )

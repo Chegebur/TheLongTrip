@@ -1,77 +1,53 @@
 {
-  "roofLevel": 4,
-  "roofX": [
-    4,
-    9
+  "cell": 40,
+  "roofCenter": [
+    -21.6,
+    10.8
   ],
-  "roofY": [
-    1,
-    6
+  "roofZ": 101.84,
+  "roofCells": [
+    3,
+    3
   ],
+  "margin": 3,
+  "levels": 4,
   "pieces": [
     {
       "id": "floor",
       "name": "Wood floor",
       "model": "models/building/nordic/nordic_floor/nordic_floor.vmdl",
-      "cells": [
-        2,
-        2,
-        1
-      ],
-      "layer": "floor",
-      "fit": "xy",
+      "kind": "floor",
       "rest": 0.6
     },
     {
       "id": "floor_cracked",
       "name": "Cracked floor",
       "model": "models/building/nordic/nordic_floor_cracked/nordic_floor_cracked.vmdl",
-      "cells": [
-        2,
-        2,
-        1
-      ],
-      "layer": "floor",
-      "fit": "xy",
+      "kind": "floor",
       "rest": 0.6
     },
     {
       "id": "wall",
       "name": "Wall",
       "model": "models/building/nordic/nordic_wall_01/nordic_wall_01.vmdl",
-      "cells": [
-        1,
-        2,
-        3
-      ],
-      "layer": "wall",
-      "fit": "yz",
+      "kind": "wall",
+      "height": 1,
       "rest": 0.6
     },
     {
-      "id": "wall_narrow",
-      "name": "Narrow wall",
+      "id": "wall_b",
+      "name": "Wall (planks)",
       "model": "models/building/nordic/nordic_wall_02/nordic_wall_02.vmdl",
-      "cells": [
-        1,
-        1,
-        3
-      ],
-      "layer": "wall",
-      "fit": "yz",
+      "kind": "wall",
+      "height": 1,
       "rest": 0.6
     },
     {
       "id": "wall_low",
       "name": "Low wall",
       "model": "models/building/nordic/nordic_wall_03/nordic_wall_03.vmdl",
-      "cells": [
-        1,
-        2,
-        2
-      ],
-      "layer": "wall",
-      "fit": "y",
+      "kind": "wall",
+      "height": 0.5,
       "rest": 0.6
     }
   ]

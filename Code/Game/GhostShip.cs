@@ -14,6 +14,15 @@ namespace LongTrip.Gameplay;
 /// </para>
 /// Goes on the car root.
 /// </summary>
+/// <summary>Marks a piece of the car's collision that the ghost ship must not clone (the exact <see cref="GhostMesh"/> stands in for it).</summary>
+public sealed class GhostIgnore : Component { }
+
+/// <summary>An exact (low-polygon, concave) collision mesh for the ghost ship: people on the car walk on this instead of the car's simple physics collision.</summary>
+public sealed class GhostMesh : Component
+{
+	public Model Mesh { get; set; }
+}
+
 public sealed class GhostShip : Component
 {
 	/// <summary>How far from the car's centre things count as on it (world units).</summary>
@@ -84,7 +93,11 @@ public sealed class GhostShip : Component
 			_seen.Clear();
 
 			foreach ( var c in Components.GetAll<Collider>( FindMode.EnabledInSelfAndDescendants ) )
-				if ( c.IsValid() && !c.IsTrigger ) _seen.Add( c );
+				if ( c.IsValid() && !c.IsTrigger && c.Components.Get<GhostIgnore>( FindMode.EverythingInSelfAndParent ) is null ) _seen.Add( c );
+
+			// the exact meshes of the body and its parts
+			foreach ( var gm in Components.GetAll<GhostMesh>( FindMode.EnabledInSelfAndDescendants ) )
+				if ( gm.IsValid() && gm.Mesh is not null ) _seen.Add( gm );
 
 			// loose and welded items lying on or fixed to the car
 			foreach ( var item in Scene.GetAllComponents<Item>() )
@@ -153,6 +166,10 @@ public sealed class GhostShip : Component
 			case ModelCollider model:
 			{
 				var c = go.AddComponent<ModelCollider>(); c.Model = model.Model; break;
+			}
+			case GhostMesh mesh:
+			{
+				var c = go.AddComponent<ModelCollider>(); c.Model = mesh.Mesh; break;
 			}
 			case PlayerController:
 			{
@@ -306,6 +323,7 @@ public sealed class GhostShip : Component
 			}
 		}
 
+		if ( _localVel.Length > 1500f ) _localVel = _localVel.Normal * 1500f;
 		_airTime = _grounded ? 0f : _airTime + dt;
 		_localPos = Move( _localPos, dt, up );
 
@@ -333,7 +351,18 @@ public sealed class GhostShip : Component
 		for ( int i = 0; i < 4 && move.LengthSquared > 1e-6f; i++ )
 		{
 			var tr = Sweep( pos, pos + move );
-			if ( tr.StartedSolid ) { pos += up * 1.5f; break; }
+			if ( tr.StartedSolid )
+			{
+				// already inside something (a part just moved into us): the smallest push up that gets us out; if there is none, stay put
+				bool freed = false;
+				foreach ( var lift in new[] { 0.5f, 1f, 2f, 4f, 8f } )
+				{
+					if ( Sweep( pos + up * lift, pos + up * lift + up * 0.05f ).StartedSolid ) continue;
+					pos += up * lift; freed = true; break;
+				}
+				if ( !freed ) _localVel = Vector3.Zero;
+				break;
+			}
 
 			pos = tr.EndPosition - _ghost.WorldPosition;
 			if ( !tr.Hit ) break;
