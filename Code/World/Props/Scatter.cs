@@ -33,6 +33,9 @@ public sealed class ScatterDefinition
 	/// <summary>A separate lid: the model that sits on the body (same origin), the one that lies flat beside it, and how often it has been knocked off.</summary>
 	public string LidOn, LidOff;
 	public float LidOffChance;
+
+	/// <summary>Set for lamps: they shine at night (see <see cref="StreetLamp"/>).</summary>
+	public LampSpec Light;
 }
 
 public readonly record struct ScatterInstance( ScatterDefinition Def, Vector3 Position, float Yaw, float Scale, float Lean );
@@ -60,7 +63,10 @@ public static class ScatterLibrary
 		public string lidOn { get; set; }
 		public string lidOff { get; set; }
 		public float lidOffChance { get; set; }
+		public LampRecord light { get; set; }
 	}
+
+	private sealed class LampRecord { public float[] color { get; set; } public float range { get; set; } = 1500f; public float angle { get; set; } = 75f; public float intensity { get; set; } = 4f; public float dead { get; set; } = 0.12f; public float flicker { get; set; } = 0.18f; }
 
 	private sealed class ScatterFile
 	{
@@ -100,6 +106,7 @@ public static class ScatterLibrary
 					MinScale = r.scale is { Length: > 0 } ? r.scale[0] : 1f,
 					MaxScale = r.scale is { Length: > 1 } ? r.scale[1] : (r.scale is { Length: 1 } ? r.scale[0] : 1f),
 					Collide = (r.collide ?? "box").ToLowerInvariant(), Sink = r.sink, Lean = r.lean, Vegetation = r.vegetation, LidOn = r.lidOn, LidOff = r.lidOff, LidOffChance = r.lidOffChance,
+						Light = r.light is null ? null : new LampSpec { Color = r.light.color is { Length: >= 3 } ? new Color( r.light.color[0], r.light.color[1], r.light.color[2] ) : new Color( 1f, 0.80f, 0.52f ), Range = r.light.range, Angle = r.light.angle, Intensity = r.light.intensity, Dead = r.light.dead, Flicker = r.light.flicker },
 				} );
 			}
 			Log.Info( $"[scatter] {_all.Count} prop kinds loaded" );

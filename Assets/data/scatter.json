@@ -1,6 +1,6 @@
 {
   "wildPerChunk": 60,
-  "roadsidePerChunk": 0,
+  "roadsidePerChunk": 3,
   "civPerHouse": 4,
   "props": [
     {
@@ -124,7 +124,19 @@
         1.6,
         1.7
       ],
-      "collide": "upright"
+      "collide": "upright",
+      "light": {
+        "color": [
+          1,
+          0.8,
+          0.52
+        ],
+        "range": 1500,
+        "angle": 78,
+        "intensity": 4,
+        "dead": 0.12,
+        "flicker": 0.18
+      }
     },
     {
       "id": "fire_hydrant",
@@ -272,6 +284,31 @@
         2.8
       ],
       "collide": "none"
+    },
+    {
+      "id": "lamp_medellin",
+      "model": "models/world/props/lamp_medellin/lamp_medellin.vmdl",
+      "zone": "roadside",
+      "weight": 1,
+      "scale": [
+        1.0,
+        1.08
+      ],
+      "lean": 16,
+      "sink": 0.0,
+      "collide": "box",
+      "light": {
+        "color": [
+          1,
+          0.8,
+          0.52
+        ],
+        "range": 1500,
+        "angle": 78,
+        "intensity": 4,
+        "dead": 0.12,
+        "flicker": 0.18
+      }
     }
   ]
 }

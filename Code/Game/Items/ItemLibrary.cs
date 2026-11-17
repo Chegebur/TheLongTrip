@@ -25,6 +25,9 @@ public enum UseKind
 
 	/// <summary>Armor or a backpack: left mouse puts it on.</summary>
 	Wear,
+
+	/// <summary>A flashlight or lantern: left mouse switches it on and off. The battery is the item's Amount.</summary>
+	Light,
 }
 
 /// <summary>
@@ -155,6 +158,9 @@ public sealed class ItemDefinition
 	public float Health;
 
 	public ExplosionConfig Explosion;
+
+	/// <summary>Set for flashlights and lanterns: how they shine and how long the battery lasts.</summary>
+	public LightConfig Light;
 }
 
 /// <summary>
@@ -210,6 +216,7 @@ public static class ItemLibrary
 	private sealed class ExplosionRecord { public float radius { get; set; } = 8f; public float force { get; set; } = 14f; public float damage { get; set; } = 45f; }
 	private sealed class MeleeRecord { public float swingSeconds { get; set; } = 0.3f; public float startAngle { get; set; } = -50f; public float endAngle { get; set; } = 55f; public float cooldown { get; set; } = 0.5f; }
 	private sealed class ContainerRecord { public float capacity { get; set; } = 50f; public string liquid { get; set; } public float fill { get; set; } }
+	private sealed class LightRecord { public string type { get; set; } = "spot"; public float[] color { get; set; } public float range { get; set; } = 1600f; public float angle { get; set; } = 34f; public float intensity { get; set; } = 3f; public float minutes { get; set; } = 10f; public float[] offset { get; set; } }
 	private sealed class LootRecord { public string id { get; set; } public int count { get; set; } = 1; public string liquid { get; set; } public float fill { get; set; } = -1f; public float fillMax { get; set; } = -1f; }
 
 	private sealed class ItemRecord
@@ -243,6 +250,7 @@ public static class ItemLibrary
 		public float health { get; set; }
 		public ContainerRecord container { get; set; }
 		public ExplosionRecord explosion { get; set; }
+		public LightRecord light { get; set; }
 	}
 
 	private sealed class ItemFile
@@ -304,6 +312,7 @@ public static class ItemLibrary
 			if ( r.melee is { } m ) def.Melee = new MeleeConfig { SwingSeconds = m.swingSeconds, StartAngle = m.startAngle, EndAngle = m.endAngle, Cooldown = m.cooldown };
 			if ( r.explosion is { } x ) def.Explosion = new ExplosionConfig { Radius = x.radius, Force = x.force, Damage = x.damage };
 			if ( r.container is { } k ) def.Container = new ContainerConfig { Capacity = k.capacity, Liquid = k.liquid, StartFill = k.fill };
+			if ( r.light is { } lt ) def.Light = new LightConfig { Type = (lt.type ?? "spot").ToLowerInvariant(), Color = lt.color is { Length: >= 3 } ? new Color( lt.color[0], lt.color[1], lt.color[2] ) : new Color( 1f, 0.95f, 0.82f ), Range = lt.range, Angle = lt.angle, Intensity = lt.intensity, Minutes = lt.minutes, Offset = lt.offset is { Length: 3 } ? new Vector3( lt.offset[0], lt.offset[1], lt.offset[2] ) : Vector3.Zero };
 			if ( def.Use == UseKind.Melee && def.Melee is null ) def.Melee = new MeleeConfig();
 
 			_definitions[def.Id] = def;
@@ -322,6 +331,7 @@ public static class ItemLibrary
 		"refuel" => UseKind.Refuel,
 		"melee" => UseKind.Melee,
 		"wear" => UseKind.Wear,
+		"light" => UseKind.Light,
 		_ => UseKind.None,
 	};
 
@@ -405,6 +415,8 @@ public static class ItemLibrary
 		else item.Amount = Math.Clamp( amount, 0f, 1f );
 
 		// everything hurts a little when it hits hard enough; weapons hurt a lot
+		if ( def.Light is { } lightConfig ) go.Components.Create<ItemLight>().Setup( item, lightConfig );
+
 		var impact = go.Components.Create<ImpactDamage>();
 		impact.Config = def.Damage;
 		impact.Item = item;
@@ -445,6 +457,10 @@ public static class ItemLibrary
 				"can" => Can(),
 				"fuel_can" => FuelCan(),
 				"nails" => Nails(),
+				"flashlight" => Flashlight( false ),
+				"power_flashlight" => Flashlight( true ),
+				"lantern" => Lantern(),
+				"battery" => Battery(),
 				_ => null,
 			};
 		}
@@ -476,6 +492,53 @@ public static class ItemLibrary
 		b.Cylinder( Metal, Vector3.Zero, 1.5f, 4.5f, 18, Rotation.Identity, PropMeshBuilder.Flat( 186, 188, 194, 0.3f ) );
 		b.Cylinder( Flat, Vector3.Zero, 1.53f, 2.8f, 18, Rotation.Identity, PropMeshBuilder.Flat( 176, 42, 36, 0.7f ) );   // label
 		return b.Build( "item_can" );
+	}
+
+	// flashlights are built lying along +X (the beam goes out of the +X end); cylinders are built along Z, so they are turned onto X
+	private static Model Flashlight( bool power )
+	{
+		var b = new PropMeshBuilder();
+		var along = Rotation.From( 90f, 0f, 0f );   // Z onto X
+		var steel = PropMeshBuilder.Flat( 70, 72, 78, 0.3f );
+		var dark = PropMeshBuilder.Flat( 34, 35, 38, 0.6f );
+		var lens = PropMeshBuilder.Flat( 250, 244, 200, 0.05f );
+		if ( !power )
+		{
+			b.Cylinder( Metal, new Vector3( -0.7f, 0, 0 ), 1.05f, 5.4f, 16, along, dark );               // body
+			b.Cylinder( Metal, new Vector3( 2.3f, 0, 0 ), 1.55f, 1.8f, 18, along, steel );                // head
+			b.Cylinder( Flat, new Vector3( 3.25f, 0, 0 ), 1.32f, 0.15f, 18, along, lens );                // lens
+			b.Cylinder( Metal, new Vector3( -3.5f, 0, 0 ), 0.95f, 0.45f, 14, along, steel );              // tail cap
+			b.Box( Flat, new Vector3( 0.3f, 0, 1.15f ), new Vector3( 0.9f, 0.55f, 0.4f ), 0f, true, 1f, PropMeshBuilder.Flat( 220, 90, 40, 0.5f ) );   // switch
+			return b.Build( "item_flashlight" );
+		}
+
+		b.Cylinder( Metal, new Vector3( -1.2f, 0, 0 ), 1.5f, 7.6f, 18, along, PropMeshBuilder.Flat( 214, 112, 28, 0.55f ) );   // rubber body
+		for ( int i = 0; i < 4; i++ ) b.Cylinder( Metal, new Vector3( -3.3f + i * 1.3f, 0, 0 ), 1.58f, 0.35f, 18, along, dark );   // grip rings
+		b.Cylinder( Metal, new Vector3( 3.5f, 0, 0 ), 2.5f, 2.6f, 20, along, steel );                  // big head
+		b.Cylinder( Flat, new Vector3( 4.85f, 0, 0 ), 2.15f, 0.2f, 20, along, PropMeshBuilder.Flat( 232, 244, 255, 0.05f ) );   // lens
+		b.Cylinder( Metal, new Vector3( -5.2f, 0, 0 ), 1.4f, 0.6f, 16, along, steel );
+		b.Box( Flat, new Vector3( 0.2f, 0, 1.65f ), new Vector3( 1.1f, 0.7f, 0.5f ), 0f, true, 1f, PropMeshBuilder.Flat( 40, 200, 90, 0.5f ) );   // switch
+		return b.Build( "item_power_flashlight" );
+	}
+
+	private static Model Lantern()
+	{
+		var b = new PropMeshBuilder();
+		var dark = PropMeshBuilder.Flat( 42, 42, 46, 0.45f );
+		b.Cylinder( Metal, new Vector3( 0, 0, -3.9f ), 2.3f, 1.2f, 18, Rotation.Identity, dark );                                  // base
+		b.Cylinder( Flat, new Vector3( 0, 0, -0.3f ), 1.8f, 6f, 18, Rotation.Identity, PropMeshBuilder.Flat( 255, 214, 140, 0.15f ) );   // glass
+		b.Cylinder( Metal, new Vector3( 0, 0, 3.2f ), 2.2f, 0.9f, 18, Rotation.Identity, dark );                                   // top
+		b.Ring( Metal, new Vector3( 0, 0, 4.4f ), 1.5f, 0.14f, 18, 6, Rotation.From( 0f, 0f, 90f ), PropMeshBuilder.Flat( 120, 120, 128, 0.3f ) );   // handle
+		return b.Build( "item_lantern" );
+	}
+
+	private static Model Battery()
+	{
+		var b = new PropMeshBuilder();
+		b.Cylinder( Metal, Vector3.Zero, 0.9f, 3.8f, 14, Rotation.Identity, PropMeshBuilder.Flat( 200, 120, 40, 0.4f ) );
+		b.Cylinder( Metal, new Vector3( 0, 0, 2.0f ), 0.45f, 0.4f, 12, Rotation.Identity, PropMeshBuilder.Flat( 200, 202, 208, 0.25f ) );
+		b.Cylinder( Flat, new Vector3( 0, 0, -0.4f ), 0.93f, 1.1f, 14, Rotation.Identity, PropMeshBuilder.Flat( 30, 30, 34, 0.7f ) );
+		return b.Build( "item_battery" );
 	}
 
 	private static Model Nails()

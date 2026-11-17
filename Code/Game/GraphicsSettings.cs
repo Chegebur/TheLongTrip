@@ -17,7 +17,7 @@ public sealed class GraphicsSettings : Component
 
 	// ---- time of day ---------------------------------------------------------------------------------------------------------------
 
-	[Property, Group( "Time of day" ), Range( 0f, 24f ), Title( "Hour (0-24, 12 = noon)" )] public float Hour { get; set; } = 9f;
+	[Property, Group( "Time of day" ), Range( 0f, 24f ), Title( "Hour (0-24, 12 = noon)" )] public float Hour { get; set; } = 8f;
 	[Property, Group( "Time of day" ), Range( 0.5f, 120f ), Title( "Minutes for a whole day" )] public float DayLengthMinutes { get; set; } = 24f;
 	[Property, Group( "Time of day" ), Title( "Freeze time" )] public bool FreezeTime { get; set; }
 	[Property, Group( "Time of day" ), Range( 0f, 3f ), Title( "Daylight: sunshine" )] public float DaySun { get; set; } = 1.3f;
@@ -39,6 +39,24 @@ public sealed class GraphicsSettings : Component
 	[Property, Group( "Light" ), Range( 0f, 4f ), Title( "Sky brightness" )] public float SkyBrightness { get; set; } = 1f;
 	[Property, Group( "Light" ), Title( "Sky tint" )] public Color SkyTint { get; set; } = Color.White;
 	[Property, Group( "Light" ), Range( 0f, 5f ), Title( "Other lights (headlights, lamps, flashlight)" )] public float OtherLights { get; set; } = 1f;
+
+	// ---- shadows -----------------------------------------------------------------------------------------------------------------
+
+	[Property, Group( "Shadows" ), Title( "Lights in view cast shadows" )] public bool ViewShadows { get; set; } = true;
+	[Property, Group( "Shadows" ), Range( 0f, 90f ), Title( "Extra degrees outside the view" )] public float ShadowMargin { get; set; } = 35f;
+	[Property, Group( "Shadows" ), Range( 1, 64 ), Title( "Most lights with shadows at once" )] public int MaxShadowedLights { get; set; } = 16;
+	[Property, Group( "Shadows" ), Range( 500f, 30000f ), Title( "Shadow distance" )] public float ShadowDistance { get; set; } = 7000f;
+
+	/// <summary>How dark it is, 0 (day) to 1 (night): what street lamps and house lights go by.</summary>
+	public static float Darkness
+	{
+		get
+		{
+			if ( Instance is null ) return 0f;
+			float t = Math.Clamp( (Instance.SunElevation + 6f) / 14f, 0f, 1f );
+			return 1f - t * t * (3f - 2f * t);
+		}
+	}
 
 	// ---- fog ---------------------------------------------------------------------------------------------------------------------
 
@@ -75,7 +93,7 @@ public sealed class GraphicsSettings : Component
 	[Button( "Reset to defaults" )]
 	public void ResetToDefaults()
 	{
-		Hour = 9f; DayLengthMinutes = 24f; FreezeTime = false; DaySun = 1.3f; DayVibrance = 1.2f; SunsetGlow = 0.8f; NightBrightness = 1f; NightFog = 0.65f; NightDrain = 0.45f;
+		Hour = 8f; DayLengthMinutes = 24f; FreezeTime = false; DaySun = 1.3f; DayVibrance = 1.2f; SunsetGlow = 0.8f; NightBrightness = 1f; NightFog = 0.65f; NightDrain = 0.45f;
 		SunBrightness = AmbientBrightness = SkyBrightness = OtherLights = 1f;
 		SunTint = AmbientTint = SkyTint = FogTint = Color.White;
 		FogEnabled = true; FogDistance = FogStart = FogFalloff = 1f;
@@ -90,6 +108,39 @@ public sealed class GraphicsSettings : Component
 	protected override void OnDestroy() { if ( Instance == this ) Instance = null; }
 
 	private readonly Dictionary<Light, Color> _lightBase = new();
+	private TimeUntil _nextShadowUpdate;
+
+	/// <summary>
+	/// Lights in front of you cast shadows, and so do those a good way outside the view (a lamp just behind the edge of the screen throws shadows into it,
+	/// and turning must not make them pop). Everything else goes without: shadows are what costs. At most <see cref="MaxShadowedLights"/>, nearest first.
+	/// </summary>
+	private void UpdateShadows( CameraComponent cam )
+	{
+		if ( !ViewShadows || !_nextShadowUpdate ) return;
+		_nextShadowUpdate = 0.15f;
+
+		var forward = cam.WorldRotation.Forward;
+		float limit = cam.FieldOfView * 0.6f + ShadowMargin;   // a little more than half the view, for the corners
+		var candidates = new List<(Light Light, float Distance, bool InView)>();
+
+		foreach ( var l in Scene.GetAllComponents<Light>() )
+		{
+			if ( l is DirectionalLight || !l.IsValid() ) continue;
+			var to = l.WorldPosition - cam.WorldPosition;
+			float d = to.Length;
+			bool inView = d < 400f || (d < ShadowDistance && MathF.Acos( Math.Clamp( Vector3.Dot( forward, to / MathF.Max( d, 0.01f ) ), -1f, 1f ) ) * (180f / MathF.PI) < limit);
+			candidates.Add( (l, d, inView) );
+		}
+
+		candidates.Sort( ( a, b ) => a.Distance.CompareTo( b.Distance ) );
+		int shadowed = 0;
+		foreach ( var c in candidates )
+		{
+			bool on = c.InView && shadowed < MaxShadowedLights;
+			if ( on ) shadowed++;
+			if ( c.Light.Shadows != on ) c.Light.Shadows = on;
+		}
+	}
 
 	protected override void OnUpdate()
 	{
@@ -125,6 +176,7 @@ public sealed class GraphicsSettings : Component
 			if ( !_lightBase.TryGetValue( l, out var original ) ) _lightBase[l] = original = l.LightColor;
 			l.LightColor = original * OtherLights;
 		}
+		if ( cam.IsValid() ) UpdateShadows( cam );
 		if ( _lightBase.Count > 256 ) _lightBase.Where( kv => !kv.Key.IsValid() ).Select( kv => kv.Key ).ToList().ForEach( k => _lightBase.Remove( k ) );
 	}
 }

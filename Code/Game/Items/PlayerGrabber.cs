@@ -465,6 +465,7 @@ public sealed class PlayerGrabber : Component
 		UseKind.Refuel => "pour fuel into the car",
 		UseKind.Melee => "swing",
 		UseKind.Wear => "put on",
+		UseKind.Light => "switch on / off",
 		_ => "use",
 	};
 
@@ -600,6 +601,23 @@ public sealed class PlayerGrabber : Component
 			Notify( def.BackpackTier > 0 ? $"You put on the {def.Name.ToLowerInvariant()}" : $"You wear the {def.Name.ToLowerInvariant()}" );
 			Release( false );
 			if ( worn.IsValid() ) worn.GameObject.Destroy();
+			return true;
+		}
+
+		// a flashlight or lantern is switched on and off; a flat battery is swapped for a fresh one from your pockets
+		if ( def.Use == UseKind.Light )
+		{
+			if ( !_held.LightOn )
+			{
+				if ( _held.Amount <= 0.02f )
+				{
+					if ( _inventory is not null && _inventory.Consume( "battery", 1 ) ) { _held.Amount = 1f; Notify( "You put in a fresh battery" ); }
+					else { Notify( "The battery is flat and you have no spare" ); Sfx.Play( Sfx.Deny ); return true; }
+				}
+				_held.LightOn = true;
+			}
+			else _held.LightOn = false;
+			Sfx.Play( Sfx.Press );
 			return true;
 		}
 

@@ -3,12 +3,14 @@ namespace LongTrip.Gameplay;
 /// <summary>The numbers the HUD and the inventory show about where and when you are: the clock, your coordinates, the mile along the road and your heading.</summary>
 public static class WorldInfo
 {
-	/// <summary>The game clock: it starts at 08:00, and a game minute passes every real second (a day is 24 real minutes).</summary>
+	/// <summary>The game clock: the time of day from GraphicsSettings (it starts at 08:00; a day is 24 real minutes unless changed there).</summary>
 	public static string Clock
 	{
 		get
 		{
-			float minutes = 8f * 60f + Time.Now;
+			// the clock shows the same time of day the sky does (GraphicsSettings drives both)
+			var graphics = GraphicsSettings.Instance;
+			float minutes = graphics is not null ? graphics.Hour * 60f : 8f * 60f + Time.Now;
 			int m = (int)(minutes % 1440f);
 			return $"{m / 60:00}:{m % 60:00}";
 		}

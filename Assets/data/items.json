@@ -1177,6 +1177,152 @@
         "cap": 3
       },
       "rarity": "epic"
+    },
+    {
+      "id": "flashlight",
+      "name": "Flashlight",
+      "category": "Tool",
+      "description": "Switch it on with the left mouse. The battery lasts about ten minutes; a spare battery in your pockets is swapped in when it is flat.",
+      "mass": 0.3,
+      "model": "builtin:flashlight",
+      "size": [
+        7,
+        2.6,
+        2.6
+      ],
+      "hands": 1,
+      "use": "light",
+      "holdDistance": 46,
+      "hold": [
+        0,
+        0,
+        0
+      ],
+      "rarity": "uncommon",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      },
+      "light": {
+        "type": "spot",
+        "color": [
+          1,
+          0.95,
+          0.82
+        ],
+        "range": 1700,
+        "angle": 36,
+        "intensity": 3,
+        "minutes": 10,
+        "offset": [
+          4.2,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": "power_flashlight",
+      "name": "Power flashlight",
+      "category": "Tool",
+      "description": "A big, bright beam that reaches far, and eats batteries about three times as fast.",
+      "mass": 0.9,
+      "model": "builtin:power_flashlight",
+      "size": [
+        11,
+        3.8,
+        3.8
+      ],
+      "hands": 1,
+      "use": "light",
+      "holdDistance": 50,
+      "hold": [
+        0,
+        0,
+        0
+      ],
+      "rarity": "rare",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      },
+      "light": {
+        "type": "spot",
+        "color": [
+          0.92,
+          0.96,
+          1
+        ],
+        "range": 3600,
+        "angle": 30,
+        "intensity": 7,
+        "minutes": 3.5,
+        "offset": [
+          6,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": "lantern",
+      "name": "Lantern",
+      "category": "Tool",
+      "description": "A warm light in all directions. Set it down and it keeps shining: a light that stays where you put it.",
+      "mass": 0.8,
+      "model": "builtin:lantern",
+      "size": [
+        5,
+        5,
+        10
+      ],
+      "hands": 1,
+      "use": "light",
+      "rarity": "uncommon",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      },
+      "light": {
+        "type": "point",
+        "color": [
+          1,
+          0.72,
+          0.42
+        ],
+        "range": 1200,
+        "angle": 90,
+        "intensity": 2.4,
+        "minutes": 25,
+        "offset": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": "battery",
+      "name": "Battery",
+      "category": "Tool",
+      "description": "A spare for flashlights and lanterns. A flat light takes one from your pockets when you switch it on.",
+      "mass": 0.1,
+      "model": "builtin:battery",
+      "size": [
+        1.9,
+        1.9,
+        4.4
+      ],
+      "hands": 1,
+      "rarity": "common",
+      "damage": {
+        "scale": 0.02,
+        "minSpeed": 5,
+        "cap": 3
+      }
     }
   ],
   "loot": [
@@ -1434,6 +1580,22 @@
     {
       "id": "camping_pack",
       "count": 1
+    },
+    {
+      "id": "flashlight",
+      "count": 3
+    },
+    {
+      "id": "power_flashlight",
+      "count": 1
+    },
+    {
+      "id": "lantern",
+      "count": 2
+    },
+    {
+      "id": "battery",
+      "count": 8
     }
   ]
 }

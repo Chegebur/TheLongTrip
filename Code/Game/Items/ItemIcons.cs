@@ -1,9 +1,10 @@
 namespace LongTrip.Gameplay;
 
 /// <summary>
-/// Small pictures of items for the inventory and the hotbar. Each icon is the item's own model drawn once, from a fixed angle, into a little
-/// texture by a hidden camera far from anywhere; the textures are kept, so every item is only ever drawn once. Icons are made a few per frame
-/// so opening the inventory never hitches.
+/// Small pictures of items for the inventory and the hotbar. They are <b>baked</b>: <c>Assets/ui/icons/&lt;item id&gt;.png</c> is loaded when it exists,
+/// so nothing is drawn while playing. An item without a baked picture (a brand new one) is drawn once from its model, one per frame, by a hidden camera
+/// far from anywhere. <see cref="ExportAll"/> draws every item and writes the pictures out, to be copied into <c>Assets/ui/icons</c> (done with the
+/// "bake icons" helper; run it again after adding or changing items).
 /// </summary>
 public sealed class ItemIcons : Component
 {
@@ -35,6 +36,19 @@ public sealed class ItemIcons : Component
 	{
 		if ( string.IsNullOrEmpty( itemId ) ) return null;
 		if ( _ready.TryGetValue( itemId, out var texture ) ) return texture;
+
+		// the baked picture, if there is one
+		string path = $"ui/icons/{itemId}.png";
+		try
+		{
+			if ( FileSystem.Mounted.FileExists( path ) )
+			{
+				var baked = Texture.Load( FileSystem.Mounted, path, false );
+				if ( baked is not null && baked.IsValid() ) { _ready[itemId] = baked; return baked; }
+			}
+		}
+		catch ( System.Exception ) { }
+
 		if ( _queued.Add( itemId ) ) _queue.Enqueue( itemId );
 		return null;
 	}
@@ -43,19 +57,22 @@ public sealed class ItemIcons : Component
 
 	protected override void OnUpdate()
 	{
-		// a few icons a frame
-		for ( int n = 0; n < 3 && _queue.Count > 0; n++ )
+		// one icon a frame
+		if ( _queue.Count > 0 )
 		{
 			var id = _queue.Dequeue();
 			_ready[id] = Render( id );
 		}
 	}
 
-	private Texture Render( string itemId )
+	private int _serial;
+
+	/// <summary>Set the studio up for one item and draw it with <paramref name="draw"/>. Every picture gets its own spot in the studio, the camera only sees a short way, and the stage is switched off at once, so pictures never show through each other.</summary>
+	private bool Draw( string itemId, Action<CameraComponent> draw )
 	{
 		var def = ItemLibrary.Get( itemId );
 		var model = def is null ? null : ItemLibrary.GetModel( def );
-		if ( model is null || !model.IsValid() ) return null;
+		if ( model is null || !model.IsValid() ) return false;
 
 		if ( !_cameraObject.IsValid() )
 		{
@@ -66,28 +83,25 @@ public sealed class ItemIcons : Component
 			_camera.IsMainCamera = false;
 			_camera.FieldOfView = 28f;
 			_camera.ZNear = 1f;
-			_camera.ZFar = 4000f;
 			_camera.BackgroundColor = new Color( 0f, 0f, 0f, 0f );
 			_camera.Enabled = false;   // only draws when asked to
 			_camera.RenderTags.Add( StudioTag );   // draws only what is tagged for the studio: no sky, ground or fog behind the item
 		}
 
-		if ( _stage.IsValid() ) _stage.Destroy();
-		_stage = Scene.CreateObject();
-		_stage.Name = "Icon stage";
-		_stage.Flags |= GameObjectFlags.NotSaved;
-		_stage.WorldPosition = Studio;
-		_stage.Tags.Add( StudioTag );
+		var spot = Studio + new Vector3( (_serial++ % 100) * 3000f, 0f, 0f );
+		var stage = Scene.CreateObject();
+		stage.Name = "Icon stage";
+		stage.Flags |= GameObjectFlags.NotSaved;
+		stage.WorldPosition = spot;
+		stage.Tags.Add( StudioTag );
 
 		var bounds = model.Bounds;
 		float scale = def.ModelScale;
 		var holder = Scene.CreateObject();
-		holder.SetParent( _stage, false );
+		holder.SetParent( stage, false );
 		holder.Tags.Add( StudioTag );
 		holder.LocalScale = scale;
 		holder.LocalPosition = -bounds.Center * scale;
-		// a three-quarter view, tipped a little so long things (tools) read well
-		holder.LocalRotation = Rotation.From( 0f, 0f, 0f );
 		var renderer = holder.Components.Create<ModelRenderer>();
 		renderer.Model = model;
 		renderer.RenderType = ModelRenderer.ShadowRenderType.Off;
@@ -95,12 +109,13 @@ public sealed class ItemIcons : Component
 		float radius = MathF.Max( 2f, bounds.Size.Length * 0.5f * scale );
 		float distance = radius / MathF.Sin( 14f * MathF.PI / 180f ) * 1.05f;
 		var direction = new Vector3( 1f, -0.85f, 0.65f ).Normal;
-		_cameraObject.WorldPosition = Studio + direction * distance;
+		_camera.ZFar = distance + radius * 2f;   // sees only its own stage
+		_cameraObject.WorldPosition = spot + direction * distance;
 		_cameraObject.WorldRotation = Rotation.LookAt( -direction );
 
 		// lit by lights of its own, tagged for the studio, so an icon looks the same in any weather
 		var lightObject = Scene.CreateObject();
-		lightObject.SetParent( _stage, false );
+		lightObject.SetParent( stage, false );
 		lightObject.Tags.Add( StudioTag );
 		lightObject.WorldPosition = _cameraObject.WorldPosition + Vector3.Up * distance * 0.4f + new Vector3( 0f, -distance * 0.3f, 0f );
 		var light = lightObject.Components.Create<PointLight>();
@@ -109,13 +124,36 @@ public sealed class ItemIcons : Component
 		light.Intensity = 1.2f;
 		light.Shadows = false;
 
-		var texture = Texture.CreateRenderTarget( "icon_" + itemId, ImageFormat.RGBA8888, new Vector2( Size, Size ) );
 		_camera.Enabled = true;
-		_camera.RenderToTexture( texture );
+		draw( _camera );
 		_camera.Enabled = false;
 
-		_stage.Destroy();
-		_stage = null;
-		return texture;
+		stage.Enabled = false;   // gone from the studio at once (Destroy only happens at the end of the frame)
+		stage.Destroy();
+		return true;
+	}
+
+	private Texture Render( string itemId )
+	{
+		var texture = Texture.CreateRenderTarget( "icon_" + itemId, ImageFormat.RGBA8888, new Vector2( Size, Size ) );
+		return Draw( itemId, cam => cam.RenderToTexture( texture ) ) ? texture : null;
+	}
+
+	/// <summary>
+	/// Draw every item and write the pictures as PNG files into the game's data folder (<c>icons/&lt;id&gt;.png</c>). Returns the folder's full path and
+	/// how many were written. Copy them to <c>Assets/ui/icons</c> and the game loads them instead of drawing anything.
+	/// </summary>
+	public (string Folder, int Count) ExportAll()
+	{
+		FileSystem.Data.CreateDirectory( "icons" );
+		int count = 0;
+		foreach ( var def in ItemLibrary.All.ToList() )
+		{
+			var bitmap = new Bitmap( Size * 2, Size * 2 );
+			if ( !Draw( def.Id, cam => cam.RenderToBitmap( bitmap ) ) ) continue;
+			FileSystem.Data.WriteAllBytes( $"icons/{def.Id}.png", bitmap.ToPng() );
+			count++;
+		}
+		return (FileSystem.Data.GetFullPath( "icons" ), count);
 	}
 }

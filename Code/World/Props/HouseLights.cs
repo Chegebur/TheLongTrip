@@ -15,6 +15,7 @@ public sealed class HouseLights : Component
 	private readonly List<GameObject> _lights = new();
 	private TimeSince _lastCheck = 999f;
 	private bool _on;
+	private bool _noPower;
 
 	private readonly List<GameObject> _furniture = new();
 	private IReadOnlyList<FurniturePiece> _pieces;
@@ -22,6 +23,7 @@ public sealed class HouseLights : Component
 	public void Setup( IReadOnlyList<Vector3> positions, float radius, IReadOnlyList<FurniturePiece> furniture = null )
 	{
 		_pieces = furniture;
+		_noPower = ((int)MathF.Abs( WorldPosition.x * 0.013f + WorldPosition.y * 0.029f )) % 10 < 3;   // three houses in ten are dark
 
 		foreach ( var p in positions )
 		{
@@ -50,7 +52,8 @@ public sealed class HouseLights : Component
 		var camera = Scene.Camera;
 		if ( !camera.IsValid() ) return;
 
-		bool near = (camera.WorldPosition - WorldPosition).Length < OnDistance;
+		// the lights in the house come on at dusk (and not every house has power)
+		bool near = (camera.WorldPosition - WorldPosition).Length < OnDistance && !_noPower && LongTrip.Gameplay.GraphicsSettings.Darkness > 0.25f;
 		if ( near == _on ) return;
 		_on = near;
 

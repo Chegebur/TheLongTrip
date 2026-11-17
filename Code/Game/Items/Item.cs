@@ -23,6 +23,9 @@ public class Item : Component
 	/// <summary>What a container item holds ("water", "fuel"...), or null while it is empty. Amount is then how full it is.</summary>
 	[Sync] public string Liquid { get; set; }
 
+	/// <summary>A flashlight or lantern that is switched on (it shines while its battery lasts).</summary>
+	[Sync] public bool LightOn { get; set; }
+
 	/// <summary>Set by the grabber while somebody is carrying it.</summary>
 	[Sync] public bool IsHeld { get; set; }
 

@@ -1,0 +1,7 @@
+"Layer0"
+{
+	"shader"		"shaders/complex.shader"
+	"TextureColor"		"materials/world/props/lamp_medellin/lamp_medellin_cables_color.png"
+	"TextureNormal"		"materials/world/props/lamp_medellin/lamp_medellin_cables_normal.png"
+	"TextureRoughness"		"materials/world/props/lamp_medellin/rough.png"
+}

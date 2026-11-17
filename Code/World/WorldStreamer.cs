@@ -620,6 +620,9 @@ public sealed class WorldStreamer : Component
 				}
 			}
 
+			// lamps light up at night (and lean with the prop, so a tipped lamp throws its light off to the side)
+			if ( inst.Def.Light is { } lampSpec ) go.AddComponent<StreetLamp>().Setup( model, lampSpec, inst.Yaw );
+
 			if ( inst.Def.Collide == "none" ) continue;
 			// real collision from the model's geometry (rocks, fences and so on get their actual shape); a box only where a box fits
 			ColliderGenerator.Add( go, model, inst.Def.Collide == "upright" ? new Vector3( 0.7f, 0.7f, 1f ) : Vector3.One );
