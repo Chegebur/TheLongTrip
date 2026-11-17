@@ -88,7 +88,7 @@ public sealed class GraphicsSettings : Component
 	[Property, Group( "Camera" ), Range( 40f, 120f ), Title( "Field of view on foot" )] public float FootFov { get; set; } = 78f;
 	[Property, Group( "Camera" ), Range( 0f, 1f ), Title( "Vignette standing" )] public float VignetteStanding { get; set; } = 0.16f;
 	[Property, Group( "Camera" ), Range( 0f, 1f ), Title( "Vignette at speed" )] public float VignetteSpeed { get; set; } = 0.34f;
-	[Property, Group( "Camera" ), Range( 0f, 2f ), Title( "Sharpening" )] public float Sharpening { get; set; } = 0.25f;
+	[Property, Group( "Camera" ), Range( 0f, 2f ), Title( "Sharpening" )] public float Sharpening { get; set; } = 0f;
 
 	[Button( "Reset to defaults" )]
 	public void ResetToDefaults()
@@ -101,7 +101,7 @@ public sealed class GraphicsSettings : Component
 		BloomEnabled = true; BloomStrength = 0.35f; BloomThreshold = 1.4f;
 		Exposure = 0f;
 		AoEnabled = true; AoIntensity = 0.9f; AoRadius = 96f;
-		FootFov = 78f; VignetteStanding = 0.16f; VignetteSpeed = 0.34f; Sharpening = 0.25f;
+		FootFov = 78f; VignetteStanding = 0.16f; VignetteSpeed = 0.34f; Sharpening = 0f;
 	}
 
 	protected override void OnEnabled() => Instance = this;
@@ -166,7 +166,7 @@ public sealed class GraphicsSettings : Component
 			if ( grade.IsValid() ) { grade.Brightness = Brightness; grade.HueRotate = HueShift; }
 
 			var sharpen = cam.GameObject.Components.Get<Sharpen>( true );
-			if ( sharpen.IsValid() ) sharpen.Scale = Sharpening;
+			if ( sharpen.IsValid() ) { sharpen.Enabled = Sharpening > 0.01f; sharpen.Scale = Sharpening; }   // off by default: sharpening draws outlines around edges
 		}
 
 		// every light that is not the sun or the ambient light: scale what it was

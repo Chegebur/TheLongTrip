@@ -56,7 +56,7 @@
 						</div>
 					</div>
 
-					<div class="character" onmousedown=@StartSpin>
+					<div class="character" onmousedown=@StartSpin onmouseup=@StopSpin>
 						<ScenePanel @ref="_charPanel" class="scene" />
 						<div class="note">DRAG TO TURN</div>
 					</div>
@@ -285,8 +285,9 @@
 		// drag on the character to turn it
 		if ( _spinning )
 		{
-			if ( Input.Down( "Attack1" ) ) { _charYaw += (Mouse.Position.x - _spinFrom) * 0.6f; _spinFrom = Mouse.Position.x; }
-			else _spinning = false;
+			// the button is tracked through the panel's own mouse events: the game's Input does not see a press that a panel has taken
+			_charYaw += (Mouse.Position.x - _spinFrom) * 0.6f;
+			_spinFrom = Mouse.Position.x;
 		}
 
 		UpdateScenes();
@@ -311,6 +312,7 @@
 		}
 		else
 		{
+			_spinning = false;
 			ReturnCursor();
 		}
 		_version++;
@@ -620,7 +622,10 @@
 
 	// ---- the 3D previews ---------------------------------------------------------------------------------------------------------------
 
-	private void StartSpin() { _spinning = true; _spinFrom = Mouse.Position.x; }
+	private void StartSpin() { if ( _cursor is not null ) return; _spinning = true; _spinFrom = Mouse.Position.x; }
+
+	/// <summary>The button goes up on the panel that was pressed (wherever the pointer is by then), so this ends the turn.</summary>
+	private void StopSpin() { _spinning = false; }
 
 	private static void Build( ScenePanel panel, out GameObject root, out GameObject camera, out CameraComponent cam )
 	{
